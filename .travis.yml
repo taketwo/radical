@@ -1,0 +1,19 @@
+sudo: false
+language: cpp
+compiler: clang
+env:
+  - OPENCV_VERSION=2.4.8
+  - OPENCV_VERSION=3.1.0
+addons:
+  apt:
+    sources:
+      - kalakris-cmake
+      - boost-latest
+    packages:
+      - cmake
+      - libboost1.55-all-dev
+cache:
+  directories:
+    - $HOME/opencv
+script:
+  - bash .travis.sh
