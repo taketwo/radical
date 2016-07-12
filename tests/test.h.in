@@ -1,0 +1,50 @@
+#define TEST_DATA_DIR "@TEST_DATA_DIR@"
+#include <boost/test/unit_test.hpp>
+#include <boost/filesystem.hpp>
+
+#include <opencv2/core/core.hpp>
+
+inline std::string
+getTestFilename(const std::string& relative_path)
+{
+  boost::filesystem::path p(std::string(TEST_DATA_DIR));
+  return (p / relative_path).make_preferred().string();
+}
+
+inline std::string
+getTemporaryFilename()
+{
+  // TODO: return an object which deletes the file upon destruction
+  boost::filesystem::path temp = boost::filesystem::unique_path();
+  return temp.make_preferred().string();
+}
+
+template<typename T>
+boost::test_tools::predicate_result
+compareMat(const cv::Mat& m1, const cv::Mat& m2)
+{
+  if (m1.size() != m2.size())
+  {
+    boost::test_tools::predicate_result result(false);
+    result.message() << "Different sizes [" << m1.size() << " != " << m2.size() << "]";
+    return result;
+  }
+  for (int row = 0; row < m1.rows; ++row)
+  {
+    for (int col = 0; col < m1.cols; ++col)
+    {
+      const auto& v1 = m1.at<T>(row, col);
+      const auto& v2 = m2.at<T>(row, col);
+      if (v1 != v2)
+      {
+        boost::test_tools::predicate_result result(false);
+        result.message() << "Elements at position [" << row << ", " << col << "] are different [" << v1 << " != " << v2 << "]";
+        return result;
+      }
+    }
+  }
+  return true;
+}
+
+#define BOOST_CHECK_EQUAL_MAT(M1, M2, T) \
+  BOOST_CHECK((compareMat<T>(M1, M2)))
