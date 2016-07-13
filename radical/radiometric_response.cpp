@@ -31,6 +31,17 @@
 #include <radical/exceptions.h>
 #include <radical/radiometric_response.h>
 
+/** Helper function for inverse look-up in a table (cv::Vec3f → Vec3b). */
+inline cv::Vec3b inverseLUT(const std::vector<cv::Mat>& lut, const cv::Vec3f& in) {
+  cv::Vec3b out;
+  for (int c = 0; c < 3; ++c) {
+    auto begin = &lut[c].at<float>(0);
+    auto p = std::lower_bound(begin, &lut[c].at<float>(255), in[c]);
+    out[c] = std::distance(begin, p);
+  }
+  return out;
+}
+
 namespace radical {
 
 RadiometricResponse::RadiometricResponse(cv::InputArray _response, ChannelOrder order) : order_(order) {
@@ -72,13 +83,7 @@ cv::Mat RadiometricResponse::load(const std::string& filename) {
 }
 
 cv::Vec3b RadiometricResponse::directMap(const cv::Vec3f& E) const {
-  cv::Vec3b d;
-  for (size_t i = 0; i < 3; ++i) {
-    auto begin = &response_channels_[i].at<float>(0);
-    auto p = std::lower_bound(begin, &response_channels_[i].at<float>(255), E[i]);
-    d[i] = std::distance(begin, p);
-  }
-  return d;
+  return inverseLUT(response_channels_, E);
 }
 
 }  // namespace radical
