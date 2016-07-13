@@ -59,3 +59,16 @@ BOOST_AUTO_TEST_CASE(DirectMapPixel) {
   BOOST_CHECK_EQUAL(rr.directMap(cv::Vec3f(0, 0, 0)), cv::Vec3b(0, 0, 0));
   BOOST_CHECK_EQUAL(rr.directMap(cv::Vec3f(100, 200, 255)), cv::Vec3b(100, 200, 255));
 }
+
+BOOST_AUTO_TEST_CASE(DirectMapImage) {
+  radical::RadiometricResponse rr(getTestFilename("radiometric_response_identity.txt"));
+  cv::Mat E(256, 1, CV_32FC3);
+  cv::Mat I_expected(256, 1, CV_8UC3);
+  for (int j = 0; j < 256; ++j) {
+    E.at<cv::Vec3f>(0, j) = cv::Vec3f(j, j + 10, 255 - j);
+    I_expected.at<cv::Vec3b>(0, j) = cv::Vec3b(j, std::min(255, j + 10), 255 - j);
+  }
+  cv::Mat I;
+  rr.directMap(E, I);
+  BOOST_CHECK_EQUAL_MAT(I, I_expected, cv::Vec3b);
+}

@@ -86,4 +86,21 @@ cv::Vec3b RadiometricResponse::directMap(const cv::Vec3f& E) const {
   return inverseLUT(response_channels_, E);
 }
 
+void RadiometricResponse::directMap(cv::InputArray _E, cv::OutputArray _I) const {
+  if (_E.empty()) {
+    _I.clear();
+    return;
+  }
+  auto E = _E.getMat();
+  _I.create(_E.size(), CV_8UC3);
+  auto I = _I.getMat();
+#if CV_MAJOR_VERSION > 2
+  E.forEach<cv::Vec3f>(
+      [&I, this](cv::Vec3f& v, const int* p) { I.at<cv::Vec3b>(p[0], p[1]) = inverseLUT(response_channels_, v); });
+#else
+  for (int i = 0; i < E.rows; i++)
+    for (int j = 0; j < E.cols; j++) I.at<cv::Vec3b>(i, j) = inverseLUT(response_channels_, E.at<cv::Vec3f>(i, j));
+#endif
+}
+
 }  // namespace radical

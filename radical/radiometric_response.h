@@ -23,6 +23,7 @@
 #pragma once
 
 #include <string>
+#include <vector>
 
 #include <opencv2/core/core.hpp>
 
@@ -45,6 +46,11 @@ class RadiometricResponse {
     * \param[in] E pixel irradiance
     * \param[out] I pixel brightness */
   cv::Vec3b directMap(const cv::Vec3f& E) const;
+
+  /** Compute image brightness from image irradiance (direct mapping).
+    * \param[in] E image irradiance
+    * \param[out] I image brightness */
+  void directMap(cv::InputArray E, cv::OutputArray I) const;
 
  private:
   /** Load radiometric response function from calibration file. */
