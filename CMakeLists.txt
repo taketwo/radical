@@ -16,6 +16,7 @@ include_directories(${CMAKE_SOURCE_DIR} ${OpenCV_INCLUDE_DIRS})
 
 set(RADICAL_SRC
   radical/radiometric_response.cpp
+  radical/mat_io.cpp
 )
 
 add_library(${LIB_NAME} SHARED ${RADICAL_SRC})

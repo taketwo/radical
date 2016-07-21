@@ -22,26 +22,25 @@
 
 #pragma once
 
-#include <stdexcept>
-
-#include <boost/exception/info.hpp>
-#include <boost/exception/exception.hpp>
+#include <string>
+#include <fstream>
 
 #include <opencv2/core/core.hpp>
 
 namespace radical {
 
-class SerializationException : public boost::exception, public std::runtime_error {
- public:
-  SerializationException(const std::string& message) : std::runtime_error(message) {}
-  using Filename = boost::error_info<struct tag_filename, std::string>;
-};
+/** Write a given cv::Mat to a file in binary format.
+  * The cv::Mat is expected to:
+  *   - not be empty;
+  *   - be continuous;
+  *   - be 1- or 2-dimensional. */
+void writeMat(const std::string& filename, const cv::Mat& mat);
 
-class RadiometricResponseException : public boost::exception, public std::runtime_error {
- public:
-  RadiometricResponseException(const std::string& message) : std::runtime_error(message) {}
-  using Size = boost::error_info<struct tag_size, cv::Size>;
-  using Type = boost::error_info<struct tag_type, int>;
-};
+void writeMat(std::ofstream& file, const cv::Mat& mat);
+
+/** Read a cv::Mat from a file. */
+cv::Mat readMat(const std::string& filename);
+
+cv::Mat readMat(std::ifstream& file);
 
 }  // namespace radical

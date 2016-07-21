@@ -53,8 +53,6 @@ class RadiometricResponse {
   void directMap(cv::InputArray E, cv::OutputArray I) const;
 
  private:
-  /** Load radiometric response function from calibration file. */
-  cv::Mat load(const std::string& filename);
 
   cv::Mat response_;
   cv::Mat log_response_;

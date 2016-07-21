@@ -28,6 +28,7 @@
 #include <boost/format.hpp>
 #include <boost/throw_exception.hpp>
 
+#include <radical/mat_io.h>
 #include <radical/exceptions.h>
 #include <radical/radiometric_response.h>
 
@@ -57,34 +58,11 @@ RadiometricResponse::RadiometricResponse(cv::InputArray _response, ChannelOrder 
 }
 
 RadiometricResponse::RadiometricResponse(const std::string& filename, ChannelOrder order)
-: RadiometricResponse(load(filename), order) {}
+: RadiometricResponse(readMat(filename), order) {}
 
 RadiometricResponse::~RadiometricResponse() {}
 
-cv::Mat RadiometricResponse::load(const std::string& filename) {
-  std::ifstream file(filename);
-  if (!file.is_open())
-    BOOST_THROW_EXCEPTION(SerializationException("Failed to open radiometric response file")
-                          << SerializationException::Filename(filename));
-
-  cv::Mat response(1, 256, CV_32FC3);
-  for (size_t i = 0; i < 3; ++i) {
-    auto v = response.begin<cv::Vec3f>();
-    for (size_t j = 0; j < 256; ++j) {
-      file >> (*v++)[order_ == ChannelOrder::BGR ? i : 2 - i];
-      if (file.fail())
-        BOOST_THROW_EXCEPTION(SerializationException("Radiometric response file contains invalid data")
-                              << SerializationException::Filename(filename));
-    }
-  }
-  file.close();
-
-  return response;
-}
-
-cv::Vec3b RadiometricResponse::directMap(const cv::Vec3f& E) const {
-  return inverseLUT(response_channels_, E);
-}
+cv::Vec3b RadiometricResponse::directMap(const cv::Vec3f& E) const { return inverseLUT(response_channels_, E); }
 
 void RadiometricResponse::directMap(cv::InputArray _E, cv::OutputArray _I) const {
   if (_E.empty()) {
