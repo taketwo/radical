@@ -72,3 +72,23 @@ BOOST_AUTO_TEST_CASE(DirectMapImage) {
   rr.directMap(E, I);
   BOOST_CHECK_EQUAL_MAT(I, I_expected, cv::Vec3b);
 }
+
+BOOST_AUTO_TEST_CASE(InverseMapPixel) {
+  RadiometricResponse rr(getTestFilename("radiometric_response_identity.crf"));
+  BOOST_CHECK_EQUAL(rr.inverseMap(cv::Vec3b(0, 0, 0)), cv::Vec3f(0, 0, 0));
+  BOOST_CHECK_EQUAL(rr.inverseMap(cv::Vec3b(100, 200, 255)), cv::Vec3f(100, 200, 255));
+}
+
+BOOST_AUTO_TEST_CASE(InverseMapImage) {
+  RadiometricResponse rr(getTestFilename("radiometric_response_identity.crf"));
+  cv::Mat I(256, 1, CV_8UC3);
+  cv::Mat E_expected(256, 1, CV_32FC3);
+  for (int j = 0; j < 256; ++j) {
+    I.at<cv::Vec3b>(0, j) = cv::Vec3b(j, j, 255 - j);
+    E_expected.at<cv::Vec3f>(0, j) = cv::Vec3f(j, j, 255 - j);
+  }
+  cv::Mat E;
+  rr.inverseMap(I, E);
+  BOOST_CHECK_EQUAL_MAT(E, E_expected, cv::Vec3f);
+}
+

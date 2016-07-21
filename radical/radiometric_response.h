@@ -44,13 +44,23 @@ class RadiometricResponse {
 
   /** Compute pixel brightness from pixel irradiance (direct mapping).
     * \param[in] E pixel irradiance
-    * \param[out] I pixel brightness */
+    * \returns pixel brightness */
   cv::Vec3b directMap(const cv::Vec3f& E) const;
 
   /** Compute image brightness from image irradiance (direct mapping).
     * \param[in] E image irradiance
     * \param[out] I image brightness */
   void directMap(cv::InputArray E, cv::OutputArray I) const;
+
+  /** Compute pixel irradiance from pixel brightness (inverse mapping).
+    * \param[in] I pixel brightness
+    * \returns pixel irradiance */
+  cv::Vec3f inverseMap(const cv::Vec3b& I) const;
+
+  /** Compute image irradiance from image brightness (inverse mapping).
+    * \param[in] I image brightness
+    * \param[out] E image irradiance */
+  void inverseMap(cv::InputArray I, cv::OutputArray E) const;
 
  private:
 

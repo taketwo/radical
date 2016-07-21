@@ -81,4 +81,19 @@ void RadiometricResponse::directMap(cv::InputArray _E, cv::OutputArray _I) const
 #endif
 }
 
+cv::Vec3f RadiometricResponse::inverseMap(const cv::Vec3b& _I) const {
+  cv::Mat I(1, 1, CV_8UC3);
+  I.at<cv::Vec3b>(0, 0) = _I;
+  cv::Mat E;
+  cv::LUT(I, response_, E);
+  return E.at<cv::Vec3f>(0, 0);
+}
+
+void RadiometricResponse::inverseMap(cv::InputArray _I, cv::OutputArray _E) const {
+  if (_I.empty()) BOOST_THROW_EXCEPTION(RadiometricResponseException("Brightness image should not be empty"));
+  if (_I.depth() != CV_8U && _I.depth() != CV_8S)
+    BOOST_THROW_EXCEPTION(RadiometricResponseException("Brightness image should have 8U or 8S depth"));
+  cv::LUT(_I, response_, _E);
+}
+
 }  // namespace radical
