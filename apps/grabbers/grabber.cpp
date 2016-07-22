@@ -20,10 +20,34 @@
  * SOFTWARE.
  ******************************************************************************/
 
+#include <boost/throw_exception.hpp>
+
 #include <grabbers/grabber.h>
+#include <grabbers/openni2_grabber.h>
 
 namespace grabbers {
 
 Grabber::~Grabber() {}
+
+Grabber::Ptr
+createGrabber(const std::string& uri)
+{
+
+#if HAVE_OPENNI2
+  try
+  {
+    if (uri == "openni" || uri == "openni2" || uri == "kinect" || uri == "asus" || uri == "any")
+      return Grabber::Ptr(new OpenNI2Grabber);
+    else
+      return Grabber::Ptr(new OpenNI2Grabber(uri));
+  }
+  catch (GrabberException&)
+  {
+  }
+#endif
+  BOOST_THROW_EXCEPTION(GrabberException("Failed to create a grabber") <<
+                        GrabberException::URI(uri));
+  return nullptr;
+}
 
 }  // namespace grabbers

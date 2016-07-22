@@ -37,6 +37,7 @@ class GrabberException : public boost::exception, public std::runtime_error {
  public:
   GrabberException(const std::string& message) : std::runtime_error(message) {}
   using ErrorInfo = boost::error_info<struct tag_error_info, std::string>;
+  using URI = boost::error_info<struct tag_uri, std::string>;
 };
 
 class Grabber {
@@ -61,5 +62,17 @@ class Grabber {
 
   virtual std::string getSerialNumber() const = 0;
 };
+
+/** Create a grabber from URI.
+  *
+  * Supported URI types:
+  *
+  *   - path to an *.oni file :: OpenNIGrabber with file
+  *   - "openni", "openni2", "kinect", "asus" :: OpenNI2Grabber with first available device
+  *   - "rs", "realsense", "intel" :: RealSenseGrabber with first available device
+  *   - openni device uri :: OpenNIGrabber for that device
+  *   - "any" :: first available device with any grabber */
+Grabber::Ptr
+createGrabber(const std::string& uri = "any");
 
 }  // namespace grabbers
