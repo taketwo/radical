@@ -91,4 +91,3 @@ BOOST_AUTO_TEST_CASE(InverseMapImage) {
   rr.inverseMap(I, E);
   BOOST_CHECK_EQUAL_MAT(E, E_expected, cv::Vec3f);
 }
-

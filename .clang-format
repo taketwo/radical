@@ -1,5 +1,8 @@
 ---
 Language                                       : Cpp
+AllowShortIfStatementsOnASingleLine            : false
+AllowShortLoopsOnASingleLine                   : false
+AllowShortFunctionsOnASingleLine               : Empty
 BasedOnStyle                                   : Google
 ConstructorInitializerAllOnOneLineOrOnePerLine : false
 ConstructorInitializerIndentWidth              : 0

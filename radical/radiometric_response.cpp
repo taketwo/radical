@@ -62,7 +62,9 @@ RadiometricResponse::RadiometricResponse(const std::string& filename, ChannelOrd
 
 RadiometricResponse::~RadiometricResponse() {}
 
-cv::Vec3b RadiometricResponse::directMap(const cv::Vec3f& E) const { return inverseLUT(response_channels_, E); }
+cv::Vec3b RadiometricResponse::directMap(const cv::Vec3f& E) const {
+  return inverseLUT(response_channels_, E);
+}
 
 void RadiometricResponse::directMap(cv::InputArray _E, cv::OutputArray _I) const {
   if (_E.empty()) {
@@ -77,7 +79,8 @@ void RadiometricResponse::directMap(cv::InputArray _E, cv::OutputArray _I) const
       [&I, this](cv::Vec3f& v, const int* p) { I.at<cv::Vec3b>(p[0], p[1]) = inverseLUT(response_channels_, v); });
 #else
   for (int i = 0; i < E.rows; i++)
-    for (int j = 0; j < E.cols; j++) I.at<cv::Vec3b>(i, j) = inverseLUT(response_channels_, E.at<cv::Vec3f>(i, j));
+    for (int j = 0; j < E.cols; j++)
+      I.at<cv::Vec3b>(i, j) = inverseLUT(response_channels_, E.at<cv::Vec3f>(i, j));
 #endif
 }
 
@@ -90,7 +93,8 @@ cv::Vec3f RadiometricResponse::inverseMap(const cv::Vec3b& _I) const {
 }
 
 void RadiometricResponse::inverseMap(cv::InputArray _I, cv::OutputArray _E) const {
-  if (_I.empty()) BOOST_THROW_EXCEPTION(RadiometricResponseException("Brightness image should not be empty"));
+  if (_I.empty())
+    BOOST_THROW_EXCEPTION(RadiometricResponseException("Brightness image should not be empty"));
   if (_I.depth() != CV_8U && _I.depth() != CV_8S)
     BOOST_THROW_EXCEPTION(RadiometricResponseException("Brightness image should have 8U or 8S depth"));
   cv::LUT(_I, response_, _E);

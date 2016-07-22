@@ -42,9 +42,12 @@ void writeMat(const std::string& filename, const cv::Mat& mat) {
 }
 
 void writeMat(std::ofstream& file, const cv::Mat& mat) {
-  if (mat.empty()) BOOST_THROW_EXCEPTION(SerializationException("cv::Mat should not be empty"));
-  if (mat.dims > 2) BOOST_THROW_EXCEPTION(SerializationException("cv::Mat should be 1- or 2-dimensional"));
-  if (!mat.isContinuous()) BOOST_THROW_EXCEPTION(SerializationException("cv::Mat should be continuous"));
+  if (mat.empty())
+    BOOST_THROW_EXCEPTION(SerializationException("cv::Mat should not be empty"));
+  if (mat.dims > 2)
+    BOOST_THROW_EXCEPTION(SerializationException("cv::Mat should be 1- or 2-dimensional"));
+  if (!mat.isContinuous())
+    BOOST_THROW_EXCEPTION(SerializationException("cv::Mat should be continuous"));
 
   uint32_t type = mat.type();
   file.write((const char*)(&MAGIC), sizeof(uint32_t));
@@ -71,7 +74,8 @@ cv::Mat readMat(const std::string& filename) {
 cv::Mat readMat(std::ifstream& file) {
   uint32_t magic, type, dims, rows, cols;
   file.read((char*)(&magic), sizeof(uint32_t));
-  if (magic != MAGIC) BOOST_THROW_EXCEPTION(SerializationException("File does not contain a cv::Mat"));
+  if (magic != MAGIC)
+    BOOST_THROW_EXCEPTION(SerializationException("File does not contain a cv::Mat"));
   file.read((char*)(&type), sizeof(uint32_t));
   file.read((char*)(&dims), sizeof(uint32_t));
   if (dims > 2)
