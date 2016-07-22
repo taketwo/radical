@@ -28,6 +28,8 @@
 #include <boost/format.hpp>
 #include <boost/throw_exception.hpp>
 
+#include <opencv2/imgproc/imgproc.hpp>
+
 #include <radical/mat_io.h>
 #include <radical/exceptions.h>
 #include <radical/radiometric_response.h>
@@ -52,7 +54,10 @@ RadiometricResponse::RadiometricResponse(cv::InputArray _response, ChannelOrder 
   if (_response.type() != CV_32FC3)
     BOOST_THROW_EXCEPTION(RadiometricResponseException("Radiometric response values should be 3-channel float")
                           << RadiometricResponseException::Type(_response.type()));
-  response_ = _response.getMat();
+  if (order_ == ChannelOrder::RGB)
+    cv::cvtColor(_response, response_, CV_BGR2RGB);
+  else
+    response_ = _response.getMat();
   cv::log(response_, log_response_);
   cv::split(response_, response_channels_);
 }
