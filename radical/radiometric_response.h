@@ -42,6 +42,9 @@ class RadiometricResponse {
 
   virtual ~RadiometricResponse();
 
+  /** Write radiometric response to a file. */
+  void save(const std::string& filename) const;
+
   /** Compute pixel brightness from pixel irradiance (direct mapping).
     * \param[in] E pixel irradiance
     * \returns pixel brightness */

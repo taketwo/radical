@@ -67,6 +67,15 @@ RadiometricResponse::RadiometricResponse(const std::string& filename, ChannelOrd
 
 RadiometricResponse::~RadiometricResponse() {}
 
+void RadiometricResponse::save(const std::string& filename) const {
+  cv::Mat response;
+  if (order_ == ChannelOrder::RGB)
+    cv::cvtColor(response_, response, CV_RGB2BGR);
+  else
+    response = response_;
+  writeMat(filename, response);
+}
+
 cv::Vec3b RadiometricResponse::directMap(const cv::Vec3f& E) const {
   return inverseLUT(response_channels_, E);
 }

@@ -112,3 +112,14 @@ BOOST_AUTO_TEST_CASE(ChannelOrder) {
     BOOST_CHECK_EQUAL(rr.directMap(cv::Vec3f(100, 10, 1)), cv::Vec3b(1, 1, 1));
   }
 }
+
+BOOST_AUTO_TEST_CASE(SaveLoad)
+{
+  cv::Mat response(256, 1, CV_32FC3);
+  response.setTo(10);
+  auto f = getTemporaryFilename();
+  RadiometricResponse(response).save(f);
+  RadiometricResponse rr(f);
+  for (int j = 0; j < 256; ++j)
+    BOOST_CHECK_EQUAL(rr.inverseMap(cv::Vec3b(j, j, j)), cv::Vec3f(10, 10, 10));
+}
