@@ -10,6 +10,7 @@ include("${CMAKE_SOURCE_DIR}/cmake/Utils.cmake")
 
 add_definitions(-Wall -Wextra -std=c++11)
 
+RADICAL_OPTION(BUILD_APPS                        "Build apps"                ON)
 RADICAL_OPTION(BUILD_TESTS                       "Build tests"              OFF)
 
 find_package(OpenCV REQUIRED)
@@ -22,6 +23,10 @@ set(RADICAL_SRC
 
 add_library(${LIB_NAME} SHARED ${RADICAL_SRC})
 target_link_libraries(${LIB_NAME} ${OpenCV_LIBS})
+
+if(BUILD_APPS)
+  add_subdirectory(apps)
+endif()
 
 if(BUILD_TESTS)
   enable_testing(true)
