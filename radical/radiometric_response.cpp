@@ -46,8 +46,8 @@ inline cv::Vec3b inverseLUT(const std::vector<cv::Mat>& lut, const cv::Vec3f& in
 namespace radical {
 
 RadiometricResponse::RadiometricResponse(cv::InputArray _response, ChannelOrder order) : order_(order) {
-  if (_response.size().width != 256 || _response.size().height != 1)
-    BOOST_THROW_EXCEPTION(RadiometricResponseException("Radiometric response should have 1 x 256 size")
+  if (_response.total() != 256)
+    BOOST_THROW_EXCEPTION(RadiometricResponseException("Radiometric response should have exactly 256 elements")
                           << RadiometricResponseException::Size(_response.size()));
   if (_response.type() != CV_32FC3)
     BOOST_THROW_EXCEPTION(RadiometricResponseException("Radiometric response values should be 3-channel float")
