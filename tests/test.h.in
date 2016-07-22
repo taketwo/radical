@@ -14,9 +14,9 @@ getTestFilename(const std::string& relative_path)
 inline std::string
 getTemporaryFilename()
 {
+  boost::filesystem::path p(boost::filesystem::temp_directory_path());
+  return (p / boost::filesystem::unique_path()).make_preferred().string();
   // TODO: return an object which deletes the file upon destruction
-  boost::filesystem::path temp = boost::filesystem::unique_path();
-  return temp.make_preferred().string();
 }
 
 template<typename T>
