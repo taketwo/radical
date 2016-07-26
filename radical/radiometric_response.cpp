@@ -20,12 +20,8 @@
  * SOFTWARE.
  ******************************************************************************/
 
-#include <fstream>
-#include <iomanip>
-#include <iostream>
 #include <algorithm>
 
-#include <boost/format.hpp>
 #include <boost/throw_exception.hpp>
 
 #include <opencv2/imgproc/imgproc.hpp>
