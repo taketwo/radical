@@ -8,6 +8,19 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/modules")
 include("${CMAKE_SOURCE_DIR}/cmake/Utils.cmake")
 
+# Extract version from header
+execute_process(
+  COMMAND grep "RADICAL_VERSION " radical/version.h
+  WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+  RESULT_VARIABLE GREP_VERSION_RESULT
+  OUTPUT_VARIABLE PROJECT_VERSION
+  OUTPUT_STRIP_TRAILING_WHITESPACE
+)
+if(NOT GREP_VERSION_RESULT EQUAL 0)
+  message(SEND_ERROR "Cannot extract version number: ${GREP_VERSION_RESULT}")
+endif()
+string(REGEX REPLACE ".*\"(.*)\".*" "\\1" PROJECT_VERSION "${PROJECT_VERSION}" )
+
 add_definitions(-Wall -Wextra -std=c++11)
 
 RADICAL_OPTION(BUILD_APPS                        "Build apps"                ON)
@@ -23,6 +36,7 @@ set(RADICAL_SRC
 
 add_library(${LIB_NAME} SHARED ${RADICAL_SRC})
 target_link_libraries(${LIB_NAME} ${OpenCV_LIBS})
+set_target_properties(${LIB_NAME} PROPERTIES VERSION "${PROJECT_VERSION}" SOVERSION 1)
 
 if(BUILD_APPS)
   add_subdirectory(apps)
