@@ -35,8 +35,14 @@ set(RADICAL_SRC
 )
 
 add_library(${LIB_NAME} SHARED ${RADICAL_SRC})
+install(TARGETS ${LIB_NAME} LIBRARY DESTINATION lib)
 target_link_libraries(${LIB_NAME} ${OpenCV_LIBS})
 set_target_properties(${LIB_NAME} PROPERTIES VERSION "${PROJECT_VERSION}" SOVERSION 1)
+
+install(DIRECTORY ${CMAKE_SOURCE_DIR}/radical
+  DESTINATION ${CMAKE_INSTALL_PREFIX}/include
+  FILES_MATCHING PATTERN "*.h"
+)
 
 if(BUILD_APPS)
   add_subdirectory(apps)
