@@ -7,13 +7,12 @@ env:
 addons:
   apt:
     sources:
-      - kalakris-cmake
       - boost-latest
     packages:
-      - cmake
       - libboost1.55-all-dev
 cache:
   directories:
     - $HOME/opencv
+    - $HOME/cmake
 script:
   - bash .travis.sh

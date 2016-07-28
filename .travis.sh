@@ -1,6 +1,7 @@
 RADICAL_DIR=`pwd`
 RADICAL_BUILD_DIR=$RADICAL_DIR/build
 OPENCV_DIR=$HOME/opencv
+CMAKE_DIR=$HOME/cmake
 DOWNLOAD_DIR=$HOME/download
 
 function test()
@@ -16,6 +17,35 @@ function build()
     -DOpenCV_DIR=$OPENCV_DIR/${OPENCV_VERSION}/share/OpenCV \
     -DBUILD_TESTS=ON
   make -j2
+}
+
+function install_cmake()
+{
+  local pkg_ver=$CMAKE_VERSION
+  local pkg_url="https://cmake.org/files/v2.8/cmake-${pkg_ver}.tar.gz"
+  local pkg_md5sum="17c6513483d23590cbce6957ec6d1e66"
+  local pkg_src_dir=${DOWNLOAD_DIR}/cmake-${pkg_ver}
+  local pkg_install_dir=$CMAKE_DIR/${pkg_ver}
+  local cmake_exe=$pkg_install_dir/bin/cmake
+  echo "Installing CMake ${pkg_ver}"
+  if [[ -e ${cmake_exe} ]]; then
+    local version=`$cmake_exe --version | grep -Po "(?<=version ).*"`
+    if [[ "$version" = "$pkg_ver" ]]; then
+      local modified=`stat -c %y ${cmake_exe} | cut -d ' ' -f1`
+      echo " > Found cached installation of CMake"
+      echo " > Version ${pkg_ver}, built on ${modified}"
+      return 0
+    fi
+  fi
+  download ${pkg_url} ${pkg_md5sum}
+  if [[ $? -ne 0 ]]; then
+    return $?
+  fi
+  tar xvzf pkg
+  cd ${pkg_src_dir}
+  ./bootstrap --prefix=$pkg_install_dir
+  make -j2 && make install
+  return $?
 }
 
 function install_opencv()
@@ -67,7 +97,7 @@ function install_opencv()
 function download()
 {
   mkdir -p $DOWNLOAD_DIR && cd $DOWNLOAD_DIR && rm -rf *
-  wget --output-document=pkg $1
+  wget --no-check-certificate --output-document=pkg $1
   if [[ $? -ne 0 ]]; then
     return $?
   fi
@@ -82,4 +112,7 @@ function download()
   return 0
 }
 
-install_opencv && build && test
+CMAKE_VERSION="2.8.12.2"
+export PATH=$CMAKE_DIR/$CMAKE_VERSION/bin:$PATH
+
+install_cmake && install_opencv && build && test
