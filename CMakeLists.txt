@@ -26,8 +26,7 @@ add_definitions(-Wall -Wextra -std=c++11)
 RADICAL_OPTION(BUILD_APPS                        "Build apps"                ON)
 RADICAL_OPTION(BUILD_TESTS                       "Build tests"              OFF)
 
-find_package(OpenCV REQUIRED)
-include_directories(${CMAKE_SOURCE_DIR} ${OpenCV_INCLUDE_DIRS})
+find_package(OpenCV COMPONENTS core imgproc REQUIRED)
 
 set(RADICAL_SRC
   radical/radiometric_response.cpp
@@ -36,14 +35,18 @@ set(RADICAL_SRC
 
 add_library(${LIB_NAME} SHARED ${RADICAL_SRC})
 install(TARGETS ${LIB_NAME} LIBRARY DESTINATION lib)
-target_link_libraries(${LIB_NAME} ${OpenCV_LIBS})
 set_target_properties(${LIB_NAME} PROPERTIES VERSION "${PROJECT_VERSION}" SOVERSION 1)
 
 install(DIRECTORY ${CMAKE_SOURCE_DIR}/radical
   DESTINATION ${CMAKE_INSTALL_PREFIX}/include
   FILES_MATCHING PATTERN "*.h"
 )
+target_include_directories(
+  ${LIB_NAME} PUBLIC
+  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>"
+)
 
+target_link_libraries(${LIB_NAME} PUBLIC opencv_core opencv_imgproc)
 if(BUILD_APPS)
   add_subdirectory(apps)
 endif()

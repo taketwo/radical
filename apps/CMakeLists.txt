@@ -1,4 +1,5 @@
 find_package(Boost COMPONENTS program_options REQUIRED)
+find_package(OpenCV COMPONENTS highgui photo REQUIRED)
 
 include_directories(${CMAKE_CURRENT_LIST_DIR})
 
@@ -10,7 +11,8 @@ macro(APP_ADD _name)
   target_link_libraries(${_executable}
     ${LIB_NAME}
     grabbers
-    ${OpenCV_LIBS}
+    opencv_highgui
+    opencv_photo
     ${Boost_PROGRAM_OPTIONS_LIBRARY}
   )
 endmacro(APP_ADD)
