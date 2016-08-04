@@ -32,6 +32,7 @@ set(RADICAL_SRC
   radical/nonparametric_vignetting_model.cpp
   radical/radiometric_response.cpp
   radical/mat_io.cpp
+  radical/check.cpp
 )
 
 add_library(${LIB_NAME} SHARED ${RADICAL_SRC})

@@ -23,6 +23,7 @@
 #include <fstream>
 #include <iostream>
 
+#include <radical/check.h>
 #include <radical/mat_io.h>
 #include <radical/exceptions.h>
 #include <radical/nonparametric_vignetting_model.h>
@@ -30,11 +31,7 @@
 namespace radical {
 
 NonparametricVignettingModel::NonparametricVignettingModel(cv::InputArray _coefficients) {
-  if (_coefficients.empty())
-    BOOST_THROW_EXCEPTION(MatException("Coefficients for nonparametric vignetting model should not be empty"));
-  if (_coefficients.type() != CV_32FC3)
-    BOOST_THROW_EXCEPTION(MatException("Vignetting model coefficients should be 3-channel float")
-                          << MatException::ActualType(_coefficients.type()));
+  Check("Nonparametric vignetting model", _coefficients).notEmpty().hasType(CV_32FC3);
   coefficients_ = _coefficients.getMat();
 }
 
