@@ -34,13 +34,8 @@ set(RADICAL_SRC
 )
 
 add_library(${LIB_NAME} SHARED ${RADICAL_SRC})
-install(TARGETS ${LIB_NAME} LIBRARY DESTINATION lib)
 set_target_properties(${LIB_NAME} PROPERTIES VERSION "${PROJECT_VERSION}" SOVERSION 1)
-
-install(DIRECTORY ${CMAKE_SOURCE_DIR}/radical
-  DESTINATION ${CMAKE_INSTALL_PREFIX}/include
-  FILES_MATCHING PATTERN "*.h"
-)
+target_compile_definitions(${LIB_NAME} PUBLIC "RADICAL_DEBUG=$<CONFIG:Debug>")
 target_include_directories(
   ${LIB_NAME} PUBLIC
   "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>"
@@ -56,8 +51,80 @@ if(BUILD_TESTS)
   add_subdirectory(tests)
 endif()
 
-### Uninstall target
+#---------------------------------------------------------------------#
+#                            Installation                             #
+#---------------------------------------------------------------------#
+
+## Layout:
+#
+#   <prefix>
+#   ├── include
+#   │   └── radical
+#   └── lib
+#       └── cmake
+#           └── radical
+
+set(_config_install_dir "lib/cmake/${PROJECT_NAME}")
+set(_include_install_dir "include")
 set(_generated_dir "${CMAKE_CURRENT_BINARY_DIR}/generated")
+
+set(_version_config_file "${_generated_dir}/${PROJECT_NAME}-config-version.cmake")
+set(_project_config_file "${_generated_dir}/${PROJECT_NAME}-config.cmake")
+set(_targets_export_name "${PROJECT_NAME}-targets")
+
+## Create radical-config-version.cmake
+
+include(CMakePackageConfigHelpers)
+write_basic_package_version_file(
+  "${_version_config_file}"
+  VERSION ${PROJECT_VERSION}
+  COMPATIBILITY AnyNewerVersion
+)
+
+## Create radical-config.cmake
+
+configure_package_config_file(
+  "cmake/Config.cmake.in"
+  "${_project_config_file}"
+  INSTALL_DESTINATION "${_config_install_dir}"
+)
+
+## Install targets
+
+install(TARGETS ${LIB_NAME}
+  EXPORT "${_targets_export_name}"
+  LIBRARY DESTINATION lib
+  ARCHIVE DESTINATION lib
+  RUNTIME DESTINATION bin
+  INCLUDES DESTINATION ${_include_install_dir}
+)
+
+## Install headers
+
+install(
+  DIRECTORY ${CMAKE_SOURCE_DIR}/${PROJECT_NAME}
+  DESTINATION ${_include_install_dir}
+  FILES_MATCHING PATTERN "*.h"
+)
+
+## Instal config files
+
+install(
+  FILES ${_project_config_file} ${_version_config_file}
+  DESTINATION "${_config_install_dir}"
+)
+
+install(
+  EXPORT "${_targets_export_name}"
+  DESTINATION "${_config_install_dir}"
+)
+
+#---------------------------------------------------------------------#
+#                           Uninstallation                            #
+#---------------------------------------------------------------------#
+
+## Uninstall target
+
 configure_file(
   "cmake/Uninstall.cmake.in"
   "${_generated_dir}/uninstall.cmake"
