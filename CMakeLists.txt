@@ -29,6 +29,7 @@ RADICAL_OPTION(BUILD_TESTS                       "Build tests"              OFF)
 find_package(OpenCV COMPONENTS core imgproc REQUIRED)
 
 set(RADICAL_SRC
+  radical/nonparametric_vignetting_model.cpp
   radical/radiometric_response.cpp
   radical/mat_io.cpp
 )

@@ -22,3 +22,4 @@ macro(TEST_ADD _name)
 endmacro(TEST_ADD)
 
 TEST_ADD(radiometric_response)
+TEST_ADD(nonparametric_vignetting_model)
