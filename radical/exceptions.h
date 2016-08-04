@@ -44,4 +44,13 @@ class RadiometricResponseException : public boost::exception, public std::runtim
   using Type = boost::error_info<struct tag_type, int>;
 };
 
+class MatException : public boost::exception, public std::runtime_error {
+ public:
+  MatException(const std::string& message) : std::runtime_error(message) {}
+  using ExpectedSize = boost::error_info<struct tag_expected_size, cv::Size>;
+  using ActualSize = boost::error_info<struct tag_actual_size, cv::Size>;
+  using ExpectedType = boost::error_info<struct tag_expected_type, int>;
+  using ActualType = boost::error_info<struct tag_actual_type, int>;
+};
+
 }  // namespace radical
