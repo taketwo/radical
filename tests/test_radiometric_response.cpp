@@ -30,13 +30,13 @@ using namespace radical;
 BOOST_AUTO_TEST_CASE(MatConstructor) {
   // Invalid initialization, should throw
   cv::Mat m;
-  BOOST_CHECK_THROW(RadiometricResponse rr(m), RadiometricResponseException);
+  BOOST_CHECK_THROW(RadiometricResponse rr(m), MatException);
   m.create(1, 100, CV_32FC1);
-  BOOST_CHECK_THROW(RadiometricResponse rr(m), RadiometricResponseException);
+  BOOST_CHECK_THROW(RadiometricResponse rr(m), MatException);
   m.create(1, 256, CV_32FC1);
-  BOOST_CHECK_THROW(RadiometricResponse rr(m), RadiometricResponseException);
+  BOOST_CHECK_THROW(RadiometricResponse rr(m), MatException);
   m.create(1, 256, CV_8UC3);
-  BOOST_CHECK_THROW(RadiometricResponse rr(m), RadiometricResponseException);
+  BOOST_CHECK_THROW(RadiometricResponse rr(m), MatException);
   // Valid initialization
   m.create(1, 256, CV_32FC3);
   m.setTo(1.0f);

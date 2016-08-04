@@ -22,12 +22,10 @@
 
 #include <algorithm>
 
-#include <boost/throw_exception.hpp>
-
 #include <opencv2/imgproc/imgproc.hpp>
 
+#include <radical/check.h>
 #include <radical/mat_io.h>
-#include <radical/exceptions.h>
 #include <radical/radiometric_response.h>
 
 /** Helper function for inverse look-up in a table (cv::Vec3f → Vec3b). */
@@ -44,12 +42,7 @@ inline cv::Vec3b inverseLUT(const std::vector<cv::Mat>& lut, const cv::Vec3f& in
 namespace radical {
 
 RadiometricResponse::RadiometricResponse(cv::InputArray _response) {
-  if (_response.total() != 256)
-    BOOST_THROW_EXCEPTION(RadiometricResponseException("Radiometric response should have exactly 256 elements")
-                          << RadiometricResponseException::Size(_response.size()));
-  if (_response.type() != CV_32FC3)
-    BOOST_THROW_EXCEPTION(RadiometricResponseException("Radiometric response values should be 3-channel float")
-                          << RadiometricResponseException::Type(_response.type()));
+  Check("Radiometric response", _response).hasSize(256).hasType(CV_32FC3);
   response_ = _response.getMat();
   cv::log(response_, log_response_);
   cv::split(response_, response_channels_);
@@ -72,6 +65,7 @@ void RadiometricResponse::directMap(cv::InputArray _E, cv::OutputArray _I) const
     _I.clear();
     return;
   }
+  Check("Irradiance image", _E).hasType(CV_32FC3);
   auto E = _E.getMat();
   _I.create(_E.size(), CV_8UC3);
   auto I = _I.getMat();
@@ -94,10 +88,11 @@ cv::Vec3f RadiometricResponse::inverseMap(const cv::Vec3b& _I) const {
 }
 
 void RadiometricResponse::inverseMap(cv::InputArray _I, cv::OutputArray _E) const {
-  if (_I.empty())
-    BOOST_THROW_EXCEPTION(RadiometricResponseException("Brightness image should not be empty"));
-  if (_I.depth() != CV_8U && _I.depth() != CV_8S)
-    BOOST_THROW_EXCEPTION(RadiometricResponseException("Brightness image should have 8U or 8S depth"));
+  if (_I.empty()) {
+    _E.clear();
+    return;
+  }
+  Check("Brightness image", _I).hasType(CV_8UC3);
   cv::LUT(_I, response_, _E);
 }
 
