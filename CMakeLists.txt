@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 2.8.12.2)
 
 set(LIB_NAME radical)
-project("lib${LIB_NAME}")
+project("${LIB_NAME}")
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
