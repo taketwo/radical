@@ -40,8 +40,7 @@ BOOST_AUTO_TEST_CASE(MatConstructor) {
   // Valid initialization
   m.create(1, 256, CV_32FC3);
   m.setTo(1.0f);
-  BOOST_CHECK_NO_THROW(RadiometricResponse rr1(m, RadiometricResponse::ChannelOrder::RGB));
-  BOOST_CHECK_NO_THROW(RadiometricResponse rr2(m, RadiometricResponse::ChannelOrder::BGR));
+  BOOST_CHECK_NO_THROW(RadiometricResponse rr(m));
 }
 
 BOOST_AUTO_TEST_CASE(LoadConstructor) {
@@ -55,9 +54,15 @@ BOOST_AUTO_TEST_CASE(LoadConstructor) {
 }
 
 BOOST_AUTO_TEST_CASE(DirectMapPixel) {
-  RadiometricResponse rr(getTestFilename("radiometric_response_identity.crf"));
-  BOOST_CHECK_EQUAL(rr.directMap(cv::Vec3f(0, 0, 0)), cv::Vec3b(0, 0, 0));
-  BOOST_CHECK_EQUAL(rr.directMap(cv::Vec3f(100, 200, 255)), cv::Vec3b(100, 200, 255));
+  {
+    RadiometricResponse rr(getTestFilename("radiometric_response_identity.crf"));
+    BOOST_CHECK_EQUAL(rr.directMap(cv::Vec3f(0, 0, 0)), cv::Vec3b(0, 0, 0));
+    BOOST_CHECK_EQUAL(rr.directMap(cv::Vec3f(100, 200, 255)), cv::Vec3b(100, 200, 255));
+  }
+  {
+    RadiometricResponse rr(getTestFilename("radiometric_response_scaling.crf"));
+    BOOST_CHECK_EQUAL(rr.directMap(cv::Vec3f(1, 10, 100)), cv::Vec3b(1, 1, 1));
+  }
 }
 
 BOOST_AUTO_TEST_CASE(DirectMapImage) {
@@ -74,9 +79,17 @@ BOOST_AUTO_TEST_CASE(DirectMapImage) {
 }
 
 BOOST_AUTO_TEST_CASE(InverseMapPixel) {
-  RadiometricResponse rr(getTestFilename("radiometric_response_identity.crf"));
-  BOOST_CHECK_EQUAL(rr.inverseMap(cv::Vec3b(0, 0, 0)), cv::Vec3f(0, 0, 0));
-  BOOST_CHECK_EQUAL(rr.inverseMap(cv::Vec3b(100, 200, 255)), cv::Vec3f(100, 200, 255));
+  {
+    RadiometricResponse rr(getTestFilename("radiometric_response_identity.crf"));
+    BOOST_CHECK_EQUAL(rr.inverseMap(cv::Vec3b(0, 0, 0)), cv::Vec3f(0, 0, 0));
+    BOOST_CHECK_EQUAL(rr.inverseMap(cv::Vec3b(100, 200, 255)), cv::Vec3f(100, 200, 255));
+  }
+  {
+    RadiometricResponse rr(getTestFilename("radiometric_response_scaling.crf"));
+    BOOST_CHECK_EQUAL(rr.inverseMap(cv::Vec3b(0, 0, 0)), cv::Vec3f(0, 0, 0));
+    BOOST_CHECK_EQUAL(rr.inverseMap(cv::Vec3b(1, 1, 1)), cv::Vec3f(1, 10, 100));
+    BOOST_CHECK_EQUAL(rr.inverseMap(cv::Vec3b(2, 3, 4)), cv::Vec3f(2, 30, 400));
+  }
 }
 
 BOOST_AUTO_TEST_CASE(InverseMapImage) {
@@ -90,27 +103,6 @@ BOOST_AUTO_TEST_CASE(InverseMapImage) {
   cv::Mat E;
   rr.inverseMap(I, E);
   BOOST_CHECK_EQUAL_MAT(E, E_expected, cv::Vec3f);
-}
-
-BOOST_AUTO_TEST_CASE(ChannelOrder) {
-  // "radiometric_response_scaling.crf" contains response where
-  //   - red channel is scaled by 100
-  //   - green channel is scaled by 10
-  //   - blue channel is identity
-  {
-    RadiometricResponse rr(getTestFilename("radiometric_response_scaling.crf"), RadiometricResponse::ChannelOrder::BGR);
-    BOOST_CHECK_EQUAL(rr.inverseMap(cv::Vec3b(0, 0, 0)), cv::Vec3f(0, 0, 0));
-    BOOST_CHECK_EQUAL(rr.inverseMap(cv::Vec3b(1, 1, 1)), cv::Vec3f(1, 10, 100));
-    BOOST_CHECK_EQUAL(rr.inverseMap(cv::Vec3b(2, 3, 4)), cv::Vec3f(2, 30, 400));
-    BOOST_CHECK_EQUAL(rr.directMap(cv::Vec3f(1, 10, 100)), cv::Vec3b(1, 1, 1));
-  }
-  {
-    RadiometricResponse rr(getTestFilename("radiometric_response_scaling.crf"), RadiometricResponse::ChannelOrder::RGB);
-    BOOST_CHECK_EQUAL(rr.inverseMap(cv::Vec3b(0, 0, 0)), cv::Vec3f(0, 0, 0));
-    BOOST_CHECK_EQUAL(rr.inverseMap(cv::Vec3b(1, 1, 1)), cv::Vec3f(100, 10, 1));
-    BOOST_CHECK_EQUAL(rr.inverseMap(cv::Vec3b(2, 3, 4)), cv::Vec3f(200, 30, 4));
-    BOOST_CHECK_EQUAL(rr.directMap(cv::Vec3f(100, 10, 1)), cv::Vec3b(1, 1, 1));
-  }
 }
 
 BOOST_AUTO_TEST_CASE(SaveLoad)

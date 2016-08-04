@@ -29,16 +29,15 @@
 
 namespace radical {
 
+/** The RadiometricResponse class models camera response function (CRF) and
+  * allows to map from pixel brightness to pixel irradiance and vice versa. */
 class RadiometricResponse {
  public:
-  enum class ChannelOrder {
-    BGR,
-    RGB,
-  };
+  /** Construct RadiometricResponse from a cv::Mat with inverse CRF.
+    * \param[in] response inverse CRF (CV_32FC3, 256 elements) */
+  RadiometricResponse(cv::InputArray response);
 
-  RadiometricResponse(cv::InputArray response, ChannelOrder order = ChannelOrder::BGR);
-
-  RadiometricResponse(const std::string& filename, ChannelOrder order = ChannelOrder::BGR);
+  RadiometricResponse(const std::string& filename);
 
   virtual ~RadiometricResponse();
 
@@ -70,7 +69,6 @@ class RadiometricResponse {
   cv::Mat response_;
   cv::Mat log_response_;
   std::vector<cv::Mat> response_channels_;
-  ChannelOrder order_;
 };
 
 }  // namespace radical

@@ -43,33 +43,24 @@ inline cv::Vec3b inverseLUT(const std::vector<cv::Mat>& lut, const cv::Vec3f& in
 
 namespace radical {
 
-RadiometricResponse::RadiometricResponse(cv::InputArray _response, ChannelOrder order) : order_(order) {
+RadiometricResponse::RadiometricResponse(cv::InputArray _response) {
   if (_response.total() != 256)
     BOOST_THROW_EXCEPTION(RadiometricResponseException("Radiometric response should have exactly 256 elements")
                           << RadiometricResponseException::Size(_response.size()));
   if (_response.type() != CV_32FC3)
     BOOST_THROW_EXCEPTION(RadiometricResponseException("Radiometric response values should be 3-channel float")
                           << RadiometricResponseException::Type(_response.type()));
-  if (order_ == ChannelOrder::RGB)
-    cv::cvtColor(_response, response_, CV_BGR2RGB);
-  else
-    response_ = _response.getMat();
+  response_ = _response.getMat();
   cv::log(response_, log_response_);
   cv::split(response_, response_channels_);
 }
 
-RadiometricResponse::RadiometricResponse(const std::string& filename, ChannelOrder order)
-: RadiometricResponse(readMat(filename), order) {}
+RadiometricResponse::RadiometricResponse(const std::string& filename) : RadiometricResponse(readMat(filename)) {}
 
 RadiometricResponse::~RadiometricResponse() {}
 
 void RadiometricResponse::save(const std::string& filename) const {
-  cv::Mat response;
-  if (order_ == ChannelOrder::RGB)
-    cv::cvtColor(response_, response, CV_RGB2BGR);
-  else
-    response = response_;
-  writeMat(filename, response);
+  writeMat(filename, response_);
 }
 
 cv::Vec3b RadiometricResponse::directMap(const cv::Vec3f& E) const {
