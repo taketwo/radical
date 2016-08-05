@@ -41,6 +41,11 @@ macro(APP_ADD _name)
   endif()
 endmacro(APP_ADD)
 
+APP_ADD(display_vignetting_response
+  OPENCV2 highgui
+  OPENCV3 highgui imgcodecs
+)
+
 APP_ADD(calibrate_radiometric_response
   OPENCV3 highgui photo
   LINK_WITH grabbers
