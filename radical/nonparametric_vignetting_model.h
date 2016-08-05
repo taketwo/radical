@@ -34,6 +34,8 @@ class NonparametricVignettingModel : public VignettingModel {
 
   NonparametricVignettingModel(const std::string& filename);
 
+  virtual std::string getName() const override;
+
   virtual void save(const std::string& filename) const override;
 
   virtual cv::Vec3f operator()(const cv::Vec2f& p) const override;

@@ -36,6 +36,9 @@ class VignettingModel {
 
   virtual ~VignettingModel() {}
 
+  /** Get the name of the vignetting model. */
+  virtual std::string getName() const = 0;
+
   /** Write vignetting model to a file. */
   virtual void save(const std::string& filename) const = 0;
 

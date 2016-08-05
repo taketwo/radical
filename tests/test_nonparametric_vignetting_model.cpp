@@ -49,6 +49,11 @@ BOOST_AUTO_TEST_CASE(LoadConstructor) {
   BOOST_CHECK_NO_THROW(NonparametricVignettingModel vm(getTestFilename("nonparametric_vignetting_model_identity.vgn")));
 }
 
+BOOST_AUTO_TEST_CASE(GetName) {
+  NonparametricVignettingModel vm(getTestFilename("nonparametric_vignetting_model_identity.vgn"));
+  BOOST_CHECK_EQUAL(vm.getName(), "nonparametric");
+}
+
 BOOST_AUTO_TEST_CASE(GetImageSize) {
   NonparametricVignettingModel vm(cv::Mat(10, 10, CV_32FC3));
   BOOST_CHECK_EQUAL(vm.getImageSize().width, 10);

@@ -54,6 +54,10 @@ NonparametricVignettingModel::NonparametricVignettingModel(const std::string& fi
   }
 }
 
+std::string NonparametricVignettingModel::getName() const {
+  return "nonparametric";
+}
+
 void NonparametricVignettingModel::save(const std::string& filename) const {
   std::ofstream file(filename);
   if (file.is_open()) {
