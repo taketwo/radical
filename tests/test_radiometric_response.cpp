@@ -41,6 +41,10 @@ BOOST_AUTO_TEST_CASE(MatConstructor) {
   m.create(1, 256, CV_32FC3);
   m.setTo(1.0f);
   BOOST_CHECK_NO_THROW(RadiometricResponse rr(m));
+  // 256x1 is also valid
+  m.create(256, 1, CV_32FC3);
+  m.setTo(1.0f);
+  BOOST_CHECK_NO_THROW(RadiometricResponse rr(m));
 }
 
 BOOST_AUTO_TEST_CASE(LoadConstructor) {
@@ -78,6 +82,15 @@ BOOST_AUTO_TEST_CASE(DirectMapImage) {
   BOOST_CHECK_EQUAL_MAT(I, I_expected, cv::Vec3b);
 }
 
+BOOST_AUTO_TEST_CASE(DirectMapImageInvalid) {
+  RadiometricResponse rr(getTestFilename("radiometric_response_identity.crf"));
+  cv::Mat E, I;
+  rr.directMap(E, I);
+  BOOST_CHECK(I.empty());
+  E.create(10, 10, CV_32FC2);
+  BOOST_CHECK_THROW(rr.directMap(E, I), MatException);
+}
+
 BOOST_AUTO_TEST_CASE(InverseMapPixel) {
   {
     RadiometricResponse rr(getTestFilename("radiometric_response_identity.crf"));
@@ -103,6 +116,15 @@ BOOST_AUTO_TEST_CASE(InverseMapImage) {
   cv::Mat E;
   rr.inverseMap(I, E);
   BOOST_CHECK_EQUAL_MAT(E, E_expected, cv::Vec3f);
+}
+
+BOOST_AUTO_TEST_CASE(InverseMapImageInvalid) {
+  RadiometricResponse rr(getTestFilename("radiometric_response_identity.crf"));
+  cv::Mat I, E;
+  rr.inverseMap(I, E);
+  BOOST_CHECK(E.empty());
+  I.create(10, 10, CV_8UC1);
+  BOOST_CHECK_THROW(rr.directMap(I, E), MatException);
 }
 
 BOOST_AUTO_TEST_CASE(SaveLoad)
