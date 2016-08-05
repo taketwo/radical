@@ -24,8 +24,8 @@
 #include <iostream>
 
 #include <radical/check.h>
-#include <radical/mat_io.h>
 #include <radical/exceptions.h>
+#include <radical/mat_io.h>
 #include <radical/nonparametric_vignetting_model.h>
 
 namespace radical {
@@ -38,12 +38,10 @@ NonparametricVignettingModel::NonparametricVignettingModel(cv::InputArray _coeff
 NonparametricVignettingModel::NonparametricVignettingModel(const std::string& filename) {
   std::ifstream file(filename);
   if (file.is_open()) {
-    std::string line;
-    std::string name;
+    std::string line, name;
     {
       std::getline(file, line);
-      std::stringstream ss(line);
-      ss >> name;
+      std::stringstream(line) >> name;
       if (name != "NonparametricVignettingModel")
         BOOST_THROW_EXCEPTION(SerializationException("Vignetting model stored in the file is not nonparametric")
                               << SerializationException::Filename(filename));
@@ -80,4 +78,4 @@ cv::Mat NonparametricVignettingModel::getModelCoefficients() const {
   return coefficients_;
 }
 
-} // namespace radical
+}  // namespace radical
