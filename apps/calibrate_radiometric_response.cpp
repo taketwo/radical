@@ -36,7 +36,8 @@
 #include "grabbers/grabber.h"
 #include "utils/program_options.h"
 
-struct Options : public OptionsBase {
+class Options : public OptionsBase {
+ public:
   std::string output;
   int min;
   int max;
@@ -44,9 +45,11 @@ struct Options : public OptionsBase {
   unsigned int average = 10;
   unsigned int lag = 10;
 
+ protected:
   virtual void addOptions(boost::program_options::options_description& desc) override {
     namespace po = boost::program_options;
-    desc.add_options()("output,o", po::value<std::string>(&output), "Output filename (default: camera serial number + \".crf\" suffix)");
+    desc.add_options()("output,o", po::value<std::string>(&output),
+                       "Output filename (default: camera serial number + \".crf\" suffix)");
     desc.add_options()("min", po::value<int>(&min), "Minimum exposure (default: depends on the camera)");
     desc.add_options()("max", po::value<int>(&max), "Maximum exposure (default: depends on the camera)");
     desc.add_options()("step", po::value<unsigned int>(&step),

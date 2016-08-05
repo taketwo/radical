@@ -26,9 +26,8 @@
 
 #include <boost/program_options.hpp>
 
-struct OptionsBase {
-  boost::program_options::variables_map vm;
-
+class OptionsBase {
+ public:
   virtual ~OptionsBase() {}
 
   bool parse(int argc, const char** argv) {
@@ -50,6 +49,7 @@ struct OptionsBase {
         return false;
       }
       po::notify(vm);
+      validate();
     } catch (boost::program_options::error& e) {
       std::cerr << "Option parsing error: " << e.what() << std::endl;
       return false;
@@ -57,6 +57,11 @@ struct OptionsBase {
     return true;
   }
 
+  bool operator()(const std::string& name) const {
+    return vm.count(name) != 0;
+  }
+
+ protected:
   virtual void addOptions(boost::program_options::options_description& /* desc */) {}
 
   virtual void addPositional(boost::program_options::options_description& /* desc */,
@@ -66,7 +71,10 @@ struct OptionsBase {
     std::cout << "Help" << std::endl;
   }
 
-  bool operator()(const std::string& name) const {
-    return vm.count(name) != 0;
-  }
+  /** Validate supplied options.
+    * This function is called directly after parsing command line.
+    * Should throw boost::program_options::error if validation fails. */
+  virtual void validate() {}
+
+  boost::program_options::variables_map vm;
 };
