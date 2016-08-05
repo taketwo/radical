@@ -22,33 +22,42 @@
 
 #pragma once
 
-#include <stdexcept>
-
-#include <boost/exception/info.hpp>
-#include <boost/exception/exception.hpp>
+#include <memory>
+#include <string>
 
 #include <opencv2/core/core.hpp>
 
 namespace radical {
 
-class Exception : public boost::exception, public std::runtime_error {
- public:
-  Exception(const std::string& message) : std::runtime_error(message) {}
-};
+class VignettingModel;
 
-class SerializationException : public Exception {
+class VignettingResponse {
  public:
-  SerializationException(const std::string& message) : Exception(message) {}
-  using Filename = boost::error_info<struct tag_filename, std::string>;
-};
+  VignettingResponse(const std::string& filename);
 
-class MatException : public Exception {
- public:
-  MatException(const std::string& message) : Exception(message) {}
-  using ExpectedSize = boost::error_info<struct tag_expected_size, cv::Size>;
-  using ActualSize = boost::error_info<struct tag_actual_size, cv::Size>;
-  using ExpectedType = boost::error_info<struct tag_expected_type, int>;
-  using ActualType = boost::error_info<struct tag_actual_type, int>;
+  virtual ~VignettingResponse();
+
+  std::shared_ptr<const VignettingModel> getModel() const;
+
+  cv::Mat getResponse() const;
+
+  cv::Mat getResponse(cv::Size image_size) const;
+
+  /** Remove vignetting effects from a given image.
+    * \param[in] E image irradiance
+    * \param[out] L scene radiance */
+  void remove(cv::InputArray E, cv::OutputArray L) const;
+
+  /** Add vignetting effects to a given image.
+    * \param[in] L scene radiance
+    * \param[out] E image irradiance */
+  void add(cv::InputArray L, cv::OutputArray E) const;
+
+ private:
+  std::shared_ptr<const VignettingModel> model_;
+
+  struct ResponseCache;
+  mutable std::unique_ptr<ResponseCache> response_cache_;
 };
 
 }  // namespace radical
