@@ -33,6 +33,8 @@ class VignettingModel;
 
 class VignettingResponse {
  public:
+  using Ptr = std::shared_ptr<VignettingResponse>;
+
   VignettingResponse(const std::string& filename);
 
   virtual ~VignettingResponse();

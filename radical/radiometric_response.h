@@ -22,6 +22,7 @@
 
 #pragma once
 
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -33,6 +34,8 @@ namespace radical {
   * allows to map from pixel brightness to pixel irradiance and vice versa. */
 class RadiometricResponse {
  public:
+  using Ptr = std::shared_ptr<RadiometricResponse>;
+
   /** Construct RadiometricResponse from a cv::Mat with inverse CRF.
     * \param[in] response inverse CRF (CV_32FC3, 256 elements) */
   RadiometricResponse(cv::InputArray response);
