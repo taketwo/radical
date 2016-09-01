@@ -96,4 +96,21 @@ void RadiometricResponse::inverseMap(cv::InputArray _I, cv::OutputArray _E) cons
   cv::LUT(_I, response_, _E);
 }
 
+cv::Vec3f RadiometricResponse::inverseLogMap(const cv::Vec3b& _I) const {
+  cv::Mat I(1, 1, CV_8UC3);
+  I.at<cv::Vec3b>(0, 0) = _I;
+  cv::Mat E;
+  cv::LUT(I, log_response_, E);
+  return E.at<cv::Vec3f>(0, 0);
+}
+
+void RadiometricResponse::inverseLogMap(cv::InputArray _I, cv::OutputArray _E) const {
+  if (_I.empty()) {
+    _E.clear();
+    return;
+  }
+  Check("Brightness image", _I).hasType(CV_8UC3);
+  cv::LUT(_I, log_response_, _E);
+}
+
 }  // namespace radical

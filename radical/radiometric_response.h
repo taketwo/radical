@@ -67,8 +67,17 @@ class RadiometricResponse {
     * \param[out] E image irradiance */
   void inverseMap(cv::InputArray I, cv::OutputArray E) const;
 
- private:
+  /** Compute logarithm of pixel irradiance from pixel brightness (inverse mapping).
+    * \param[in] I pixel brightness
+    * \returns logarithm of pixel irradiance */
+  cv::Vec3f inverseLogMap(const cv::Vec3b& I) const;
 
+  /** Compute logarithm of image irradiance from image brightness (inverse mapping).
+    * \param[in] I image brightness
+    * \param[out] E logarithm of image irradiance */
+  void inverseLogMap(cv::InputArray I, cv::OutputArray E) const;
+
+ private:
   cv::Mat response_;
   cv::Mat log_response_;
   std::vector<cv::Mat> response_channels_;
