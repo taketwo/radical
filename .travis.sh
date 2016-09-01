@@ -41,7 +41,7 @@ function install_cmake()
   if [[ $? -ne 0 ]]; then
     return $?
   fi
-  tar xvzf pkg
+  tar xzf pkg
   cd ${pkg_src_dir}
   ./bootstrap --prefix=$pkg_install_dir
   make -j2 && make install
@@ -73,12 +73,14 @@ function install_opencv()
   if [[ $? -ne 0 ]]; then
     return $?
   fi
-  tar xvzf pkg
+  tar xzf pkg
   cd ${pkg_src_dir}
   mkdir -p build && cd build
   cmake .. \
     -DCMAKE_BUILD_TYPE=Release \
     -DCMAKE_INSTALL_PREFIX=$pkg_install_dir \
+    -DWITH_IPP=OFF \
+    -DWITH_WEBP=OFF \
     -DBUILD_opencv_apps=OFF \
     -DBUILD_opencv_calib3d=OFF \
     -DBUILD_opencv_features2d=OFF \
