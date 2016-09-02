@@ -45,6 +45,10 @@ class VignettingResponse {
 
   cv::Mat getResponse(cv::Size image_size) const;
 
+  cv::Mat getLogResponse() const;
+
+  cv::Mat getLogResponse(cv::Size image_size) const;
+
   /** Remove vignetting effects from a given image.
     * \param[in] E image irradiance
     * \param[out] L scene radiance */

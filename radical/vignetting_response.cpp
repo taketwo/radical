@@ -24,6 +24,8 @@
 
 #include <boost/throw_exception.hpp>
 
+#include <opencv2/imgproc/imgproc.hpp>
+
 #include <radical/check.h>
 #include <radical/exceptions.h>
 #include <radical/vignetting_response.h>
@@ -50,6 +52,7 @@ namespace radical {
 struct VignettingResponse::ResponseCache
 {
   std::unordered_map<cv::Size, cv::Mat> precomputed_responses_;
+  std::unordered_map<cv::Size, cv::Mat> precomputed_log_responses_;
   const VignettingModel& model_;
 
   ResponseCache(const VignettingModel& model)
@@ -78,6 +81,18 @@ struct VignettingResponse::ResponseCache
       precomputed_responses_.insert({image_size, response});
     }
     return precomputed_responses_[image_size];
+  }
+
+  cv::Mat
+  getLog(const cv::Size& image_size)
+  {
+    if (precomputed_log_responses_.count(image_size) == 0)
+    {
+      cv::Mat log;
+      cv::log(get(image_size), log);
+      precomputed_log_responses_.insert({image_size, log});
+    }
+    return precomputed_log_responses_[image_size];
   }
 };
 
@@ -116,6 +131,18 @@ cv::Mat
 VignettingResponse::getResponse(cv::Size image_size) const
 {
   return response_cache_->get(image_size);
+}
+
+cv::Mat
+VignettingResponse::getLogResponse() const
+{
+  return response_cache_->getLog(model_->getImageSize());
+}
+
+cv::Mat
+VignettingResponse::getLogResponse(cv::Size image_size) const
+{
+  return response_cache_->getLog(image_size);
 }
 
 void

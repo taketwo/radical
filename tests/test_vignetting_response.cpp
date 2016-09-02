@@ -43,30 +43,48 @@ BOOST_AUTO_TEST_CASE(GetResponse) {
   VignettingResponse vv(getTestFilename("nonparametric_vignetting_model_identity.vgn"));
   {
     cv::Mat response_expected(10, 10, CV_32FC3);
+    // Normal
     response_expected.setTo(1.0);
     BOOST_CHECK_EQUAL_MAT(vv.getResponse(), response_expected, cv::Vec3f);
     BOOST_CHECK_EQUAL_MAT(vv.getResponse({10, 10}), response_expected, cv::Vec3f);
+    // Logarithm
+    response_expected.setTo(0.0);
+    BOOST_CHECK_EQUAL_MAT(vv.getLogResponse(), response_expected, cv::Vec3f);
+    BOOST_CHECK_EQUAL_MAT(vv.getLogResponse({10, 10}), response_expected, cv::Vec3f);
   }
   {
     cv::Mat response_expected(4, 4, CV_32FC3);
+    // Normal
     response_expected.setTo(1.0);
     BOOST_CHECK_EQUAL_MAT(vv.getResponse({4, 4}), response_expected, cv::Vec3f);
+    // Logarithm
+    response_expected.setTo(0.0);
+    BOOST_CHECK_EQUAL_MAT(vv.getLogResponse({4, 4}), response_expected, cv::Vec3f);
   }
   {
     cv::Mat response_expected(20, 20, CV_32FC3);
+    // Normal
     response_expected.setTo(1.0);
     BOOST_CHECK_EQUAL_MAT(vv.getResponse({20, 20}), response_expected, cv::Vec3f);
+    // Logarithm
+    response_expected.setTo(0.0);
+    BOOST_CHECK_EQUAL_MAT(vv.getLogResponse({20, 20}), response_expected, cv::Vec3f);
   }
   {
     cv::Mat response_expected(53, 53, CV_32FC3);
+    // Normal
     response_expected.setTo(1.0);
     BOOST_CHECK_EQUAL_MAT(vv.getResponse({53, 53}), response_expected, cv::Vec3f);
+    // Logarithm
+    response_expected.setTo(0.0);
+    BOOST_CHECK_EQUAL_MAT(vv.getLogResponse({53, 53}), response_expected, cv::Vec3f);
   }
 }
 
 BOOST_AUTO_TEST_CASE(GetResponseInvalidScale) {
   VignettingResponse vv(getTestFilename("nonparametric_vignetting_model_identity.vgn"));
   BOOST_CHECK_THROW(vv.getResponse({30, 10}), Exception);
+  BOOST_CHECK_THROW(vv.getLogResponse({30, 10}), Exception);
 }
 
 BOOST_AUTO_TEST_CASE(RemoveInvalid) {
