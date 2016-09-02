@@ -94,8 +94,10 @@ BOOST_AUTO_TEST_CASE(RemoveInvalid) {
   BOOST_CHECK(L.empty());
   E.create(10, 10, CV_32FC2);
   BOOST_CHECK_THROW(vm.remove(E, L), MatException); // wrong type
+  BOOST_CHECK_THROW(vm.removeLog(E, L), MatException); // wrong type
   E.create(20, 10, CV_32FC3);
   BOOST_CHECK_THROW(vm.remove(E, L), Exception); // invalid aspect ratio
+  BOOST_CHECK_THROW(vm.removeLog(E, L), Exception); // invalid aspect ratio
 }
 
 BOOST_AUTO_TEST_CASE(RemoveIdentity) {
@@ -103,7 +105,11 @@ BOOST_AUTO_TEST_CASE(RemoveIdentity) {
   cv::Mat E(10, 10, CV_32FC3);
   cv::randu(E, cv::Scalar(0, 0, 0), cv::Scalar(1, 1, 1));
   VignettingResponse vm(getTestFilename("nonparametric_vignetting_model_identity.vgn"));
+  // Normal
   vm.remove(E, L);
+  BOOST_CHECK_EQUAL_MAT(L, E, cv::Vec3f);
+  // Logarithm
+  vm.removeLog(E, L);
   BOOST_CHECK_EQUAL_MAT(L, E, cv::Vec3f);
 }
 
@@ -114,8 +120,10 @@ BOOST_AUTO_TEST_CASE(AddInvalid) {
   BOOST_CHECK(E.empty());
   L.create(10, 10, CV_32FC2);
   BOOST_CHECK_THROW(vm.add(L, E), MatException); // wrong type
+  BOOST_CHECK_THROW(vm.addLog(L, E), MatException); // wrong type
   L.create(10, 20, CV_32FC2);
   BOOST_CHECK_THROW(vm.add(L, E), Exception); // invalid aspect ratio
+  BOOST_CHECK_THROW(vm.addLog(L, E), Exception); // invalid aspect ratio
 }
 
 BOOST_AUTO_TEST_CASE(AddIdentity) {
@@ -123,7 +131,11 @@ BOOST_AUTO_TEST_CASE(AddIdentity) {
   cv::Mat L(10, 10, CV_32FC3);
   cv::randu(L, cv::Scalar(0, 0, 0), cv::Scalar(1, 1, 1));
   VignettingResponse vm(getTestFilename("nonparametric_vignetting_model_identity.vgn"));
+  // Normal
   vm.add(L, E);
+  BOOST_CHECK_EQUAL_MAT(E, L, cv::Vec3f);
+  // Logarithm
+  vm.addLog(L, E);
   BOOST_CHECK_EQUAL_MAT(E, L, cv::Vec3f);
 }
 

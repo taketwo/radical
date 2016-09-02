@@ -157,6 +157,17 @@ VignettingResponse::remove(cv::InputArray _E, cv::OutputArray _L) const
 }
 
 void
+VignettingResponse::removeLog(cv::InputArray _E, cv::OutputArray _L) const
+{
+  if (_E.empty()) {
+    _L.clear();
+    return;
+  }
+  Check("Irradiance image", _E).hasType(CV_32FC3);
+  cv::subtract(_E, getLogResponse(_E.size()), _L);
+}
+
+void
 VignettingResponse::add(cv::InputArray _L, cv::OutputArray _E) const
 {
   if (_L.empty()) {
@@ -165,6 +176,17 @@ VignettingResponse::add(cv::InputArray _L, cv::OutputArray _E) const
   }
   Check("Radiance image", _L).hasType(CV_32FC3);
   cv::multiply(_L, getResponse(_L.size()), _E);
+}
+
+void
+VignettingResponse::addLog(cv::InputArray _L, cv::OutputArray _E) const
+{
+  if (_L.empty()) {
+    _E.clear();
+    return;
+  }
+  Check("Radiance image", _L).hasType(CV_32FC3);
+  cv::add(_L, getLogResponse(_L.size()), _E);
 }
 
 } // namespace radical

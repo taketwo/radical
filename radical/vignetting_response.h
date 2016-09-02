@@ -54,10 +54,20 @@ class VignettingResponse {
     * \param[out] L scene radiance */
   void remove(cv::InputArray E, cv::OutputArray L) const;
 
+  /** Remove vignetting effects from a given log image.
+    * \param[in] E logarithm of image irradiance
+    * \param[out] L logarithm of scene radiance */
+  void removeLog(cv::InputArray E, cv::OutputArray L) const;
+
   /** Add vignetting effects to a given image.
     * \param[in] L scene radiance
     * \param[out] E image irradiance */
   void add(cv::InputArray L, cv::OutputArray E) const;
+
+  /** Add vignetting effects to a given log image.
+    * \param[in] L logarithm of scene radiance
+    * \param[out] E logarithm of image irradiance */
+  void addLog(cv::InputArray L, cv::OutputArray E) const;
 
  private:
   std::shared_ptr<const VignettingModel> model_;
