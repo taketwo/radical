@@ -44,6 +44,9 @@ class RadiometricResponse {
 
   virtual ~RadiometricResponse();
 
+  /** Get inverse of the response function (a lookup table that maps pixel brightness to irradiance). */
+  cv::Mat getInverseResponse() const;
+
   /** Write radiometric response to a file. */
   void save(const std::string& filename) const;
 

@@ -152,6 +152,6 @@ BOOST_AUTO_TEST_CASE(SaveLoad)
   auto f = getTemporaryFilename();
   RadiometricResponse(response).save(f);
   RadiometricResponse rr(f);
-  for (int j = 0; j < 256; ++j)
-    BOOST_CHECK_EQUAL(rr.inverseMap(cv::Vec3b(j, j, j)), cv::Vec3f(10, 10, 10));
+  BOOST_CHECK_EQUAL_MAT(rr.getInverseResponse(), response, cv::Vec3f);
 }
+

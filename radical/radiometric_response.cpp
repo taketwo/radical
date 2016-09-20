@@ -52,6 +52,10 @@ RadiometricResponse::RadiometricResponse(const std::string& filename) : Radiomet
 
 RadiometricResponse::~RadiometricResponse() {}
 
+cv::Mat RadiometricResponse::getInverseResponse() const {
+  return response_;
+}
+
 void RadiometricResponse::save(const std::string& filename) const {
   writeMat(filename, response_);
 }
