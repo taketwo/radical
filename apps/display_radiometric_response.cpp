@@ -31,6 +31,7 @@
 
 #include <radical/radiometric_response.h>
 
+#include "utils/plotting.h"
 #include "utils/program_options.h"
 
 class Options : public OptionsBase {
@@ -74,24 +75,7 @@ int main(int argc, const char** argv) {
   std::cout << "Loaded radiometric response from file \"" << options.r_response << "\"" << std::endl;
   std::cout << "Irradiance range: " << min_radiance << " - " << max_radiance << std::endl;
 
-  const int WIDTH = 640;
-  const int HEIGHT = 480;
-
-  cv::Mat plot(HEIGHT, WIDTH, CV_8UC3);
-  plot.setTo(255);
-
-  float min = std::min(std::min(min_radiance[0], min_radiance[1]), min_radiance[2]);
-  float max = std::max(std::max(max_radiance[0], max_radiance[1]), max_radiance[2]);
-  float x_scale = 1.0f * WIDTH / (256);
-  float y_scale = 1.0f * HEIGHT / (max - min);
-
-  const cv::Scalar CHANNELS[] = {{255, 0, 0}, {0, 255, 0}, {0, 0, 255}};
-
-  for (size_t i = 0; i < 256; ++i) {
-    auto pt = rr.inverseMap(cv::Vec3b(i, i, i));
-    for (int c = 0; c < 3; ++c)
-      cv::circle(plot, cv::Point(i * x_scale, HEIGHT - pt[c] * y_scale), 3, CHANNELS[c], -1);
-  }
+  auto plot = plotRadiometricResponse(rr);
 
   if (options.save) {
     auto output = options.r_response + ".png";
