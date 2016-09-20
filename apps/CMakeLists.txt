@@ -52,6 +52,7 @@ APP_ADD(display_vignetting_response
 )
 
 APP_ADD(calibrate_radiometric_response
-  OPENCV3 highgui photo
+  OPENCV2 highgui imgproc
+  OPENCV3 highgui imgproc photo
   LINK_WITH grabbers
 )
