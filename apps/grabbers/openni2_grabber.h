@@ -48,7 +48,9 @@ class OpenNI2Grabber : public Grabber {
 
   virtual std::pair<int, int> getExposureRange() const override;
 
-  virtual std::string getSerialNumber() const override;
+  virtual std::string getCameraModelName() const override;
+
+  virtual std::string getCameraSerialNumber() const override;
 
  private:
   struct Impl;

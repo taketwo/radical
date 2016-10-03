@@ -60,7 +60,12 @@ class Grabber {
 
   virtual std::pair<int, int> getExposureRange() const = 0;
 
-  virtual std::string getSerialNumber() const = 0;
+  virtual std::string getCameraModelName() const = 0;
+
+  virtual std::string getCameraSerialNumber() const = 0;
+
+  /** Get a unique id for the camera (concatenation of model name and serial number). */
+  std::string getCameraUID() const;
 };
 
 /** Create a grabber from URI.

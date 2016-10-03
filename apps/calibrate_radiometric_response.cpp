@@ -62,7 +62,7 @@ class Options : public OptionsBase {
     namespace po = boost::program_options;
     desc.add_options()(
         "output,o", po::value<std::string>(&output),
-        "Output filename with calibrated response function (default: camera serial number + \".crf\" suffix)");
+        "Output filename with calibrated response function (default: camera model name + \".\" + camera serial number + \".crf\" suffix)");
     desc.add_options()("min", po::value<int>(&exposure_min), "Minimum exposure (default: depends on the camera)");
     desc.add_options()("max", po::value<int>(&exposure_max), "Maximum exposure (default: depends on the camera)");
     desc.add_options()("factor,f", po::value<float>(&exposure_factor),
@@ -299,7 +299,7 @@ int main(int argc, const char** argv) {
   grabber->setAutoWhiteBalanceEnabled(false);
 
   if (!options("output"))
-    options.output = grabber->getSerialNumber() + ".crf";
+    options.output = grabber->getCameraUID() + ".crf";
   if (!options("min"))
     options.exposure_min = grabber->getExposureRange().first;
   if (!options("max"))

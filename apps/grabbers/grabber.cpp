@@ -29,6 +29,9 @@ namespace grabbers {
 
 Grabber::~Grabber() {}
 
+std::string Grabber::getCameraUID() const {
+  return getCameraModelName() + "." + getCameraSerialNumber();
+}
 Grabber::Ptr
 createGrabber(const std::string& uri)
 {

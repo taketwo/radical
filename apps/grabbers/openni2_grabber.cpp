@@ -20,6 +20,9 @@
  * SOFTWARE.
  ******************************************************************************/
 
+#include <boost/algorithm/string.hpp>
+#include <boost/throw_exception.hpp>
+
 #include <OpenNI.h>
 
 #include <grabbers/openni2_grabber.h>
@@ -152,7 +155,13 @@ std::pair<int, int> OpenNI2Grabber::getExposureRange() const {
   return {1, 500};
 }
 
-std::string OpenNI2Grabber::getSerialNumber() const {
+std::string OpenNI2Grabber::getCameraModelName() const {
+  std::string name = p->device.getDeviceInfo().getName();
+  boost::algorithm::to_lower(name);
+  return name;
+}
+
+std::string OpenNI2Grabber::getCameraSerialNumber() const {
   char serial[1024];
   p->device.getProperty(ONI_DEVICE_PROPERTY_SERIAL_NUMBER, &serial);
   return std::string(serial);
