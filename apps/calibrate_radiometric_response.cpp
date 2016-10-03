@@ -46,6 +46,7 @@
 
 class Options : public OptionsBase {
  public:
+  std::string camera = "";
   std::string output;
   int exposure_min;
   int exposure_max;
@@ -81,8 +82,15 @@ class Options : public OptionsBase {
                        "Do not visualize the calibration process and results");
   }
 
+  virtual void addPositional(boost::program_options::options_description& desc,
+                             boost::program_options::positional_options_description& positional) override {
+    namespace po = boost::program_options;
+    desc.add_options()("camera", po::value<std::string>(&camera), "Camera to calibrate (\"asus\", \"intel\")");
+    positional.add("camera", -1);
+  }
+
   virtual void printHelp() override {
-    std::cout << "Usage: calibrate_radiometric_response [options]" << std::endl;
+    std::cout << "Usage: calibrate_radiometric_response [options] <camera>" << std::endl;
     std::cout << "" << std::endl;
     std::cout << "Calibrate radiometric response of a camera. Two algorithms are available:" << std::endl;
     std::cout << " * Engel et al. (A Photometrically Calibrated Benchmark For Monocular Visual Odometry)" << std::endl;
@@ -294,7 +302,18 @@ int main(int argc, const char** argv) {
   if (!options.parse(argc, argv))
     return 1;
 
-  auto grabber = grabbers::createGrabber();
+  grabbers::Grabber::Ptr grabber;
+
+  try
+  {
+    grabber = grabbers::createGrabber(options.camera);
+  }
+  catch (grabbers::GrabberException& e)
+  {
+    std::cerr << "Failed to create a grabber" << (options.camera != "" ? " for camera " + options.camera : "") << std::endl;
+    return 1;
+  }
+
   grabber->setAutoExposureEnabled(false);
   grabber->setAutoWhiteBalanceEnabled(false);
 
@@ -309,7 +328,7 @@ int main(int argc, const char** argv) {
 
   auto imshow = [&options](const cv::Mat& image, int w = -1) {
     if (!options.no_visualization) {
-      cv::imshow("Camera", image);
+      cv::imshow("Calibration", image);
       cv::waitKey(w);
     }
   };
