@@ -23,11 +23,11 @@
 #pragma once
 
 #include <memory>
-#include <string>
 #include <stdexcept>
+#include <string>
 
-#include <boost/exception/info.hpp>
 #include <boost/exception/exception.hpp>
+#include <boost/exception/info.hpp>
 
 #include <opencv2/core/core.hpp>
 
@@ -72,12 +72,11 @@ class Grabber {
   *
   * Supported URI types:
   *
-  *   - path to an *.oni file :: OpenNIGrabber with file
-  *   - "openni", "openni2", "kinect", "asus" :: OpenNI2Grabber with first available device
-  *   - "rs", "realsense", "intel" :: RealSenseGrabber with first available device
-  *   - openni device uri :: OpenNIGrabber for that device
-  *   - "any" :: first available device with any grabber */
-Grabber::Ptr
-createGrabber(const std::string& uri = "any");
+  *   - "rs", "realsense", "intel"            → RealSenseGrabber with first available device
+  *   - "openni", "openni2", "kinect", "asus" → OpenNI2Grabber with first available device
+  *   - path to an *.oni file                 → OpenNIGrabber with file
+  *   - openni device uri                     → OpenNIGrabber for that device
+  *   - "" (empty string)                     → first available device with any grabber */
+Grabber::Ptr createGrabber(const std::string& uri = "");
 
 }  // namespace grabbers

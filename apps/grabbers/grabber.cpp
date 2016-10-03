@@ -24,6 +24,7 @@
 
 #include <grabbers/grabber.h>
 #include <grabbers/openni2_grabber.h>
+#include <grabbers/realsense_grabber.h>
 
 namespace grabbers {
 
@@ -32,24 +33,25 @@ Grabber::~Grabber() {}
 std::string Grabber::getCameraUID() const {
   return getCameraModelName() + "." + getCameraSerialNumber();
 }
-Grabber::Ptr
-createGrabber(const std::string& uri)
-{
 
+Grabber::Ptr createGrabber(const std::string& uri) {
+#if HAVE_REALSENSE
+  if (uri == "rs" || uri == "realsense" || uri == "intel" || uri == "")
+    try {
+      return Grabber::Ptr(new RealSenseGrabber);
+    } catch (GrabberException&) {
+    }
+#endif
 #if HAVE_OPENNI2
-  try
-  {
-    if (uri == "openni" || uri == "openni2" || uri == "kinect" || uri == "asus" || uri == "any")
+  try {
+    if (uri == "openni" || uri == "openni2" || uri == "kinect" || uri == "asus" || uri == "")
       return Grabber::Ptr(new OpenNI2Grabber);
     else
       return Grabber::Ptr(new OpenNI2Grabber(uri));
-  }
-  catch (GrabberException&)
-  {
+  } catch (GrabberException&) {
   }
 #endif
-  BOOST_THROW_EXCEPTION(GrabberException("Failed to create a grabber") <<
-                        GrabberException::URI(uri));
+  BOOST_THROW_EXCEPTION(GrabberException("Failed to create a grabber") << GrabberException::URI(uri));
   return nullptr;
 }
 
