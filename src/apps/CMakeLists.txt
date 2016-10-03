@@ -9,8 +9,6 @@ find_package(Boost COMPONENTS program_options REQUIRED)
 
 include_directories(${CMAKE_CURRENT_LIST_DIR})
 
-add_subdirectory(grabbers)
-
 macro(APP_ADD _name)
   set(options)
   set(one_value_args)
@@ -56,3 +54,4 @@ APP_ADD(calibrate_radiometric_response
   OPENCV3 highgui imgproc photo
   LINK_WITH grabbers
 )
+

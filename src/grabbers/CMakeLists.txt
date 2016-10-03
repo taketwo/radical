@@ -1,5 +1,5 @@
 find_package(OpenNI2)
-find_package(RealSense)
+find_package(RealSense 1.9.7)
 
 set(GRABBERS_SRC grabber.cpp)
 

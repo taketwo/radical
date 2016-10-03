@@ -10,7 +10,7 @@ include("${CMAKE_SOURCE_DIR}/cmake/Utils.cmake")
 
 # Extract version from header
 execute_process(
-  COMMAND grep "RADICAL_VERSION " radical/version.h
+  COMMAND grep "RADICAL_VERSION " include/radical/version.h
   WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
   RESULT_VARIABLE GREP_VERSION_RESULT
   OUTPUT_VARIABLE PROJECT_VERSION
@@ -28,12 +28,14 @@ RADICAL_OPTION(BUILD_TESTS                       "Build tests"              OFF)
 
 find_package(OpenCV COMPONENTS core imgproc REQUIRED)
 
+include_directories("${PROJECT_SOURCE_DIR}/include")
+
 set(RADICAL_SRC
-  radical/radiometric_response.cpp
-  radical/vignetting_response.cpp
-  radical/nonparametric_vignetting_model.cpp
-  radical/mat_io.cpp
-  radical/check.cpp
+  src/radical/radiometric_response.cpp
+  src/radical/vignetting_response.cpp
+  src/radical/nonparametric_vignetting_model.cpp
+  src/radical/mat_io.cpp
+  src/radical/check.cpp
 )
 
 add_library(${LIB_NAME} SHARED ${RADICAL_SRC})
@@ -41,12 +43,14 @@ set_target_properties(${LIB_NAME} PROPERTIES VERSION "${PROJECT_VERSION}" SOVERS
 target_compile_definitions(${LIB_NAME} PUBLIC "RADICAL_DEBUG=$<CONFIG:Debug>")
 target_include_directories(
   ${LIB_NAME} PUBLIC
-  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>"
+  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
 )
 
 target_link_libraries(${LIB_NAME} PUBLIC opencv_core opencv_imgproc)
+
 if(BUILD_APPS)
-  add_subdirectory(apps)
+  add_subdirectory(src/grabbers)
+  add_subdirectory(src/apps)
 endif()
 
 if(BUILD_TESTS)
@@ -105,7 +109,7 @@ install(TARGETS ${LIB_NAME}
 ## Install headers
 
 install(
-  DIRECTORY ${CMAKE_SOURCE_DIR}/${PROJECT_NAME}
+  DIRECTORY ${CMAKE_SOURCE_DIR}/include/${PROJECT_NAME}
   DESTINATION ${_include_install_dir}
   FILES_MATCHING PATTERN "*.h"
 )
