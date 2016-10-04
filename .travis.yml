@@ -14,5 +14,7 @@ cache:
   directories:
     - $HOME/opencv
     - $HOME/cmake
+    - $HOME/eigen
+    - $HOME/ceres
 script:
   - bash .travis.sh
