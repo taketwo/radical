@@ -26,11 +26,12 @@ macro(APP_ADD _name)
     set(_opencv_link ${APP_ADD_OPENCV3})
   endif()
   if(_enabled)
+    set(_executable ${_name})
     foreach(_lib ${_opencv_link})
       list(APPEND APP_ADD_LINK_WITH "opencv_${_lib}")
     endforeach()
-    set(_executable ${_name})
-    add_executable(${_executable} ${_executable}.cpp)
+    file(GLOB _sources *.cpp)
+    add_executable(${_executable} ${_sources})
     target_link_libraries(${_executable}
       ${LIB_NAME}
       ${APP_ADD_LINK_WITH}
@@ -39,19 +40,6 @@ macro(APP_ADD _name)
   endif()
 endmacro(APP_ADD)
 
-APP_ADD(display_radiometric_response
-  OPENCV2 highgui
-  OPENCV3 highgui imgcodecs
-)
-
-APP_ADD(display_vignetting_response
-  OPENCV2 highgui imgproc
-  OPENCV3 highgui imgproc imgcodecs
-)
-
-APP_ADD(calibrate_radiometric_response
-  OPENCV2 highgui imgproc
-  OPENCV3 highgui imgproc photo
-  LINK_WITH grabbers
-)
-
+add_subdirectory(calibrate_radiometric_response)
+add_subdirectory(display_radiometric_response)
+add_subdirectory(display_vignetting_response)
