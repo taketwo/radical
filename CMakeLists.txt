@@ -23,6 +23,12 @@ if(NOT GREP_VERSION_RESULT EQUAL 0)
 endif()
 string(REGEX REPLACE ".*\"(.*)\".*" "\\1" PROJECT_VERSION "${PROJECT_VERSION}" )
 
+# Set build type to Release if not specified by user
+if(NOT CMAKE_BUILD_TYPE)
+  message("-- No build type specified; defaulting to CMAKE_BUILD_TYPE=Release")
+  set(CMAKE_BUILD_TYPE Release CACHE STRING "Choose the type of build, options are: None Debug Release RelWithDebInfo MinSizeRel" FORCE)
+endif()
+
 add_definitions(-Wall -Wextra -std=c++11)
 
 RADICAL_OPTION(BUILD_APPS                        "Build apps"                ON)
