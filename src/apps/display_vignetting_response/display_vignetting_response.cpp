@@ -29,6 +29,7 @@
 #include <opencv2/imgcodecs/imgcodecs.hpp>
 #endif
 
+#include <radical/exceptions.h>
 #include <radical/vignetting_model.h>
 #include <radical/vignetting_response.h>
 
@@ -92,11 +93,20 @@ int main(int argc, const char** argv) {
   if (!options.parse(argc, argv))
     return 1;
 
-  radical::VignettingResponse vr(options.v_response);
+  radical::VignettingResponse::Ptr vr;
+  try
+  {
+    vr.reset(new radical::VignettingResponse(options.v_response));
+  }
+  catch (radical::SerializationException& e)
+  {
+    std::cerr << e.what() << std::endl;
+    return 1;
+  }
 
   std::cout << "Loaded vignetting response from file \"" << options.v_response << "\"" << std::endl;
-  std::cout << "Vignetting model type: " << vr.getModel()->getName() << std::endl;
-  std::cout << "Native image resolution of the model: " << vr.getModel()->getImageSize() << std::endl;
+  std::cout << "Vignetting model type: " << vr->getModel()->getName() << std::endl;
+  std::cout << "Native image resolution of the model: " << vr->getModel()->getImageSize() << std::endl;
 
   std::string mode = "fused";
   if (!options.fused) {
@@ -107,7 +117,7 @@ int main(int argc, const char** argv) {
 
   std::cout << "Display mode: " << mode << std::endl;
 
-  cv::Mat response = vr.getResponse();
+  cv::Mat response = vr->getResponse();
 
   if (!options.fused) {
     cv::Mat uchars;
