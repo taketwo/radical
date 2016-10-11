@@ -26,6 +26,9 @@
 
 namespace radical {
 
+/** Nonparametric (dense) model of vignetting response.
+  *
+  * Attenuation factor of every color channel at every image location is stored directly. */
 class NonparametricVignettingModel : public VignettingModel {
  public:
   using Ptr = std::shared_ptr<NonparametricVignettingModel>;

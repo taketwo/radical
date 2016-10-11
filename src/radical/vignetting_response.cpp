@@ -29,7 +29,7 @@
 #include <radical/check.h>
 #include <radical/exceptions.h>
 #include <radical/vignetting_response.h>
-#include <radical/nonparametric_vignetting_model.h>
+#include <radical/vignetting_model.h>
 
 // Custom hasher to allow unordered map with cv::Size keys.
 namespace std
@@ -98,17 +98,12 @@ struct VignettingResponse::ResponseCache
 
 VignettingResponse::VignettingResponse(const std::string& filename)
 {
-  try
-  {
-    model_.reset(new NonparametricVignettingModel(filename));
-    response_cache_.reset(new ResponseCache(*model_));
-    return;
-  }
-  catch (SerializationException& e)
-  {
-  }
-  BOOST_THROW_EXCEPTION(SerializationException("File does not contain any valid vignetting model")
-                        << SerializationException::Filename(filename));
+  model_ = VignettingModel::load(filename);
+  if (!model_)
+    BOOST_THROW_EXCEPTION(SerializationException("File does not contain any valid vignetting model")
+                          << SerializationException::Filename(filename));
+
+  response_cache_.reset(new ResponseCache(*model_));
 }
 
 VignettingResponse::~VignettingResponse()

@@ -20,23 +20,27 @@
  * SOFTWARE.
  ******************************************************************************/
 
-#include <radical/vignetting_model.h>
+#include <radical/exceptions.h>
 #include <radical/nonparametric_vignetting_model.h>
+#include <radical/polynomial_vignetting_model.h>
+#include <radical/vignetting_model.h>
 
 namespace radical {
 
-VignettingModel::Ptr
-VignettingModel::load(const std::string& filename)
-{
-  // try
-  // {
-    return std::make_shared<NonparametricVignettingModel>(filename);
-  // }
-  // catch (VignettingModelException& e)
-  // {
-    // return std::make_shared<PolynomialVignettingModel<3>>(filename);
-  // }
+#define TRY_LOAD(Model)                    \
+  if (!model)                              \
+    try {                                  \
+      model.reset(new Model(filename));    \
+    } catch (SerializationException & e) { \
+    }
+
+VignettingModel::Ptr VignettingModel::load(const std::string& filename) {
+  VignettingModel::Ptr model = nullptr;
+
+  TRY_LOAD(NonparametricVignettingModel);
+  TRY_LOAD(PolynomialVignettingModel<3>);
+
+  return model;
 }
 
-} // namespace radical
-
+}  // namespace radical

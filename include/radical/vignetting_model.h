@@ -42,7 +42,7 @@ class VignettingModel {
   /** Write vignetting model to a file. */
   virtual void save(const std::string& filename) const = 0;
 
-  /** Evaluate the model at a given pixel location.
+  /** Evaluate the model at a given image location.
     *
     * Pixel coordinates do not need to be integer. Some vignetting models may
     * be able to interpolate between pixels.
@@ -62,6 +62,9 @@ class VignettingModel {
   /** Get model coefficients. */
   virtual cv::Mat getModelCoefficients() const = 0;
 
+  /** Load the vignetting model stored in a given file.
+    * This function will try to load every implemented vignetting model from the given file. The first one that succeeds
+    * in loading will be returned. If the file does not contain any valid vignetting model, \c nullptr is returned. */
   static Ptr load(const std::string& filename);
 };
 

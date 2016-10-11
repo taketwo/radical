@@ -41,6 +41,7 @@ include_directories("${PROJECT_SOURCE_DIR}/include")
 set(RADICAL_SRC
   src/radical/radiometric_response.cpp
   src/radical/vignetting_response.cpp
+  src/radical/vignetting_model.cpp
   src/radical/nonparametric_vignetting_model.cpp
   src/radical/polynomial_vignetting_model.cpp
   src/radical/mat_io.cpp
