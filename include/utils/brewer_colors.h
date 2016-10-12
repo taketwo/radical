@@ -22,36 +22,6 @@
 
 #pragma once
 
-#include <boost/assert.hpp>
-
 #include <opencv2/core/core.hpp>
 
-#include <radical/radiometric_response.h>
-
-inline cv::Mat plotRadiometricResponse(const cv::Mat& response, cv::Size size = {512, 512}) {
-  BOOST_ASSERT(size.area() > 0);
-
-  cv::Mat plot(size, CV_8UC3);
-  plot.setTo(255);
-
-  double min;
-  double max;
-  cv::minMaxLoc(response.reshape(1), &min, &max);
-  float x_scale = static_cast<float>(size.width) / 256;
-  float y_scale = static_cast<float>(size.height) / (max - min);
-
-  const cv::Scalar COLORS[] = {{255, 0, 0}, {0, 255, 0}, {0, 0, 255}};
-
-  for (size_t i = 0; i < 256; ++i) {
-    auto pt = response.at<cv::Vec3f>(i);
-    for (int c = 0; c < 3; ++c)
-      cv::circle(plot, cv::Point(i * x_scale, size.height - pt[c] * y_scale), std::ceil(x_scale), COLORS[c], -1);
-  }
-
-  return plot;
-}
-
-inline cv::Mat plotRadiometricResponse(const radical::RadiometricResponse& rr, cv::Size size = {512, 512}) {
-  return plotRadiometricResponse(rr.getInverseResponse(), size);
-}
-
+static const cv::Scalar COLORS[] = {{228, 26, 28}, {77, 175, 74}, {55, 126, 184}};

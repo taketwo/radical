@@ -41,5 +41,6 @@ macro(APP_ADD _name)
 endmacro(APP_ADD)
 
 add_subdirectory(calibrate_radiometric_response)
+add_subdirectory(calibrate_vignetting_response)
 add_subdirectory(display_radiometric_response)
 add_subdirectory(display_vignetting_response)

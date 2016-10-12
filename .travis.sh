@@ -17,6 +17,7 @@ function build()
   cmake .. \
     -DCMAKE_BUILD_TYPE=Release \
     -DOpenCV_DIR=$OPENCV_DIR/${OPENCV_VERSION}/share/OpenCV \
+    -DCeres_DIR=$CERES_DIR/${CERES_VERSION}/share/Ceres \
     -DBUILD_TESTS=ON
   make -j2
 }

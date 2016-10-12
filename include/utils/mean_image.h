@@ -28,47 +28,56 @@
 
 class MeanImage {
  public:
-  MeanImage(unsigned int num_images) : num_images_(num_images), counter_(0) {
+  MeanImage(unsigned int num_images) : num_images_(num_images), done_(true) {
     BOOST_ASSERT(num_images_);
   }
 
-  /** Accumulate one more image.
-    * \returns flag indicating whether the prescribed number of images have been accumulated and the mean image is ready
-    * to be retrieved with get() function. */
-  bool add(const cv::Mat& image) {
-    if (sum_.empty()) {
-      sum_.create(image.size(), CV_32FC3);
+  /** Accumulate one more image. */
+  bool add(const cv::Mat& image, const cv::Mat& mask = cv::Mat()) {
+    if (done_) {
+      sum_.create(image.size());
       sum_.setTo(0);
+      counter_.create(image.size());
+      counter_.setTo(0);
+      type_ = image.type();
+      done_ = false;
     } else {
-      BOOST_ASSERT(sum_.size() == image.size());
+      BOOST_ASSERT(sum_.size() == image.size() && counter_.size() == image.size() && type_ == image.type());
     }
     cv::Mat image_float;
     image.convertTo(image_float, CV_32FC3);
-    sum_ += image_float;
-    if (++counter_ == num_images_) {
-      sum_ /= (1.0f * num_images_);
-      mean_.release();  // to make sure that we do not touch data of previously computed mean images
-      sum_.convertTo(mean_, CV_8UC3);
-      reset();
-      return true;
-    }
-    return false;
+    cv::add(sum_, image_float, sum_, mask);
+    cv::add(counter_, 1, counter_, mask);
+    // Check if we are done
+    double min, max;
+    cv::minMaxLoc(counter_, &min, &max);
+    if (min >= num_images_)
+      done_ = true;
+    return done_;
   }
 
-  /** Get mean image.
-    * The returned image is only valid after add() has returned \c true. */
-  cv::Mat get() {
-    return mean_;
+  /** Get mean image. */
+  cv::Mat getMean() {
+    cv::Mat counter_no_zeros, mean;
+    cv::max(counter_, cv::Scalar(1), counter_no_zeros);
+    cv::cvtColor(counter_no_zeros, counter_no_zeros, CV_GRAY2BGR);  // duplicate channels so that division works
+    cv::divide(sum_, counter_no_zeros, mean);
+    mean.convertTo(mean, type_);
+    return mean;
   }
 
-  void reset() {
-    sum_.release();
-    counter_ = 0;
+  /** Get the number of accumulated samples per pixel.
+    * The returned matrix is only valid until add() has returned \c true. */
+  cv::Mat getNumSamples(bool normalize = false) {
+    if (normalize)
+      return counter_ / num_images_;
+    return counter_;
   }
 
  private:
   const unsigned int num_images_;
-  unsigned int counter_;
-  cv::Mat sum_;
-  cv::Mat mean_;
+  bool done_;
+  int type_;
+  cv::Mat_<float> counter_;
+  cv::Mat_<cv::Vec3f> sum_;
 };

@@ -41,7 +41,7 @@
 #include "grabbers/grabber.h"
 
 #include "utils/mean_image.h"
-#include "utils/plotting.h"
+#include "utils/plot_radiometric_response.h"
 #include "utils/program_options.h"
 
 class Options : public OptionsBase {
@@ -61,9 +61,9 @@ class Options : public OptionsBase {
  protected:
   virtual void addOptions(boost::program_options::options_description& desc) override {
     namespace po = boost::program_options;
-    desc.add_options()(
-        "output,o", po::value<std::string>(&output),
-        "Output filename with calibrated response function (default: camera model name + \".\" + camera serial number + \".crf\" suffix)");
+    desc.add_options()("output,o", po::value<std::string>(&output),
+                       "Output filename with calibrated response function (default: camera model name + \".\" + camera "
+                       "serial number + \".crf\" suffix)");
     desc.add_options()("min", po::value<int>(&exposure_min), "Minimum exposure (default: depends on the camera)");
     desc.add_options()("max", po::value<int>(&exposure_max), "Maximum exposure (default: depends on the camera)");
     desc.add_options()("factor,f", po::value<float>(&exposure_factor),
@@ -156,7 +156,7 @@ class DataCollection {
     if (!mean_.add(dilateSaturatedAreas(frame)))
       return false;
 
-    dataset_.emplace_back(mean_.get(), exposure_);
+    dataset_.emplace_back(mean_.getMean(), exposure_);
 
     if (--accumulate_frames_ > 0)
       return false;
@@ -304,13 +304,11 @@ int main(int argc, const char** argv) {
 
   grabbers::Grabber::Ptr grabber;
 
-  try
-  {
+  try {
     grabber = grabbers::createGrabber(options.camera);
-  }
-  catch (grabbers::GrabberException& e)
-  {
-    std::cerr << "Failed to create a grabber" << (options.camera != "" ? " for camera " + options.camera : "") << std::endl;
+  } catch (grabbers::GrabberException& e) {
+    std::cerr << "Failed to create a grabber" << (options.camera != "" ? " for camera " + options.camera : "")
+              << std::endl;
     return 1;
   }
 

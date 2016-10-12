@@ -31,7 +31,7 @@
 
 #include <radical/radiometric_response.h>
 
-#include "utils/plotting.h"
+#include "utils/plot_radiometric_response.h"
 #include "utils/program_options.h"
 
 class Options : public OptionsBase {
