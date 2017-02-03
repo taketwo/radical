@@ -20,14 +20,11 @@
  * SOFTWARE.
  ******************************************************************************/
 
-#include <algorithm>
 #include <cmath>
 #include <iostream>
-#include <map>
 #include <string>
 #include <vector>
 
-#include <boost/filesystem.hpp>
 #include <boost/format.hpp>
 
 #include <opencv2/core/core.hpp>
@@ -35,7 +32,6 @@
 #include <opencv2/imgproc/imgproc.hpp>
 
 #if CV_MAJOR_VERSION >= 3
-#include <opencv2/imgcodecs/imgcodecs.hpp>  // imwrite and imread
 #include <opencv2/photo.hpp>                // Debevec calibration
 #endif
 
@@ -46,6 +42,8 @@
 #include "utils/mean_image.h"
 #include "utils/plot_radiometric_response.h"
 #include "utils/program_options.h"
+
+#include "dataset.h"
 
 class Options : public OptionsBase {
  public:
@@ -106,68 +104,6 @@ class Options : public OptionsBase {
   }
 };
 
-class Dataset : public std::vector<std::pair<cv::Mat, int>> {
- public:
-  std::vector<cv::Mat> getImages() const {
-    std::vector<cv::Mat> images;
-    std::transform(begin(), end(), std::back_inserter(images),
-                   [](const std::pair<cv::Mat, int>& p) { return p.first; });
-    return images;
-  }
-
-  std::vector<int> getExposures() const {
-    std::vector<int> exposures;
-    std::transform(begin(), end(), std::back_inserter(exposures),
-                   [](const std::pair<cv::Mat, int>& p) { return p.second; });
-    return exposures;
-  }
-
-  std::vector<Dataset> splitChannels() const {
-    int num_channels = at(0).first.channels();
-    if (num_channels == 1)
-      return std::vector<Dataset>(1, *this);
-    std::vector<Dataset> splitted(num_channels);
-    std::vector<cv::Mat> channels;
-    for (size_t i = 0; i < size(); ++i) {
-      cv::split(at(i).first, channels);
-      for (int c = 0; c < num_channels; ++c)
-        splitted[c].emplace_back(channels[c].clone(), at(i).second);
-    }
-    return splitted;
-  }
-
-  void save(const std::string& path) const {
-    namespace fs = boost::filesystem;
-    fs::path dir(path);
-    if (!fs::exists(dir))
-      fs::create_directories(dir);
-    std::map<int, int> indices;
-    boost::format fmt("%1$06d_%2$03d.png");
-    for (const auto& item : *this) {
-      if (indices.count(item.second) == 0)
-        indices[item.second] = 0;
-      cv::imwrite((dir / boost::str(fmt % item.second % indices[item.second])).native(), item.first);
-      ++indices[item.second];
-    }
-  }
-
-  bool load(const std::string& path) {
-    namespace fs = boost::filesystem;
-    fs::path dir(path);
-    clear();
-    if (fs::exists(dir) && fs::is_directory(dir)) {
-      for (fs::directory_iterator iter = fs::directory_iterator(dir); iter != fs::directory_iterator(); ++iter) {
-        auto stem = iter->path().stem().string();
-        try {
-          auto exposure = boost::lexical_cast<int>(stem.substr(0, 6));
-          emplace_back(cv::imread(iter->path().string()), exposure);
-        } catch (boost::bad_lexical_cast& e) {
-        }
-      }
-    }
-    return !empty();
-  }
-};
 
 class DataCollection {
  public:
@@ -177,7 +113,7 @@ class DataCollection {
   DataCollection(grabbers::Grabber::Ptr grabber, ExposureRange range, float factor, unsigned int average_frames,
                  unsigned int images, unsigned int control_lag)
   : grabber_(grabber), range_(range), factor_(factor), lag_(control_lag), mean_(images),
-    average_frames_(average_frames) {
+    dataset_(new Dataset), average_frames_(average_frames) {
     BOOST_ASSERT(range.first <= range.second);
     BOOST_ASSERT(factor > 1.0);
     exposure_ = range_.first;
@@ -195,7 +131,7 @@ class DataCollection {
     if (!mean_.add(dilateSaturatedAreas(frame)))
       return false;
 
-    dataset_.emplace_back(mean_.getMean(), exposure_);
+    dataset_->emplace_back(mean_.getMean(), exposure_);
 
     if (--accumulate_frames_ > 0)
       return false;
@@ -213,7 +149,7 @@ class DataCollection {
     return false;
   }
 
-  const Dataset& getDataset() const {
+  Dataset::Ptr getDataset() const {
     return dataset_;
   }
 
@@ -232,7 +168,7 @@ class DataCollection {
   const unsigned int lag_;
   MeanImage mean_;
   int exposure_;
-  Dataset dataset_;
+  Dataset::Ptr dataset_;
   int skip_frames_;
   const unsigned int average_frames_;
   int accumulate_frames_;
@@ -348,8 +284,8 @@ int main(int argc, const char** argv) {
     }
   };
 
-  Dataset data;
-  if (data.load(options.data_source)) {
+  auto data = Dataset::load(options.data_source);
+  if (data) {
     if (!options("output")) {
       std::cerr << "When calibrating from existing dataset, output calibration filename should be explicitly set"
                 << std::endl;
@@ -406,21 +342,21 @@ int main(int argc, const char** argv) {
 
   if (options.save_dataset != "") {
     std::cout << "Saving dataset to: " << options.save_dataset << std::endl;
-    data.save(options.save_dataset);
+    data->save(options.save_dataset);
   }
 
   if (options.calibration_method == "debevec") {
 #if CV_MAJOR_VERSION >= 3
     std::cout << "Starting Debevec calibration procedure" << std::endl;
     auto debevec = cv::createCalibrateDebevec();
-    debevec->process(data.getImages(), response, data.getExposures());
+    debevec->process(data->getImages(), response, data->getExposures());
 #else
     std::cerr << "Debevec calibration is supported only with OpenCV 3.0 and above.\n";
     return 2;
 #endif
   } else if (options.calibration_method == "engel") {
     std::cout << "Starting Engel calibration procedure" << std::endl;
-    auto data_channels = data.splitChannels();
+    auto data_channels = data->splitChannels();
 
     std::vector<Optimization> opts;
     for (const auto& data : data_channels)
