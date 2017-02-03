@@ -1,3 +1,6 @@
+[![Build Status](https://travis-ci.org/taketwo/radical.svg?branch=master)](https://travis-ci.org/taketwo/radical)
+[![License](https://img.shields.io/badge/license-MIT-green.svg?style=flat)](https://github.com/taketwo/radical/blob/master/LICENSE.md)
+
 Consumer-grade color cameras suffer from significant optical nonlinearities,
 often referred to as vignetting effects. For example, in Asus Xtion Live Pro
 cameras the pixels in the corners are two times darker than those in the center
