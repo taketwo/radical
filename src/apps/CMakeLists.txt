@@ -5,7 +5,7 @@ else()
 endif()
 
 find_package(OpenCV COMPONENTS ${OpenCV_COMPONENTS} REQUIRED)
-find_package(Boost COMPONENTS program_options REQUIRED)
+find_package(Boost COMPONENTS program_options filesystem REQUIRED)
 
 include_directories(${CMAKE_CURRENT_LIST_DIR})
 
@@ -35,7 +35,7 @@ macro(APP_ADD _name)
     target_link_libraries(${_executable}
       ${LIB_NAME}
       ${APP_ADD_LINK_WITH}
-      ${Boost_PROGRAM_OPTIONS_LIBRARY}
+      ${Boost_LIBRARIES}
     )
   endif()
 endmacro(APP_ADD)

@@ -23,9 +23,11 @@
 #include <algorithm>
 #include <cmath>
 #include <iostream>
+#include <map>
 #include <string>
 #include <vector>
 
+#include <boost/filesystem.hpp>
 #include <boost/format.hpp>
 
 #include <opencv2/core/core.hpp>
@@ -33,7 +35,8 @@
 #include <opencv2/imgproc/imgproc.hpp>
 
 #if CV_MAJOR_VERSION >= 3
-#include <opencv2/photo.hpp>
+#include <opencv2/imgcodecs/imgcodecs.hpp>  // imwrite and imread
+#include <opencv2/photo.hpp>                // Debevec calibration
 #endif
 
 #include <radical/radiometric_response.h>
@@ -57,6 +60,7 @@ class Options : public OptionsBase {
   float convergence_threshold = 0.00001;
   std::string calibration_method = "engel";
   bool no_visualization = false;
+  std::string save_dataset = "";
 
  protected:
   virtual void addOptions(boost::program_options::options_description& desc) override {
@@ -80,6 +84,8 @@ class Options : public OptionsBase {
                        "Calibration method to use (default: engel)");
     desc.add_options()("no-visualization", po::bool_switch(&no_visualization),
                        "Do not visualize the calibration process and results");
+    desc.add_options()("save-dataset,s", po::value<std::string>(&save_dataset),
+                       "Save collected dataset in the given directory");
   }
 
   virtual void addPositional(boost::program_options::options_description& desc,
@@ -127,6 +133,21 @@ class Dataset : public std::vector<std::pair<cv::Mat, int>> {
         splitted[c].emplace_back(channels[c].clone(), at(i).second);
     }
     return splitted;
+  }
+
+  void save(const std::string& path) const {
+    namespace fs = boost::filesystem;
+    fs::path dir(path);
+    if (!fs::exists(dir))
+      fs::create_directories(dir);
+    std::map<int, int> indices;
+    boost::format fmt("%1$06d_%2$03d.png");
+    for (const auto& item : *this) {
+      if (indices.count(item.second) == 0)
+        indices[item.second] = 0;
+      cv::imwrite((dir / boost::str(fmt % item.second % indices[item.second])).native(), item.first);
+      ++indices[item.second];
+    }
   }
 };
 
@@ -353,6 +374,11 @@ int main(int argc, const char** argv) {
 
   const auto& data = data_collection->getDataset();
   cv::Mat response;
+
+  if (options.save_dataset != "") {
+    std::cout << "Saving dataset to: " << options.save_dataset << std::endl;
+    data.save(options.save_dataset);
+  }
 
   if (options.calibration_method == "debevec") {
 #if CV_MAJOR_VERSION >= 3
