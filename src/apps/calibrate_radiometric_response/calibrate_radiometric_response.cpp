@@ -49,7 +49,7 @@
 
 class Options : public OptionsBase {
  public:
-  std::string camera = "";
+  std::string data_source = "";
   std::string output;
   int exposure_min;
   int exposure_max;
@@ -91,12 +91,13 @@ class Options : public OptionsBase {
   virtual void addPositional(boost::program_options::options_description& desc,
                              boost::program_options::positional_options_description& positional) override {
     namespace po = boost::program_options;
-    desc.add_options()("camera", po::value<std::string>(&camera), "Camera to calibrate (\"asus\", \"intel\")");
-    positional.add("camera", -1);
+    desc.add_options()("data-source", po::value<std::string>(&data_source),
+                       "Data source, either a camera (\"asus\", \"intel\"), or a path to dataset");
+    positional.add("data-source", -1);
   }
 
   virtual void printHelp() override {
-    std::cout << "Usage: calibrate_radiometric_response [options] <camera>" << std::endl;
+    std::cout << "Usage: calibrate_radiometric_response [options] <data-source>" << std::endl;
     std::cout << "" << std::endl;
     std::cout << "Calibrate radiometric response of a camera. Two algorithms are available:" << std::endl;
     std::cout << " * Engel et al. (A Photometrically Calibrated Benchmark For Monocular Visual Odometry)" << std::endl;
@@ -148,6 +149,23 @@ class Dataset : public std::vector<std::pair<cv::Mat, int>> {
       cv::imwrite((dir / boost::str(fmt % item.second % indices[item.second])).native(), item.first);
       ++indices[item.second];
     }
+  }
+
+  bool load(const std::string& path) {
+    namespace fs = boost::filesystem;
+    fs::path dir(path);
+    clear();
+    if (fs::exists(dir) && fs::is_directory(dir)) {
+      for (fs::directory_iterator iter = fs::directory_iterator(dir); iter != fs::directory_iterator(); ++iter) {
+        auto stem = iter->path().stem().string();
+        try {
+          auto exposure = boost::lexical_cast<int>(stem.substr(0, 6));
+          emplace_back(cv::imread(iter->path().string()), exposure);
+        } catch (boost::bad_lexical_cast& e) {
+        }
+      }
+    }
+    return !empty();
   }
 };
 
@@ -323,28 +341,6 @@ int main(int argc, const char** argv) {
   if (!options.parse(argc, argv))
     return 1;
 
-  grabbers::Grabber::Ptr grabber;
-
-  try {
-    grabber = grabbers::createGrabber(options.camera);
-  } catch (grabbers::GrabberException& e) {
-    std::cerr << "Failed to create a grabber" << (options.camera != "" ? " for camera " + options.camera : "")
-              << std::endl;
-    return 1;
-  }
-
-  grabber->setAutoExposureEnabled(false);
-  grabber->setAutoWhiteBalanceEnabled(false);
-
-  if (!options("output"))
-    options.output = grabber->getCameraUID() + ".crf";
-  if (!options("min"))
-    options.exposure_min = grabber->getExposureRange().first;
-  if (!options("max"))
-    options.exposure_max = grabber->getExposureRange().second;
-  if (!options("factor"))
-    options.exposure_factor = std::pow(options.exposure_max / options.exposure_min, 1.0 / 20);
-
   auto imshow = [&options](const cv::Mat& image, int w = -1) {
     if (!options.no_visualization) {
       cv::imshow("Calibration", image);
@@ -352,27 +348,60 @@ int main(int argc, const char** argv) {
     }
   };
 
-  // Change exposure to requested min value, wait some time until it works
-  cv::Mat frame;
-  for (size_t i = 0; i < 100; ++i) {
-    grabber->grabFrame(frame);
-    imshow(frame, 30);
-    grabber->setExposure(options.exposure_min);
+  Dataset data;
+  if (data.load(options.data_source)) {
+    if (!options("output")) {
+      std::cerr << "When calibrating from existing dataset, output calibration filename should be explicitly set"
+                << std::endl;
+      return 2;
+    }
+    std::cout << "Loaded dataset from: " << options.data_source << std::endl;
+  } else {
+    grabbers::Grabber::Ptr grabber;
+
+    try {
+      grabber = grabbers::createGrabber(options.data_source);
+    } catch (grabbers::GrabberException& e) {
+      std::cerr << "Failed to create a grabber"
+                << (options.data_source != "" ? " for camera " + options.data_source : "") << std::endl;
+      return 1;
+    }
+
+    grabber->setAutoExposureEnabled(false);
+    grabber->setAutoWhiteBalanceEnabled(false);
+
+    if (!options("output"))
+      options.output = grabber->getCameraUID() + ".crf";
+    if (!options("min"))
+      options.exposure_min = grabber->getExposureRange().first;
+    if (!options("max"))
+      options.exposure_max = grabber->getExposureRange().second;
+    if (!options("factor"))
+      options.exposure_factor = std::pow(options.exposure_max / options.exposure_min, 1.0 / 20);
+
+    // Change exposure to requested min value, wait some time until it works
+    cv::Mat frame;
+    for (size_t i = 0; i < 100; ++i) {
+      grabber->grabFrame(frame);
+      imshow(frame, 30);
+      grabber->setExposure(options.exposure_min);
+    }
+
+    DataCollection::Ptr data_collection;
+    data_collection.reset(new DataCollection(grabber, {options.exposure_min, options.exposure_max},
+                                             options.exposure_factor, options.num_average_frames, options.num_images,
+                                             options.exposure_control_lag));
+
+    while (grabber->hasMoreFrames()) {
+      grabber->grabFrame(frame);
+      imshow(frame, 30);
+      if (data_collection->addFrame(frame))
+        break;
+    }
+
+    data = data_collection->getDataset();
   }
 
-  DataCollection::Ptr data_collection;
-  data_collection.reset(new DataCollection(grabber, {options.exposure_min, options.exposure_max},
-                                           options.exposure_factor, options.num_average_frames, options.num_images,
-                                           options.exposure_control_lag));
-
-  while (grabber->hasMoreFrames()) {
-    grabber->grabFrame(frame);
-    imshow(frame, 30);
-    if (data_collection->addFrame(frame))
-      break;
-  }
-
-  const auto& data = data_collection->getDataset();
   cv::Mat response;
 
   if (options.save_dataset != "") {
