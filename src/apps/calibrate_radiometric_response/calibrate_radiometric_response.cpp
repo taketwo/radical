@@ -112,13 +112,13 @@ class DataCollection {
 
   DataCollection(grabbers::Grabber::Ptr grabber, ExposureRange range, float factor, unsigned int average_frames,
                  unsigned int images, unsigned int control_lag)
-  : grabber_(grabber), range_(range), factor_(factor), lag_(control_lag), mean_(images),
-    dataset_(new Dataset), average_frames_(average_frames) {
+  : grabber_(grabber), range_(range), factor_(factor), lag_(control_lag), mean_(average_frames),
+    dataset_(new Dataset), num_images_(images) {
     BOOST_ASSERT(range.first <= range.second);
     BOOST_ASSERT(factor > 1.0);
     exposure_ = range_.first;
     skip_frames_ = lag_;
-    accumulate_frames_ = average_frames;
+    images_to_accumulate_ = num_images_;
     std::cout << "Starting data collection" << std::endl;
     std::cout << "Exposure range: " << range.first << " → " << range.second << " with factor " << factor << std::endl;
     std::cout << "Exposure: " << exposure_ << std::flush;
@@ -133,12 +133,12 @@ class DataCollection {
 
     dataset_->emplace_back(mean_.getMean(), exposure_);
 
-    if (--accumulate_frames_ > 0)
+    if (--images_to_accumulate_ > 0)
       return false;
 
     exposure_ += std::ceil(exposure_ * (factor_ - 1.0));
     skip_frames_ = lag_;
-    accumulate_frames_ = average_frames_;
+    images_to_accumulate_ = num_images_;
     grabber_->setExposure(exposure_);
     std::cout << " " << exposure_ << std::flush;
 
@@ -170,8 +170,8 @@ class DataCollection {
   int exposure_;
   Dataset::Ptr dataset_;
   int skip_frames_;
-  const unsigned int average_frames_;
-  int accumulate_frames_;
+  const unsigned int num_images_;
+  int images_to_accumulate_;
 };
 
 bool isSaturated(uint8_t intensity) {
