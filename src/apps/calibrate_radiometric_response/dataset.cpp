@@ -31,9 +31,11 @@
 
 #include <opencv2/core/core.hpp>
 
-#include <boost/lexical_cast.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/format.hpp>
+#include <boost/lexical_cast.hpp>
+
+#include <radical/mat_io.h>
 
 #include "dataset.h"
 
@@ -64,17 +66,22 @@ std::vector<Dataset> Dataset::splitChannels() const {
   return splitted;
 }
 
-void Dataset::save(const std::string& path) const {
+void Dataset::save(const std::string& path, Format format) const {
   namespace fs = boost::filesystem;
   fs::path dir(path);
   if (!fs::exists(dir))
     fs::create_directories(dir);
+  boost::format fmt("%1$06d_%2$03d.%3$s");
+  auto extension = format == PNG ? "png" : "mat";
   std::map<int, int> indices;
-  boost::format fmt("%1$06d_%2$03d.png");
   for (const auto& item : *this) {
     if (indices.count(item.second) == 0)
       indices[item.second] = 0;
-    cv::imwrite((dir / boost::str(fmt % item.second % indices[item.second])).native(), item.first);
+    auto filename = (dir / boost::str(fmt % item.second % indices[item.second] % extension)).native();
+    if (format == PNG)
+      cv::imwrite(filename, item.first);
+    else
+      radical::writeMat(filename, item.first);
     ++indices[item.second];
   }
 }
@@ -86,9 +93,15 @@ Dataset::Ptr Dataset::load(const std::string& path) {
     auto dataset = std::make_shared<Dataset>();
     for (fs::directory_iterator iter = fs::directory_iterator(dir); iter != fs::directory_iterator(); ++iter) {
       auto stem = iter->path().stem().string();
+      auto extension = iter->path().extension().string();
       try {
         auto exposure = boost::lexical_cast<int>(stem.substr(0, 6));
-        dataset->emplace_back(cv::imread(iter->path().string()), exposure);
+        cv::Mat image;
+        if (extension == ".png")
+          image = cv::imread(iter->path().string());
+        else
+          image = radical::readMat(iter->path().string());
+        dataset->emplace_back(image, exposure);
       } catch (boost::bad_lexical_cast& e) {
       }
     }

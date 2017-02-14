@@ -59,6 +59,7 @@ class Options : public OptionsBase {
   std::string calibration_method = "engel";
   bool no_visualization = false;
   std::string save_dataset = "";
+  std::string dataset_format = "mat";
 
  protected:
   virtual void addOptions(boost::program_options::options_description& desc) override {
@@ -84,6 +85,8 @@ class Options : public OptionsBase {
                        "Do not visualize the calibration process and results");
     desc.add_options()("save-dataset,s", po::value<std::string>(&save_dataset),
                        "Save collected dataset in the given directory");
+    desc.add_options()("dataset-format", po::value<std::string>(&dataset_format)->default_value(dataset_format),
+                       "Format in which dataset will be saved (mat or png)");
   }
 
   virtual void addPositional(boost::program_options::options_description& desc,
@@ -341,8 +344,13 @@ int main(int argc, const char** argv) {
   cv::Mat response;
 
   if (options.save_dataset != "") {
+    auto format = Dataset::MAT;
+    if (options.dataset_format == "png")
+      format = Dataset::PNG;
+    else if (options.dataset_format != "mat")
+      std::cerr << "Requested unknown dataset format \"" << options.dataset_format << "\", defaulting to \"mat\"" << std::endl;
     std::cout << "Saving dataset to: " << options.save_dataset << std::endl;
-    data->save(options.save_dataset);
+    data->save(options.save_dataset, format);
   }
 
   if (options.calibration_method == "debevec") {

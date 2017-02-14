@@ -37,7 +37,13 @@ class Dataset : public std::vector<std::pair<cv::Mat, int>> {
 
   std::vector<Dataset> splitChannels() const;
 
-  void save(const std::string& path) const;
+  /** Dataset ormats supported by save/load functions. */
+  enum Format {
+    PNG,  ///< Images are stored as PNG files (compressed)
+    MAT,  ///< Images are stored as binary MAT files (raw)
+  };
+
+  void save(const std::string& path, Format format) const;
 
   static Ptr load(const std::string& path);
 };
