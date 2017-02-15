@@ -450,7 +450,7 @@ int main(int argc, const char** argv) {
 
   // Post-process the response:
   //  * sort to ensure invertability
-  //  * there is no useful mapping for 0 brightness, extrapolate for 1 ond 2
+  //  * there is no useful mapping for 0 brightness, extrapolate for 1 and 2
   //  * shift and rescale response to 0..1 range
   std::vector<cv::Mat> channels;
   cv::split(response, channels);

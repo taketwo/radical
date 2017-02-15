@@ -104,7 +104,7 @@ Undo vignetting effects in frames coming from the camera:
 Supports OpenNI2 and RealSense cameras. Fix your camera in front of a static
 scene and run the app. It will take multiple images of the scene at different
 exposure times and compute the radiometric response of the camera. The response
-will be stored in a calibration file named after the camea (model type + serial
+will be stored in a calibration file named after the camera (model type + serial
 number). Run with `--help` to see different options.
 
 ### Vignetting response calibration
