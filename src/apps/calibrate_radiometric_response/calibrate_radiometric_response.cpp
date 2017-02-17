@@ -24,6 +24,7 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <array>
 
 #include <boost/format.hpp>
 
@@ -186,6 +187,10 @@ struct Optimization {
   cv::Mat E;
   cv::Mat G;
   bool converged = false;
+  // Storage for temporary matrices to avoid re-allocation
+  cv::Mat_<double> sum_t2_i;
+  std::array<double, 256> sum_omega_k;
+  std::array<int, 256> size_omega_k;
 
   Optimization(const Dataset* data) : data(data) {
     auto num_images = data->size();
@@ -206,8 +211,8 @@ struct Optimization {
 
   void optimizeInverseResponse() {
     // Eqn. 7
-    std::vector<double> sum_omega_k(256, 0);
-    std::vector<int> size_omega_k(256, 0);
+    sum_omega_k.fill(0);
+    size_omega_k.fill(0);
 
     for (size_t n = 0; n < data->size(); ++n) {
       const auto& image = data->at(n).first;
@@ -231,7 +236,7 @@ struct Optimization {
 
   void optimizeIrradiance() {
     // Eqn. 8
-    cv::Mat sum_t2_i(data->front().first.size(), CV_64FC1);
+    sum_t2_i.create(data->front().first.size());
     sum_t2_i.setTo(0);
     E.setTo(0);
 
@@ -244,7 +249,7 @@ struct Optimization {
           if (isSaturated(p))
             continue;
           E.at<double>(i, j) += G.at<double>(p) * exposure;
-          sum_t2_i.at<double>(i, j) += exposure * exposure;
+          sum_t2_i(i, j) += exposure * exposure;
         }
     }
 
