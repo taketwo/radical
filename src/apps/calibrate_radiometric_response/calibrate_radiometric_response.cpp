@@ -50,6 +50,8 @@ class Options : public OptionsBase {
  public:
   std::string data_source = "";
   std::string output;
+  unsigned int valid_min = 1;
+  unsigned int valid_max = 254;
   int exposure_min;
   int exposure_max;
   float exposure_factor;
@@ -68,6 +70,10 @@ class Options : public OptionsBase {
     desc.add_options()("output,o", po::value<std::string>(&output),
                        "Output filename with calibrated response function (default: camera model name + \".\" + camera "
                        "serial number + \".crf\" suffix)");
+    desc.add_options()("valid-min", po::value<unsigned int>(&valid_min)->default_value(valid_min),
+                       "Minimum valid intensity value of the sensor");
+    desc.add_options()("valid-max", po::value<unsigned int>(&valid_max)->default_value(valid_max),
+                       "Maximum valid intensity value of the sensor");
     desc.add_options()("threshold,t", po::value<double>(&convergence_threshold),
                        "Threshold for energy update after which convergence is declared (default: 1e-5)");
     desc.add_options()("method,m", po::value<std::string>(&calibration_method),
@@ -107,6 +113,10 @@ class Options : public OptionsBase {
     std::cout << "Calibrate radiometric response of a camera. Two algorithms are available:" << std::endl;
     std::cout << " * Engel et al. (A Photometrically Calibrated Benchmark For Monocular Visual Odometry)" << std::endl;
     std::cout << " * Debevec and Malik (Recovering High Dynamic Range Radiance Maps from Photographs)" << std::endl;
+    std::cout << "" << std::endl;
+    std::cout << "Working range of the sensor can be specified with --valid-min/--valid-max options." << std::endl;
+    std::cout << "Pixels with intensity values outside this range do not contribute to the energy and" << std::endl;
+    std::cout << "irradiance computation, however radiometric response is estimated for them as well." << std::endl;
     std::cout << "" << std::endl;
   }
 };
@@ -181,12 +191,10 @@ class DataCollection {
   int images_to_accumulate_;
 };
 
-bool isSaturated(uint8_t intensity) {
-  return intensity == 0 || intensity == 255;
-}
-
 struct Optimization {
   const Dataset* data;
+  uint8_t min_valid_;
+  uint8_t max_valid_;
   cv::Mat E;
   cv::Mat G;
   bool converged = false;
@@ -195,7 +203,7 @@ struct Optimization {
   std::array<double, 256> sum_omega_k;
   std::array<int, 256> size_omega_k;
 
-  Optimization(const Dataset* data) : data(data) {
+  Optimization(const Dataset* data, uint8_t min_valid_intensity, uint8_t max_valid_intensity) : data(data), min_valid_(min_valid_intensity), max_valid_(max_valid_intensity) {
     auto num_images = data->size();
 
     E.create(data->front().first.size(), CV_64FC1);
@@ -209,7 +217,11 @@ struct Optimization {
 
     G.create(1, 256, CV_64FC1);
     for (int i = 0; i < 256; ++i)
-      G.at<double>(i) = (1.0 / 256.0) * i;
+      G.at<double>(i) = (1.0 / 255.0) * i;
+  }
+
+  bool isValid(uint8_t intensity) {
+    return intensity < min_valid_ || intensity > max_valid_;
   }
 
   void optimizeInverseResponse() {
@@ -223,12 +235,13 @@ struct Optimization {
       for (int i = 0; i < image.rows; ++i)
         for (int j = 0; j < image.cols; ++j) {
           const auto& p = image.at<uint8_t>(i, j);
-          if (isSaturated(p))
-            continue;
           sum_omega_k[p] += exposure * E.at<double>(i, j);
           size_omega_k[p] += 1;
         }
     }
+
+    // There is no useful data for 255, so force extrapolation
+    size_omega_k[255] = 0;
 
     for (int k = 1; k < 256; ++k) {
       G.at<double>(k) = sum_omega_k[k] /= size_omega_k[k];
@@ -249,7 +262,7 @@ struct Optimization {
       for (int i = 0; i < image.rows; ++i)
         for (int j = 0; j < image.cols; ++j) {
           const auto& p = image.at<uint8_t>(i, j);
-          if (isSaturated(p))
+          if (isValid(p))
             continue;
           E.at<double>(i, j) += G.at<double>(p) * exposure;
           sum_t2_i(i, j) += exposure * exposure;
@@ -273,7 +286,7 @@ struct Optimization {
     for (const auto& d : *data) {
       for (int i = 0; i < d.first.rows; ++i)
         for (int j = 0; j < d.first.cols; ++j)
-          if (!isSaturated(d.first.at<uint8_t>(i, j))) {
+          if (!isValid(d.first.at<uint8_t>(i, j))) {
             long double r = G.at<double>(d.first.at<uint8_t>(i, j)) - d.second * E.at<double>(i, j);
             energy += r * r;
             num += 1;
@@ -376,7 +389,7 @@ int main(int argc, const char** argv) {
 
     std::vector<Optimization> opts;
     for (const auto& data : data_channels)
-      opts.emplace_back(&data);
+      opts.emplace_back(&data, options.valid_min, options.valid_max);
 
     boost::format fmt_header1("| %=5s | %=72s |");
     boost::format fmt_header2("| %=5s | %=22s | %=22s | %=22s |");
@@ -464,8 +477,6 @@ int main(int argc, const char** argv) {
   cv::split(response, channels);
   for (size_t i = 0; i < 3; ++i) {
     cv::sort(channels[i], channels[i], CV_SORT_EVERY_COLUMN | CV_SORT_ASCENDING);
-    cv::subtract(channels[i], 2 * channels[i].at<float>(1) - channels[i].at<float>(2), channels[i]);
-    channels[i].at<float>(0) = 0;
     cv::divide(channels[i], channels[i].at<float>(255), channels[i]);
   }
   cv::merge(channels, response);
