@@ -56,7 +56,7 @@ class Options : public OptionsBase {
   unsigned int num_average_frames = 5;
   unsigned int num_images = 5;
   unsigned int exposure_control_lag = 10;
-  double convergence_threshold = 0.00001;
+  double convergence_threshold = 1e-5;
   std::string calibration_method = "engel";
   bool no_visualization = false;
   std::string save_dataset = "";
@@ -68,18 +68,8 @@ class Options : public OptionsBase {
     desc.add_options()("output,o", po::value<std::string>(&output),
                        "Output filename with calibrated response function (default: camera model name + \".\" + camera "
                        "serial number + \".crf\" suffix)");
-    desc.add_options()("min", po::value<int>(&exposure_min), "Minimum exposure (default: depends on the camera)");
-    desc.add_options()("max", po::value<int>(&exposure_max), "Maximum exposure (default: depends on the camera)");
-    desc.add_options()("factor,f", po::value<float>(&exposure_factor),
-                       "Multiplication factor for exposure (default: to cover desired exposure range in 20 steps)");
-    desc.add_options()("average,a", po::value<unsigned int>(&num_average_frames),
-                       "Number of consecutive frames to average into each image (default: 5)");
-    desc.add_options()("images,i", po::value<unsigned int>(&num_images),
-                       "Number of images to take at each exposure setting (default: 5)");
-    desc.add_options()("lag,l", po::value<unsigned int>(&exposure_control_lag),
-                       "Number of frames to skip after changing exposure setting (default: 10)");
     desc.add_options()("threshold,t", po::value<double>(&convergence_threshold),
-                       "Threshold for energy update after which convergence is declared (default: 0.00001)");
+                       "Threshold for energy update after which convergence is declared (default: 1e-5)");
     desc.add_options()("method,m", po::value<std::string>(&calibration_method),
                        "Calibration method to use (default: engel)");
     desc.add_options()("no-visualization", po::bool_switch(&no_visualization),
@@ -88,6 +78,19 @@ class Options : public OptionsBase {
                        "Save collected dataset in the given directory");
     desc.add_options()("dataset-format", po::value<std::string>(&dataset_format)->default_value(dataset_format),
                        "Format in which dataset will be saved (mat or png)");
+
+    boost::program_options::options_description dc("Data collection");
+    dc.add_options()("exposure-min", po::value<int>(&exposure_min), "Minimum exposure (default: depends on the camera)");
+    dc.add_options()("exposure-max", po::value<int>(&exposure_max), "Maximum exposure (default: depends on the camera)");
+    dc.add_options()("factor,f", po::value<float>(&exposure_factor),
+                     "Multiplication factor for exposure (default: to cover desired exposure range in 20 steps)");
+    dc.add_options()("average,a", po::value<unsigned int>(&num_average_frames)->default_value(num_average_frames),
+                     "Number of consecutive frames to average into each image");
+    dc.add_options()("images,i", po::value<unsigned int>(&num_images)->default_value(num_images),
+                     "Number of images to take at each exposure setting");
+    dc.add_options()("lag,l", po::value<unsigned int>(&exposure_control_lag)->default_value(exposure_control_lag),
+                     "Number of frames to skip after changing exposure setting");
+    desc.add(dc);
   }
 
   virtual void addPositional(boost::program_options::options_description& desc,
