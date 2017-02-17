@@ -55,7 +55,7 @@ class Options : public OptionsBase {
   unsigned int num_average_frames = 5;
   unsigned int num_images = 5;
   unsigned int exposure_control_lag = 10;
-  float convergence_threshold = 0.00001;
+  double convergence_threshold = 0.00001;
   std::string calibration_method = "engel";
   bool no_visualization = false;
   std::string save_dataset = "";
@@ -77,7 +77,7 @@ class Options : public OptionsBase {
                        "Number of images to take at each exposure setting (default: 5)");
     desc.add_options()("lag,l", po::value<unsigned int>(&exposure_control_lag),
                        "Number of frames to skip after changing exposure setting (default: 10)");
-    desc.add_options()("threshold,t", po::value<float>(&convergence_threshold),
+    desc.add_options()("threshold,t", po::value<double>(&convergence_threshold),
                        "Threshold for energy update after which convergence is declared (default: 0.00001)");
     desc.add_options()("method,m", po::value<std::string>(&calibration_method),
                        "Calibration method to use (default: engel)");
