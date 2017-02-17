@@ -128,9 +128,9 @@ class DataCollection {
   using ExposureRange = std::pair<int, int>;
 
   DataCollection(grabbers::Grabber::Ptr grabber, ExposureRange range, float factor, unsigned int average_frames,
-                 unsigned int images, unsigned int control_lag)
+                 unsigned int images, unsigned int control_lag, unsigned int valid_max)
   : grabber_(grabber), range_(range), factor_(factor), lag_(control_lag), mean_(average_frames),
-    dataset_(new Dataset), num_images_(images) {
+    dataset_(new Dataset), num_images_(images), max_valid_intensity_(valid_max) {
     BOOST_ASSERT(range.first <= range.second);
     BOOST_ASSERT(factor > 1.0);
     exposure_ = range_.first;
@@ -145,7 +145,7 @@ class DataCollection {
     if (skip_frames_-- > 0)
       return false;
 
-    if (!mean_.add(dilateSaturatedAreas(frame)))
+    if (!mean_.add(dilateOverexposedAreas(frame)))
       return false;
 
     dataset_->emplace_back(mean_.getMean(), exposure_);
@@ -171,10 +171,10 @@ class DataCollection {
   }
 
  private:
-  cv::Mat dilateSaturatedAreas(const cv::Mat& image) {
+  cv::Mat dilateOverexposedAreas(const cv::Mat& image) {
     static const cv::Mat morph = cv::getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(5, 5), cv::Point(2, 2));
     cv::Mat dilated;
-    cv::threshold(image, dilated, 254, 255, cv::THRESH_BINARY);
+    cv::threshold(image, dilated, max_valid_intensity_, 255, cv::THRESH_BINARY);
     cv::dilate(dilated, dilated, morph);
     return cv::max(image, dilated);
   }
@@ -189,6 +189,7 @@ class DataCollection {
   int skip_frames_;
   const unsigned int num_images_;
   int images_to_accumulate_;
+  unsigned int max_valid_intensity_;
 };
 
 struct Optimization {
@@ -350,7 +351,7 @@ int main(int argc, const char** argv) {
     DataCollection::Ptr data_collection;
     data_collection.reset(new DataCollection(grabber, {options.exposure_min, options.exposure_max},
                                              options.exposure_factor, options.num_average_frames, options.num_images,
-                                             options.exposure_control_lag));
+                                             options.exposure_control_lag, options.valid_max));
 
     while (grabber->hasMoreFrames()) {
       grabber->grabFrame(frame);
