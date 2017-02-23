@@ -477,7 +477,7 @@ int main(int argc, const char** argv) {
   std::vector<cv::Mat> channels;
   cv::split(response, channels);
   for (size_t i = 0; i < 3; ++i) {
-    cv::sort(channels[i], channels[i], CV_SORT_EVERY_COLUMN | CV_SORT_ASCENDING);
+    cv::sort(channels[i], channels[i], CV_SORT_EVERY_ROW | CV_SORT_ASCENDING);
     cv::divide(channels[i], channels[i].at<float>(255), channels[i]);
   }
   cv::merge(channels, response);
