@@ -333,9 +333,9 @@ int main(int argc, const char** argv) {
 
     if (!options("output"))
       options.output = grabber->getCameraUID() + ".crf";
-    if (!options("min"))
+    if (!options("exposure-min"))
       options.exposure_min = grabber->getExposureRange().first;
-    if (!options("max"))
+    if (!options("exposure-max"))
       options.exposure_max = grabber->getExposureRange().second;
     if (!options("factor"))
       options.exposure_factor = std::pow(options.exposure_max / options.exposure_min, 1.0 / 20);
