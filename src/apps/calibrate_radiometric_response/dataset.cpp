@@ -23,6 +23,8 @@
 #include <algorithm>
 #include <map>
 
+#include <boost/assert.hpp>
+
 #if CV_MAJOR_VERSION >= 3
 #include <opencv2/imgcodecs/imgcodecs.hpp>
 #else
@@ -39,31 +41,69 @@
 
 #include "dataset.h"
 
-std::vector<cv::Mat> Dataset::getImages() const {
-  std::vector<cv::Mat> images;
-  std::transform(begin(), end(), std::back_inserter(images), [](const std::pair<cv::Mat, int>& p) { return p.first; });
-  return images;
+Dataset::Dataset() : num_images_(0), image_size_(0, 0) {}
+
+void Dataset::insert(int exposure_time, const cv::Mat& image) {
+  if (image_size_.area() == 0)
+    image_size_ = image.size();
+  else
+    BOOST_ASSERT_MSG(image_size_ == image.size(), "Attempted to insert images of different size into same dataset");
+  data_[exposure_time].push_back(image);
+  ++num_images_;
 }
 
-std::vector<int> Dataset::getExposures() const {
+cv::Size Dataset::getImageSize() const {
+  return image_size_;
+}
+
+size_t Dataset::getNumImages() const {
+  return num_images_;
+}
+
+size_t Dataset::getNumImages(int exposure_time) const {
+  if (data_.count(exposure_time))
+    return data_.at(exposure_time).size();
+  return 0;
+}
+
+std::vector<cv::Mat> Dataset::getImages(int exposure_time) const {
+  if (data_.count(exposure_time))
+    return data_.at(exposure_time);
+  return {};
+}
+
+std::vector<int> Dataset::getExposureTimes() const {
   std::vector<int> exposures;
-  std::transform(begin(), end(), std::back_inserter(exposures),
-                 [](const std::pair<cv::Mat, int>& p) { return p.second; });
+  std::transform(data_.begin(), data_.end(), std::back_inserter(exposures),
+                 [](const std::pair<int, std::vector<cv::Mat>>& p) { return p.first; });
   return exposures;
 }
 
 std::vector<Dataset> Dataset::splitChannels() const {
-  int num_channels = at(0).first.channels();
+  BOOST_ASSERT_MSG(!data_.empty(), "Attempted to split empty dataset");
+  int num_channels = data_.begin()->second.begin()->channels();
   if (num_channels == 1)
     return std::vector<Dataset>(1, *this);
   std::vector<Dataset> splitted(num_channels);
   std::vector<cv::Mat> channels;
-  for (size_t i = 0; i < size(); ++i) {
-    cv::split(at(i).first, channels);
-    for (int c = 0; c < num_channels; ++c)
-      splitted[c].emplace_back(channels[c].clone(), at(i).second);
-  }
+  for (const auto& time_images : data_)
+    for (const auto& image : time_images.second) {
+      cv::split(image, channels);
+      for (int c = 0; c < num_channels; ++c)
+        splitted[c].insert(time_images.first, channels[c].clone());
+    }
   return splitted;
+}
+
+void Dataset::asImageAndExposureTimeVectors(std::vector<cv::Mat>& images, std::vector<int>& exposure_times) const {
+  images.clear();
+  exposure_times.clear();
+  for (const auto& time_images : data_) {
+    for (const auto& image : time_images.second) {
+      images.push_back(image);
+      exposure_times.push_back(time_images.first);
+    }
+  }
 }
 
 void Dataset::save(const std::string& path, Format format) const {
@@ -71,19 +111,16 @@ void Dataset::save(const std::string& path, Format format) const {
   fs::path dir(path);
   if (!fs::exists(dir))
     fs::create_directories(dir);
-  boost::format fmt("%1$06d_%2$03d.%3$s");
+  boost::format fmt("%1$06d_%2$03zu.%3$s");
   auto extension = format == PNG ? "png" : "mat";
-  std::map<int, int> indices;
-  for (const auto& item : *this) {
-    if (indices.count(item.second) == 0)
-      indices[item.second] = 0;
-    auto filename = (dir / boost::str(fmt % item.second % indices[item.second] % extension)).native();
-    if (format == PNG)
-      cv::imwrite(filename, item.first);
-    else
-      utils::writeMat(filename, item.first);
-    ++indices[item.second];
-  }
+  for (const auto& time_images : data_)
+    for (size_t i = 0; i < time_images.second.size(); ++i) {
+      auto filename = (dir / boost::str(fmt % time_images.first % i % extension)).native();
+      if (format == PNG)
+        cv::imwrite(filename, time_images.second[i]);
+      else
+        utils::writeMat(filename, time_images.second[i]);
+    }
 }
 
 Dataset::Ptr Dataset::load(const std::string& path) {
@@ -101,7 +138,7 @@ Dataset::Ptr Dataset::load(const std::string& path) {
           image = cv::imread(iter->path().string());
         else
           image = utils::readMat(iter->path().string());
-        dataset->emplace_back(image, exposure);
+        dataset->insert(exposure, image);
       } catch (boost::bad_lexical_cast& e) {
       }
     }

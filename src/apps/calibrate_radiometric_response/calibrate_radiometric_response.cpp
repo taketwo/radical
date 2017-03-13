@@ -20,11 +20,11 @@
  * SOFTWARE.
  ******************************************************************************/
 
+#include <array>
 #include <cmath>
 #include <iostream>
 #include <string>
 #include <vector>
-#include <array>
 
 #include <boost/format.hpp>
 
@@ -33,7 +33,7 @@
 #include <opencv2/imgproc/imgproc.hpp>
 
 #if CV_MAJOR_VERSION >= 3
-#include <opencv2/photo.hpp>                // Debevec calibration
+#include <opencv2/photo.hpp>  // Debevec calibration
 #endif
 
 #include <radical/radiometric_response.h>
@@ -86,8 +86,10 @@ class Options : public OptionsBase {
                        "Format in which dataset will be saved (mat or png)");
 
     boost::program_options::options_description dc("Data collection");
-    dc.add_options()("exposure-min", po::value<int>(&exposure_min), "Minimum exposure (default: depends on the camera)");
-    dc.add_options()("exposure-max", po::value<int>(&exposure_max), "Maximum exposure (default: depends on the camera)");
+    dc.add_options()("exposure-min", po::value<int>(&exposure_min),
+                     "Minimum exposure (default: depends on the camera)");
+    dc.add_options()("exposure-max", po::value<int>(&exposure_max),
+                     "Maximum exposure (default: depends on the camera)");
     dc.add_options()("factor,f", po::value<float>(&exposure_factor),
                      "Multiplication factor for exposure (default: to cover desired exposure range in 20 steps)");
     dc.add_options()("average,a", po::value<unsigned int>(&num_average_frames)->default_value(num_average_frames),
@@ -121,7 +123,6 @@ class Options : public OptionsBase {
   }
 };
 
-
 class DataCollection {
  public:
   using Ptr = std::shared_ptr<DataCollection>;
@@ -148,7 +149,7 @@ class DataCollection {
     if (!mean_.add(dilateOverexposedAreas(frame)))
       return false;
 
-    dataset_->emplace_back(mean_.getMean(), exposure_);
+    dataset_->insert(exposure_, mean_.getMean());
 
     if (--images_to_accumulate_ > 0)
       return false;
@@ -204,17 +205,15 @@ struct Optimization {
   std::array<double, 256> sum_omega_k;
   std::array<int, 256> size_omega_k;
 
-  Optimization(const Dataset* data, uint8_t min_valid_intensity, uint8_t max_valid_intensity) : data(data), min_valid_(min_valid_intensity), max_valid_(max_valid_intensity) {
-    auto num_images = data->size();
-
-    E.create(data->front().first.size(), CV_64FC1);
+  Optimization(const Dataset* data, uint8_t min_valid_intensity, uint8_t max_valid_intensity)
+  : data(data), min_valid_(min_valid_intensity), max_valid_(max_valid_intensity) {
+    E.create(data->getImageSize(), CV_64FC1);
     E.setTo(0);
-    for (size_t i = 0; i < data->size(); ++i) {
-      const auto& image = data->at(i).first;
-      for (int i = 0; i < image.rows; ++i)
-        for (int j = 0; j < image.cols; ++j)
-          E.at<double>(i, j) += static_cast<double>(image.at<uint8_t>(i, j)) / num_images / 256;
-    }
+    for (const auto& t : data->getExposureTimes())
+      for (const auto& image : data->getImages(t))
+        for (int i = 0; i < image.rows; ++i)
+          for (int j = 0; j < image.cols; ++j)
+            E.at<double>(i, j) += static_cast<double>(image.at<uint8_t>(i, j)) / data->getNumImages() / 256;
 
     G.create(1, 256, CV_64FC1);
     for (int i = 0; i < 256; ++i)
@@ -230,16 +229,14 @@ struct Optimization {
     sum_omega_k.fill(0);
     size_omega_k.fill(0);
 
-    for (size_t n = 0; n < data->size(); ++n) {
-      const auto& image = data->at(n).first;
-      const auto& exposure = data->at(n).second;
-      for (int i = 0; i < image.rows; ++i)
-        for (int j = 0; j < image.cols; ++j) {
-          const auto& p = image.at<uint8_t>(i, j);
-          sum_omega_k[p] += exposure * E.at<double>(i, j);
-          size_omega_k[p] += 1;
-        }
-    }
+    for (const auto& t : data->getExposureTimes())
+      for (const auto& image : data->getImages(t))
+        for (int i = 0; i < image.rows; ++i)
+          for (int j = 0; j < image.cols; ++j) {
+            const auto& p = image.at<uint8_t>(i, j);
+            sum_omega_k[p] += t * E.at<double>(i, j);
+            size_omega_k[p] += 1;
+          }
 
     // There is no useful data for 255, so force extrapolation
     size_omega_k[255] = 0;
@@ -253,22 +250,20 @@ struct Optimization {
 
   void optimizeIrradiance() {
     // Eqn. 8
-    sum_t2_i.create(data->front().first.size());
+    sum_t2_i.create(data->getImageSize());
     sum_t2_i.setTo(0);
     E.setTo(0);
 
-    for (size_t n = 0; n < data->size(); ++n) {
-      const auto& image = data->at(n).first;
-      const auto& exposure = data->at(n).second;
-      for (int i = 0; i < image.rows; ++i)
-        for (int j = 0; j < image.cols; ++j) {
-          const auto& p = image.at<uint8_t>(i, j);
-          if (isValid(p))
-            continue;
-          E.at<double>(i, j) += G.at<double>(p) * exposure;
-          sum_t2_i(i, j) += exposure * exposure;
-        }
-    }
+    for (const auto& t : data->getExposureTimes())
+      for (const auto& image : data->getImages(t))
+        for (int i = 0; i < image.rows; ++i)
+          for (int j = 0; j < image.cols; ++j) {
+            const auto& p = image.at<uint8_t>(i, j);
+            if (isValid(p))
+              continue;
+            E.at<double>(i, j) += G.at<double>(p) * t;
+            sum_t2_i(i, j) += t * t;
+          }
 
     cv::divide(E, sum_t2_i, E);
   }
@@ -284,15 +279,15 @@ struct Optimization {
   double computeEnergy() {
     long double energy = 0;
     long unsigned int num = 0;
-    for (const auto& d : *data) {
-      for (int i = 0; i < d.first.rows; ++i)
-        for (int j = 0; j < d.first.cols; ++j)
-          if (!isValid(d.first.at<uint8_t>(i, j))) {
-            long double r = G.at<double>(d.first.at<uint8_t>(i, j)) - d.second * E.at<double>(i, j);
-            energy += r * r;
-            num += 1;
-          }
-    }
+    for (const auto& t : data->getExposureTimes())
+      for (const auto& image : data->getImages(t))
+        for (int i = 0; i < image.rows; ++i)
+          for (int j = 0; j < image.cols; ++j)
+            if (!isValid(image.at<uint8_t>(i, j))) {
+              long double r = G.at<double>(image.at<uint8_t>(i, j)) - t * E.at<double>(i, j);
+              energy += r * r;
+              num += 1;
+            }
     return std::sqrt(energy / num);
   }
 };
@@ -370,7 +365,8 @@ int main(int argc, const char** argv) {
     if (options.dataset_format == "png")
       format = Dataset::PNG;
     else if (options.dataset_format != "mat")
-      std::cerr << "Requested unknown dataset format \"" << options.dataset_format << "\", defaulting to \"mat\"" << std::endl;
+      std::cerr << "Requested unknown dataset format \"" << options.dataset_format << "\", defaulting to \"mat\""
+                << std::endl;
     std::cout << "Saving dataset to: " << options.save_dataset << std::endl;
     data->save(options.save_dataset, format);
   }
@@ -378,8 +374,11 @@ int main(int argc, const char** argv) {
   if (options.calibration_method == "debevec") {
 #if CV_MAJOR_VERSION >= 3
     std::cout << "Starting Debevec calibration procedure" << std::endl;
+    std::vector<cv::Mat> images;
+    std::vector<int> exposure_times;
+    data->asImageAndExposureTimeVectors(images, exposure_times);
     auto debevec = cv::createCalibrateDebevec();
-    debevec->process(data->getImages(), response, data->getExposures());
+    debevec->process(images, response, exposure_times);
 #else
     std::cerr << "Debevec calibration is supported only with OpenCV 3.0 and above.\n";
     return 2;

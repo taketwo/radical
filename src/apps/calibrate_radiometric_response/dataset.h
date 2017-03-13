@@ -23,27 +23,56 @@
 #pragma once
 
 #include <memory>
+#include <unordered_map>
 #include <vector>
 
 #include <opencv2/core/core.hpp>
 
-class Dataset : public std::vector<std::pair<cv::Mat, int>> {
+class Dataset {
  public:
   using Ptr = std::shared_ptr<Dataset>;
 
-  std::vector<cv::Mat> getImages() const;
+  Dataset();
 
-  std::vector<int> getExposures() const;
+  /** Insert an image taken at a given exposure time in the dataset. */
+  void insert(int exposure_time, const cv::Mat& image);
 
+  /** Get the size of images in the dataset. */
+  cv::Size getImageSize() const;
+
+  /** Get the total number of images in the dataset. */
+  size_t getNumImages() const;
+
+  /** Get the number of images at a given exposure time in the dataset. */
+  size_t getNumImages(int exposure_time) const;
+
+  /** Get all images taken at a given exposure time. */
+  std::vector<cv::Mat> getImages(int exposure_time) const;
+
+  /** Get all exposure times present in the dataset. */
+  std::vector<int> getExposureTimes() const;
+
+  /** Split a dataset with multi-channel images into multiple single-channel datasets. */
   std::vector<Dataset> splitChannels() const;
 
-  /** Dataset ormats supported by save/load functions. */
+  /** Get the contents of the dataset as a flat vector of images and a flat vector of their corresponding exposure
+    * times. This format is compatible with OpenCV built-in CRF calibration algorithms. */
+  void asImageAndExposureTimeVectors(std::vector<cv::Mat>& images, std::vector<int>& exposure_times) const;
+
+  /** Dataset formats supported by save/load functions. */
   enum Format {
     PNG,  ///< Images are stored as PNG files (compressed)
     MAT,  ///< Images are stored as binary MAT files (raw)
   };
 
+  /** Save the dataset in a given format to the disk. */
   void save(const std::string& path, Format format) const;
 
+  /** Load a dataset from the disk. */
   static Ptr load(const std::string& path);
+
+ private:
+  size_t num_images_;
+  cv::Size image_size_;
+  std::unordered_map<int, std::vector<cv::Mat>> data_;
 };
