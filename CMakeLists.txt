@@ -60,6 +60,7 @@ target_link_libraries(${LIB_NAME} PUBLIC opencv_core opencv_imgproc)
 
 if(BUILD_APPS)
   add_subdirectory(src/grabbers)
+  add_subdirectory(src/utils)
   add_subdirectory(src/apps)
 endif()
 
