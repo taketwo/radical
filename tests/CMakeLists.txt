@@ -7,6 +7,11 @@ include_directories(${CMAKE_CURRENT_BINARY_DIR})
 add_custom_target(tests "${CMAKE_CTEST_COMMAND}" "-V" VERBATIM)
 
 macro(TEST_ADD _name)
+  set(options)
+  set(one_value_args)
+  set(multi_value_args LINK_WITH)
+  cmake_parse_arguments(TEST_ADD "${options}" "${one_value_args}" "${multi_value_args}" ${ARGN})
+
   set(_executable test_${_name})
   add_executable(${_executable} ${_executable}.cpp)
   target_compile_definitions(${_executable}
@@ -15,13 +20,13 @@ macro(TEST_ADD _name)
   )
   target_link_libraries(${_executable}
     ${Boost_FILESYSTEM_LIBRARY} ${Boost_SYSTEM_LIBRARY} ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY}
-    ${LIB_NAME}
+    ${TEST_ADD_LINK_WITH}
   )
   add_test(NAME ${_name} COMMAND ${_executable})
   add_dependencies(tests ${_executable})
 endmacro(TEST_ADD)
 
-TEST_ADD(radiometric_response)
-TEST_ADD(vignetting_response)
-TEST_ADD(nonparametric_vignetting_model)
-TEST_ADD(polynomial_vignetting_model)
+TEST_ADD(radiometric_response LINK_WITH radical)
+TEST_ADD(vignetting_response LINK_WITH radical)
+TEST_ADD(nonparametric_vignetting_model LINK_WITH radical)
+TEST_ADD(polynomial_vignetting_model LINK_WITH radical)
