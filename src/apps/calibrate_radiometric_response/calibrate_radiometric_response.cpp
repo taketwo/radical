@@ -305,7 +305,7 @@ int main(int argc, const char** argv) {
     std::vector<double> diff(opts.size(), 0);
 
     for (size_t i = 1; i < 100; ++i) {
-      std::cout << boost::str(fmt_line % i % "G");
+      std::cout << boost::str(fmt_line % i % "U");
 
       for (size_t c = 0; c < opts.size(); ++c) {
         std::string info;
@@ -324,7 +324,7 @@ int main(int argc, const char** argv) {
       }
 
       std::cout << std::endl;
-      std::cout << boost::str(fmt_line % i % "E");
+      std::cout << boost::str(fmt_line % i % "B");
 
       for (size_t c = 0; c < opts.size(); ++c) {
         std::string info;

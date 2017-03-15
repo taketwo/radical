@@ -54,9 +54,9 @@ class Optimization {
   const Dataset* dataset_;
   uint8_t min_valid_;
   uint8_t max_valid_;
-  cv::Mat E_;
-  cv::Mat G_;
   bool converged_;
+  cv::Mat B_;  // irradiance
+  cv::Mat U_;  // inverse response
 
   // Storage for temporary matrices to avoid re-allocation
   cv::Mat_<double> sum_t2_i_;
