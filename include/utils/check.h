@@ -27,7 +27,7 @@
 
 #include <opencv2/core/core.hpp>
 
-namespace radical {
+namespace utils {
 
 class Check {
  public:
@@ -48,4 +48,4 @@ class Check {
   std::reference_wrapper<const cv::_InputArray> m_;
 };
 
-}  // namespace radical
+}  // namespace utils

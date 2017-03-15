@@ -25,10 +25,13 @@
 #include <boost/assert.hpp>
 #include <boost/throw_exception.hpp>
 
-#include <radical/mat_io.h>
 #include <radical/exceptions.h>
 
-namespace radical {
+#include "utils/mat_io.h"
+
+using namespace radical;
+
+namespace utils {
 
 static const uint32_t MAGIC = 0xC4A1FDD9;
 
@@ -89,4 +92,4 @@ cv::Mat readMat(std::ifstream& file) {
   return mat;
 }
 
-}  // namespace radical
+}  // namespace utils

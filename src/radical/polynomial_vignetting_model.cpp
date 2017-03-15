@@ -25,16 +25,17 @@
 
 #include <boost/lexical_cast.hpp>
 
-#include <radical/check.h>
 #include <radical/exceptions.h>
-#include <radical/mat_io.h>
 #include <radical/polynomial_vignetting_model.h>
+
+#include "utils/check.h"
+#include "utils/mat_io.h"
 
 namespace radical {
 
 template <unsigned int Degree>
 PolynomialVignettingModel<Degree>::PolynomialVignettingModel(cv::InputArray _coefficients, cv::Size image_size) {
-  Check("Polynomial vignetting model", _coefficients).hasSize(Degree + 2).hasType(CV_64FC3);
+  utils::Check("Polynomial vignetting model", _coefficients).hasSize(Degree + 2).hasType(CV_64FC3);
   coefficients_ = _coefficients.getMat();
   image_size_ = image_size;
 }
@@ -55,7 +56,7 @@ PolynomialVignettingModel<Degree>::PolynomialVignettingModel(const std::string& 
             << SerializationException::Filename(filename));
     }
     image_size_ = cv::Size(width, height);
-    coefficients_ = readMat(file);
+    coefficients_ = utils::readMat(file);
     // TODO: Check read coefficients
     file.close();
   } else {
@@ -74,7 +75,7 @@ void PolynomialVignettingModel<Degree>::save(const std::string& filename) const 
   std::ofstream file(filename);
   if (file.is_open()) {
     file << "PolynomialVignettingModel " << Degree << " " << image_size_.width << " " << image_size_.height << "\n";
-    writeMat(file, coefficients_);
+    utils::writeMat(file, coefficients_);
     file.close();
   } else {
     BOOST_THROW_EXCEPTION(SerializationException("Unable to open file to save vignetting model")

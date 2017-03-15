@@ -35,7 +35,7 @@
 #include <boost/format.hpp>
 #include <boost/lexical_cast.hpp>
 
-#include <radical/mat_io.h>
+#include "utils/mat_io.h"
 
 #include "dataset.h"
 
@@ -81,7 +81,7 @@ void Dataset::save(const std::string& path, Format format) const {
     if (format == PNG)
       cv::imwrite(filename, item.first);
     else
-      radical::writeMat(filename, item.first);
+      utils::writeMat(filename, item.first);
     ++indices[item.second];
   }
 }
@@ -100,7 +100,7 @@ Dataset::Ptr Dataset::load(const std::string& path) {
         if (extension == ".png")
           image = cv::imread(iter->path().string());
         else
-          image = radical::readMat(iter->path().string());
+          image = utils::readMat(iter->path().string());
         dataset->emplace_back(image, exposure);
       } catch (boost::bad_lexical_cast& e) {
       }

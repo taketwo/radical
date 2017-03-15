@@ -38,14 +38,14 @@ find_package(OpenCV COMPONENTS core imgproc REQUIRED)
 
 include_directories("${PROJECT_SOURCE_DIR}/include")
 
+add_subdirectory(src/utils)
+
 set(RADICAL_SRC
   src/radical/radiometric_response.cpp
   src/radical/vignetting_response.cpp
   src/radical/vignetting_model.cpp
   src/radical/nonparametric_vignetting_model.cpp
   src/radical/polynomial_vignetting_model.cpp
-  src/radical/mat_io.cpp
-  src/radical/check.cpp
 )
 
 add_library(${LIB_NAME} SHARED ${RADICAL_SRC})
@@ -57,10 +57,10 @@ target_include_directories(
 )
 
 target_link_libraries(${LIB_NAME} PUBLIC opencv_core opencv_imgproc)
+target_link_libraries(${LIB_NAME} PRIVATE utils)
 
 if(BUILD_APPS)
   add_subdirectory(src/grabbers)
-  add_subdirectory(src/utils)
   add_subdirectory(src/apps)
 endif()
 

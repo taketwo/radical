@@ -23,15 +23,16 @@
 #include <fstream>
 #include <iostream>
 
-#include <radical/check.h>
 #include <radical/exceptions.h>
-#include <radical/mat_io.h>
 #include <radical/nonparametric_vignetting_model.h>
+
+#include "utils/check.h"
+#include "utils/mat_io.h"
 
 namespace radical {
 
 NonparametricVignettingModel::NonparametricVignettingModel(cv::InputArray _coefficients) {
-  Check("Nonparametric vignetting model", _coefficients).notEmpty().hasType(CV_32FC3);
+  utils::Check("Nonparametric vignetting model", _coefficients).notEmpty().hasType(CV_32FC3);
   coefficients_ = _coefficients.getMat();
 }
 
@@ -46,7 +47,7 @@ NonparametricVignettingModel::NonparametricVignettingModel(const std::string& fi
         BOOST_THROW_EXCEPTION(SerializationException("Vignetting model stored in the file is not nonparametric")
                               << SerializationException::Filename(filename));
     }
-    coefficients_ = readMat(file);
+    coefficients_ = utils::readMat(file);
     file.close();
   } else {
     BOOST_THROW_EXCEPTION(SerializationException("Unable to open vignetting model file")
@@ -62,7 +63,7 @@ void NonparametricVignettingModel::save(const std::string& filename) const {
   std::ofstream file(filename);
   if (file.is_open()) {
     file << "NonparametricVignettingModel\n";
-    writeMat(file, coefficients_);
+    utils::writeMat(file, coefficients_);
     file.close();
   } else {
     BOOST_THROW_EXCEPTION(SerializationException("Unable to open file to save vignetting model")

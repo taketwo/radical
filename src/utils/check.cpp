@@ -22,10 +22,13 @@
 
 #include <boost/throw_exception.hpp>
 
-#include <radical/check.h>
 #include <radical/exceptions.h>
 
-namespace radical {
+#include "utils/check.h"
+
+using namespace radical;
+
+namespace utils {
 
 Check::Check(const std::string& name, cv::InputArray m) : name_(name), m_(std::cref(m)) {}
 
@@ -60,4 +63,4 @@ const Check& Check::hasType(int type) const {
   return *this;
 }
 
-}  // namespace radical
+}  // namespace utils
