@@ -20,7 +20,6 @@
  * SOFTWARE.
  ******************************************************************************/
 
-#include <array>
 #include <cmath>
 #include <iostream>
 #include <string>
@@ -45,6 +44,7 @@
 #include "utils/program_options.h"
 
 #include "dataset.h"
+#include "optimization.h"
 
 class Options : public OptionsBase {
  public:
@@ -193,105 +193,6 @@ class DataCollection {
   unsigned int max_valid_intensity_;
 };
 
-struct Optimization {
-  const Dataset* data;
-  uint8_t min_valid_;
-  uint8_t max_valid_;
-  cv::Mat E;
-  cv::Mat G;
-  bool converged = false;
-  // Storage for temporary matrices to avoid re-allocation
-  cv::Mat_<double> sum_t2_i;
-  std::array<double, 256> sum_omega_k;
-  std::array<int, 256> size_omega_k;
-
-  Optimization(const Dataset* data, uint8_t min_valid_intensity, uint8_t max_valid_intensity)
-  : data(data), min_valid_(min_valid_intensity), max_valid_(max_valid_intensity) {
-    E.create(data->getImageSize(), CV_64FC1);
-    E.setTo(0);
-    for (const auto& t : data->getExposureTimes())
-      for (const auto& image : data->getImages(t))
-        for (int i = 0; i < image.rows; ++i)
-          for (int j = 0; j < image.cols; ++j)
-            E.at<double>(i, j) += static_cast<double>(image.at<uint8_t>(i, j)) / data->getNumImages() / 256;
-
-    G.create(1, 256, CV_64FC1);
-    for (int i = 0; i < 256; ++i)
-      G.at<double>(i) = (1.0 / 255.0) * i;
-  }
-
-  bool isValid(uint8_t intensity) {
-    return intensity < min_valid_ || intensity > max_valid_;
-  }
-
-  void optimizeInverseResponse() {
-    // Eqn. 7
-    sum_omega_k.fill(0);
-    size_omega_k.fill(0);
-
-    for (const auto& t : data->getExposureTimes())
-      for (const auto& image : data->getImages(t))
-        for (int i = 0; i < image.rows; ++i)
-          for (int j = 0; j < image.cols; ++j) {
-            const auto& p = image.at<uint8_t>(i, j);
-            sum_omega_k[p] += t * E.at<double>(i, j);
-            size_omega_k[p] += 1;
-          }
-
-    // There is no useful data for 255, so force extrapolation
-    size_omega_k[255] = 0;
-
-    for (int k = 1; k < 256; ++k) {
-      G.at<double>(k) = sum_omega_k[k] /= size_omega_k[k];
-      if (!std::isfinite(G.at<double>(k)) && k > 1)
-        G.at<double>(k) = 2 * G.at<double>(k - 1) - G.at<double>(k - 2);
-    }
-  }
-
-  void optimizeIrradiance() {
-    // Eqn. 8
-    sum_t2_i.create(data->getImageSize());
-    sum_t2_i.setTo(0);
-    E.setTo(0);
-
-    for (const auto& t : data->getExposureTimes())
-      for (const auto& image : data->getImages(t))
-        for (int i = 0; i < image.rows; ++i)
-          for (int j = 0; j < image.cols; ++j) {
-            const auto& p = image.at<uint8_t>(i, j);
-            if (isValid(p))
-              continue;
-            E.at<double>(i, j) += G.at<double>(p) * t;
-            sum_t2_i(i, j) += t * t;
-          }
-
-    cv::divide(E, sum_t2_i, E);
-  }
-
-  void rescale() {
-    double min, max;
-    cv::minMaxLoc(G, &min, &max);
-    auto scale = 1.0 / max;
-    cv::multiply(G, scale, G);
-    cv::multiply(E, scale, E);
-  }
-
-  double computeEnergy() {
-    long double energy = 0;
-    long unsigned int num = 0;
-    for (const auto& t : data->getExposureTimes())
-      for (const auto& image : data->getImages(t))
-        for (int i = 0; i < image.rows; ++i)
-          for (int j = 0; j < image.cols; ++j)
-            if (!isValid(image.at<uint8_t>(i, j))) {
-              long double r = G.at<double>(image.at<uint8_t>(i, j)) - t * E.at<double>(i, j);
-              energy += r * r;
-              num += 1;
-            }
-    return std::sqrt(energy / num);
-  }
-};
-
 int main(int argc, const char** argv) {
   Options options;
   if (!options.parse(argc, argv))
@@ -408,14 +309,14 @@ int main(int argc, const char** argv) {
 
       for (size_t c = 0; c < opts.size(); ++c) {
         std::string info;
-        if (opts[c].converged) {
+        if (opts[c].converged()) {
           info = boost::str(fmt_channel_converged % "*");
         } else {
           opts[c].optimizeInverseResponse();
           auto e = opts[c].computeEnergy();
           diff[c] = energy[c] - e;
           if (energy[c] > 0 && diff[c] < options.convergence_threshold)
-            opts[c].converged = true;
+            opts[c].converged(true);
           energy[c] = e;
           info = boost::str(fmt_channel_update % e % diff[c]);
         }
@@ -427,7 +328,7 @@ int main(int argc, const char** argv) {
 
       for (size_t c = 0; c < opts.size(); ++c) {
         std::string info;
-        if (opts[c].converged) {
+        if (opts[c].converged()) {
           info = boost::str(fmt_channel_converged % "*");
         } else {
           opts[c].optimizeIrradiance();
@@ -435,7 +336,7 @@ int main(int argc, const char** argv) {
           if (energy[c] > 0) {
             diff[c] = energy[c] - e;
             if (diff[c] < options.convergence_threshold)
-              opts[c].converged = true;
+              opts[c].converged(true);
           }
           energy[c] = e;
           info = boost::str(fmt_channel_update % e % diff[c]);
@@ -450,7 +351,7 @@ int main(int argc, const char** argv) {
 
       std::vector<cv::Mat> response_channels;
       for (auto& p : opts)
-        response_channels.push_back(p.G);
+        response_channels.push_back(p.getOptimizedInverseResponse());
       cv::Mat response_double;
       cv::merge(response_channels, response_double);
       response_double.convertTo(response, CV_32FC3);
@@ -458,7 +359,7 @@ int main(int argc, const char** argv) {
 
       bool converged = true;
       for (size_t c = 0; c < opts.size(); ++c)
-        converged &= opts[c].converged;
+        converged &= opts[c].converged();
 
       if (converged)
         break;
