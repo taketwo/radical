@@ -24,6 +24,7 @@
 
 #include <string>
 #include <functional>
+#include <initializer_list>
 
 #include <opencv2/core/core.hpp>
 
@@ -42,6 +43,10 @@ class Check {
   const Check& hasSize(int total) const;
 
   const Check& hasType(int type) const;
+
+  const Check& hasType(std::initializer_list<int> types) const;
+
+  const Check& hasChannels(int channels) const;
 
  private:
   std::string name_;

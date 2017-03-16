@@ -49,6 +49,8 @@ class MatException : public Exception {
   using ActualSize = boost::error_info<struct tag_actual_size, cv::Size>;
   using ExpectedType = boost::error_info<struct tag_expected_type, int>;
   using ActualType = boost::error_info<struct tag_actual_type, int>;
+  using ExpectedChannels = boost::error_info<struct tag_expected_channels, int>;
+  using ActualChannels = boost::error_info<struct tag_actual_channels, int>;
 };
 
 }  // namespace radical

@@ -63,4 +63,21 @@ const Check& Check::hasType(int type) const {
   return *this;
 }
 
+const Check& Check::hasType(std::initializer_list<int> types) const {
+  bool condition = false;
+  for (const auto& type : types)
+    condition |= type == m_.get().type();
+  if (!condition)
+    BOOST_THROW_EXCEPTION(MatException(name_ + " does not have any of expected types")
+                          << MatException::ActualType(m_.get().type()));
+  return *this;
+}
+
+const Check& Check::hasChannels(int channels) const {
+  if (m_.get().channels() != channels)
+    BOOST_THROW_EXCEPTION(MatException(name_ + " does not have expected number of channels")
+                          << MatException::ExpectedChannels(channels) << MatException::ActualChannels(m_.get().channels()));
+  return *this;
+}
+
 }  // namespace utils
