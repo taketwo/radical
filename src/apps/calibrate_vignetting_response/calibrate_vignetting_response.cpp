@@ -166,7 +166,7 @@ int main(int argc, const char** argv) {
 
   std::cout << "Starting data collection" << std::endl;
 
-  MeanImage mean(options.num_samples);
+  utils::MeanImage mean(false, options.num_samples);
   BlobTracker tracker;
 
   cv::Mat frame;

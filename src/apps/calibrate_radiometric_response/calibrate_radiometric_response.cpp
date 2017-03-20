@@ -130,8 +130,8 @@ class DataCollection {
 
   DataCollection(grabbers::Grabber::Ptr grabber, ExposureRange range, float factor, unsigned int average_frames,
                  unsigned int images, unsigned int control_lag, unsigned int valid_max)
-  : grabber_(grabber), range_(range), factor_(factor), lag_(control_lag), mean_(average_frames),
-    dataset_(new Dataset), num_images_(images), max_valid_intensity_(valid_max) {
+  : grabber_(grabber), range_(range), factor_(factor), lag_(control_lag), mean_(false, average_frames), dataset_(new Dataset),
+    num_images_(images), max_valid_intensity_(valid_max) {
     BOOST_ASSERT(range.first <= range.second);
     BOOST_ASSERT(factor > 1.0);
     exposure_ = range_.first;
@@ -147,7 +147,7 @@ class DataCollection {
       return false;
 
     if (!mean_.add(dilateOverexposedAreas(frame)))
-      return false;
+        return false;
 
     dataset_->insert(exposure_, mean_.getMean());
 
@@ -184,7 +184,7 @@ class DataCollection {
   ExposureRange range_;
   float factor_;
   const unsigned int lag_;
-  MeanImage mean_;
+  utils::MeanImage mean_;
   int exposure_;
   Dataset::Ptr dataset_;
   int skip_frames_;

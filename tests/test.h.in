@@ -40,6 +40,12 @@ template<typename T> std::vector<T> generateRandomVector(size_t size, T min, T m
   return vector;
 }
 
+template<typename T> T generateRandomNumber(T min, T max) {
+  std::vector<T> vector(1);
+  cv::randu(vector, min, max);
+  return vector[0];
+}
+
 /** Test two cv::Mat for equality (same size, type, and elements). */
 template <typename T>
 boost::test_tools::predicate_result compareMat(const cv::Mat& m1, const cv::Mat& m2) {
@@ -87,3 +93,4 @@ boost::test_tools::predicate_result compareMat(const cv::Mat& m, const T& elemen
 }
 
 #define BOOST_CHECK_EQUAL_MAT(M1, M2, T) BOOST_CHECK((compareMat<T>(M1, M2)))
+#define BOOST_REQUIRE_EQUAL_MAT(M1, M2, T) BOOST_REQUIRE((compareMat<T>(M1, M2)))
