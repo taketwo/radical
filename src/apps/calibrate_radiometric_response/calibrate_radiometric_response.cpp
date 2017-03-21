@@ -305,26 +305,7 @@ int main(int argc, const char** argv) {
     std::vector<double> diff(opts.size(), 0);
 
     for (size_t i = 1; i < 100; ++i) {
-      std::cout << boost::str(fmt_line % i % "U");
-
-      for (size_t c = 0; c < opts.size(); ++c) {
-        std::string info;
-        if (opts[c].converged()) {
-          info = boost::str(fmt_channel_converged % "*");
-        } else {
-          opts[c].optimizeInverseResponse();
-          auto e = opts[c].computeEnergy();
-          diff[c] = energy[c] - e;
-          if (energy[c] > 0 && diff[c] < options.convergence_threshold)
-            opts[c].converged(true);
-          energy[c] = e;
-          info = boost::str(fmt_channel_update % e % diff[c]);
-        }
-        std::cout << info << " |";
-      }
-
-      std::cout << std::endl;
-      std::cout << boost::str(fmt_line % i % "B");
+      std::cout << boost::str(fmt_line % i % "B") << std::flush;
 
       for (size_t c = 0; c < opts.size(); ++c) {
         std::string info;
@@ -341,7 +322,26 @@ int main(int argc, const char** argv) {
           energy[c] = e;
           info = boost::str(fmt_channel_update % e % diff[c]);
         }
-        std::cout << info << " |";
+        std::cout << info << " |" << std::flush;
+      }
+
+      std::cout << std::endl;
+      std::cout << boost::str(fmt_line % i % "U") << std::flush;
+
+      for (size_t c = 0; c < opts.size(); ++c) {
+        std::string info;
+        if (opts[c].converged()) {
+          info = boost::str(fmt_channel_converged % "*");
+        } else {
+          opts[c].optimizeInverseResponse();
+          auto e = opts[c].computeEnergy();
+          diff[c] = energy[c] - e;
+          if (energy[c] > 0 && diff[c] < options.convergence_threshold)
+            opts[c].converged(true);
+          energy[c] = e;
+          info = boost::str(fmt_channel_update % e % diff[c]);
+        }
+        std::cout << info << " |" << std::flush;
       }
 
       std::cout << std::endl;
