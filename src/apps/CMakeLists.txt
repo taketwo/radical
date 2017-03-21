@@ -5,7 +5,7 @@ else()
 endif()
 
 find_package(OpenCV COMPONENTS ${OpenCV_COMPONENTS} REQUIRED)
-find_package(Boost COMPONENTS program_options filesystem REQUIRED)
+find_package(Boost COMPONENTS program_options filesystem system REQUIRED)
 
 include_directories(${CMAKE_CURRENT_LIST_DIR})
 
