@@ -111,7 +111,7 @@ void Dataset::save(const std::string& path, Format format) const {
   fs::path dir(path);
   if (!fs::exists(dir))
     fs::create_directories(dir);
-  boost::format fmt("%1$06d_%2$03zu.%3$s");
+  boost::format fmt("%1$06d_%2$03d.%3$s");
   auto extension = format == PNG ? "png" : "mat";
   for (const auto& time_images : data_)
     for (size_t i = 0; i < time_images.second.size(); ++i) {
