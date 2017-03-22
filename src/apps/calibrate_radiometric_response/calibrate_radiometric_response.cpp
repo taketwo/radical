@@ -91,7 +91,7 @@ class Options : public OptionsBase {
     dc.add_options()("exposure-max", po::value<int>(&exposure_max),
                      "Maximum exposure (default: depends on the camera)");
     dc.add_options()("factor,f", po::value<float>(&exposure_factor),
-                     "Multiplication factor for exposure (default: to cover desired exposure range in 20 steps)");
+                     "Multiplication factor for exposure (default: to cover desired exposure range in 30 steps)");
     dc.add_options()("average,a", po::value<unsigned int>(&num_average_frames)->default_value(num_average_frames),
                      "Number of consecutive frames to average into each image");
     dc.add_options()("images,i", po::value<unsigned int>(&num_images)->default_value(num_images),
@@ -234,7 +234,7 @@ int main(int argc, const char** argv) {
     if (!options("exposure-max"))
       options.exposure_max = grabber->getExposureRange().second;
     if (!options("factor"))
-      options.exposure_factor = std::pow(options.exposure_max / options.exposure_min, 1.0 / 20);
+      options.exposure_factor = std::pow(options.exposure_max / options.exposure_min, 1.0 / 30);
 
     // Change exposure to requested min value, wait some time until it works
     cv::Mat frame;
