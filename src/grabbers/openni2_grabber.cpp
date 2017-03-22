@@ -151,8 +151,9 @@ int OpenNI2Grabber::getExposure() const {
 }
 
 std::pair<int, int> OpenNI2Grabber::getExposureRange() const {
-  // Image does not seem to change after increasing exposure time beyound 500
-  return {1, 500};
+  // This is somewhat random. While it is certainly possible to increase the exposure beyond 150,
+  // most realistic scenes will be completely overexposed with this setting.
+  return {1, 150};
 }
 
 std::string OpenNI2Grabber::getCameraModelName() const {
