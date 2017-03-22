@@ -52,7 +52,7 @@ void maskSaturatedPixels(cv::InputArray _image, cv::InputOutputArray _mask, uint
 #else
   for (int i = 0; i < image.rows; i++)
     for (int j = 0; j < image.cols; j++) {
-      const auto& v = image.at<cv::Vec3f>(i, j);
+      const auto& v = image.at<cv::Vec3b>(i, j);
       for (size_t c = 0; c < 3; ++c)
         if (v[c] < min || v[c] > max) {
           mask.at<uint8_t>(i, j) = mask_value;
