@@ -40,9 +40,12 @@
 #include "utils/mean_image.h"
 #include "utils/plot_polynomial_vignetting_model.h"
 #include "utils/program_options.h"
+#include "utils/key_code.h"
 
 #include "blob_tracker.h"
 #include "model_fitting.h"
+
+using utils::KeyCode;
 
 class Options : public OptionsBase {
  public:
@@ -90,7 +93,8 @@ class Options : public OptionsBase {
   virtual void validate() override {
 #ifndef HAVE_CERES
     if (model == "polynomial")
-      throw boost::program_options::error("unable to calibrate polynomial vignetting model because the app was compiled without Ceres");
+      throw boost::program_options::error(
+          "unable to calibrate polynomial vignetting model because the app was compiled without Ceres");
 #endif
     if (model != "nonparametric" && model != "polynomial")
       throw boost::program_options::error("unknown vignetting model type " + model);
@@ -142,15 +146,15 @@ int main(int argc, const char** argv) {
 
   // Change exposure to requested initial value and let user adjust it
   int exposure = options.exposure;
-  int key = 0;
-  while (key != 13) {
+  KeyCode key = 0;
+  while (key != KeyCode::ENTER) {
     int old_exposure = exposure;
     cv::Mat frame;
     grabber->grabFrame(frame);
     key = imshow(frame, 30);
-    if (key == 43 || key == 65362 || key == 65363)
+    if (key == KeyCode::PLUS || key == KeyCode::ARROW_UP || key == KeyCode::ARROW_RIGHT)
       ++exposure;
-    else if (key == 45 || key == 65364 || key == 65361)
+    if (key == KeyCode::MINUS || key == KeyCode::ARROW_DOWN || key == KeyCode::ARROW_LEFT)
       --exposure;
     if (old_exposure != exposure) {
       if (exposure > range.second)
