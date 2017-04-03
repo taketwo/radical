@@ -68,21 +68,33 @@ class MeanImage {
 
   /** Get the current mean image.
     *
-    * Accumulation happens in double-precision. The user has a choice either to get these numbers as is, or to convert
-    * to the original type of the images. */
+    * Accumulation happens in double-precision floating point numbers. The user has a choice either to get these numbers
+    * as is, or to convert to the original type of the images.
+    *
+    * Note: returned matrix is only valid until the next add() or addWeighted() call, afterwards the memory it points to
+    * will be reused. */
   cv::Mat getMean(bool as_original_type = true);
 
   /** Get the current variance of the mean image.
     *
-    * Will be filled with zeros if variance computation is not enabled. */
+    * Will be filled with zeros if variance computation is not enabled.
+    *
+    * Note: returned matrix is only valid until the next add() or addWeighted() call, afterwards the memory it points to
+    * will be reused. */
   cv::Mat getVariance();
 
   /** Get the inverse of the current variance of the mean image.
     *
-    * Will be filled with zeros if variance computation is not enabled. */
+    * Will be filled with zeros if variance computation is not enabled.
+    *
+    * Note: returned matrix is only valid until the next add() or addWeighted() call, afterwards the memory it points to
+    * will be reused. */
   cv::Mat getVarianceInverse();
 
   /** Get the number of accumulated samples per pixel.
+    *
+    * Note: returned matrix is only valid until the next add() or addWeighted() call, afterwards the memory it points to
+    * will be reused.
     *
     * \param[in] normalize if set, the number of collected samples will be divided by the target number of samples,
     * producing a number between 0 and 1. Has no effect if unlitimed accumulation was selected at construction time. */
@@ -104,10 +116,12 @@ class MeanImage {
   // Storage to avoid reallocations
   cv::Mat image_minus_M_;
   cv::Mat image_minus_M_new_;
-  cv::Mat get_mean_output_;
   cv::Mat weights_32f_;
   cv::Mat mask_;
+  cv::Mat get_mean_output_;
   cv::Mat get_num_samples_output_;
+  cv::Mat get_variance_output_;
+  cv::Mat get_inverse_variance_output_;
   cv::Mat zeros_mask_;
   cv::Mat nonzeros_mask_;
 };

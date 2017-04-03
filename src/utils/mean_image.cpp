@@ -124,7 +124,8 @@ cv::Mat MeanImage::getVariance() {
     return cv::Mat();
   if (!compute_variance_)
     return S_;
-  return S_ / W_;
+  cv::divide(S_, W_, get_variance_output_);
+  return get_variance_output_;
 }
 
 cv::Mat MeanImage::getVarianceInverse() {
@@ -135,7 +136,8 @@ cv::Mat MeanImage::getVarianceInverse() {
   // Workaround for matrix element-wise division producing Infs instead of zeros
   // See: https://github.com/opencv/opencv/issues/8413#issuecomment-287475833
   cv::setUseOptimized(false);
-  return W_ / S_;
+  cv::divide(W_, S_, get_inverse_variance_output_);
+  return get_inverse_variance_output_;
 }
 
 cv::Mat MeanImage::getNumSamples(bool normalize) {

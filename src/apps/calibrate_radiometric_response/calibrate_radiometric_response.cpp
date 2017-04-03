@@ -149,7 +149,7 @@ class DataCollection {
     if (!mean_.add(dilateOverexposedAreas(frame)))
         return false;
 
-    dataset_->insert(exposure_, mean_.getMean());
+    dataset_->insert(exposure_, mean_.getMean().clone());
 
     if (--images_to_accumulate_ > 0)
       return false;
