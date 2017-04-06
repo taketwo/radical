@@ -28,7 +28,7 @@
 
 #include <radical/polynomial_vignetting_model.h>
 
-#include "brewer_colors.h"
+#include "utils/colors.h"
 
 template <unsigned int Degree>
 inline cv::Mat plotPolynomialVignettingModel(const radical::PolynomialVignettingModel<Degree>& pvm,
@@ -55,11 +55,11 @@ inline cv::Mat plotPolynomialVignettingModel(const radical::PolynomialVignetting
   for (size_t i = 0; i < 3; ++i) {
     auto cx = coeff[0][i];
     auto cy = coeff[1][i];
-    cv::circle(plot, cv::Point(cx * scale_x, cy * scale_y), 7, COLORS[i], -1);
+    cv::circle(plot, cv::Point(cx * scale_x, cy * scale_y), 7, utils::colors::BGR[i], -1);
     auto radius = 0.0;
     while (radius < max_radius) {
       auto v = pvm(cx + radius, cy)[i];
-      cv::circle(plot, cv::Point(radius * radius_scale, (1.0 - v) * plot_size.height), 2, COLORS[i], -1);
+      cv::circle(plot, cv::Point(radius * radius_scale, (1.0 - v) * plot_size.height), 2, utils::colors::BGR[i], -1);
       radius += radius_step;
     }
   }

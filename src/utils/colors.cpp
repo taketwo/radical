@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright (c) 2016 Sergey Alexandrov
+ * Copyright (c) 2016-2017 Sergey Alexandrov
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to
@@ -20,8 +20,13 @@
  * SOFTWARE.
  ******************************************************************************/
 
-#pragma once
+#include "utils/colors.h"
 
-#include <opencv2/core/core.hpp>
+namespace utils {
 
-static const cv::Scalar COLORS[] = {{228, 26, 28}, {77, 175, 74}, {55, 126, 184}};
+namespace colors {
+
+const cv::Scalar BGR[3] = {{180, 120, 31}, {44, 160, 51}, {28, 26, 227}};
+const cv::Scalar BGR_LIGHT[3] = {{227, 206, 166}, {138, 223, 178}, {153, 154, 251}};
+}
+}
