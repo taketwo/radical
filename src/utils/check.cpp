@@ -80,4 +80,11 @@ const Check& Check::hasChannels(int channels) const {
   return *this;
 }
 
+const Check& Check::hasDepth(int depth) const {
+  if (m_.get().depth() != depth)
+    BOOST_THROW_EXCEPTION(MatException(name_ + " does not have expected depth")
+                          << MatException::ExpectedDepth(depth) << MatException::ActualDepth(m_.get().depth()));
+  return *this;
+}
+
 }  // namespace utils

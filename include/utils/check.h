@@ -48,6 +48,8 @@ class Check {
 
   const Check& hasChannels(int channels) const;
 
+  const Check& hasDepth(int depth) const;
+
  private:
   std::string name_;
   std::reference_wrapper<const cv::_InputArray> m_;
