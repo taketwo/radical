@@ -1,16 +1,19 @@
-find_package(OpenNI2)
-find_package(RealSense 1.9.7)
-
 set(GRABBERS_SRC grabber.cpp)
 
-if(OPENNI2_FOUND)
-  list(APPEND GRABBERS_SRC openni2_grabber.cpp)
-  list(APPEND GRABBERS_DEPS openni2)
+if(WITH_OPENNI2)
+  find_package(OpenNI2)
+  if(OPENNI2_FOUND)
+    list(APPEND GRABBERS_SRC openni2_grabber.cpp)
+    list(APPEND GRABBERS_DEPS openni2)
+  endif()
 endif()
 
-if(REALSENSE_FOUND)
-  list(APPEND GRABBERS_SRC realsense_grabber.cpp)
-  list(APPEND GRABBERS_DEPS realsense)
+if(WITH_REALSENSE)
+  find_package(RealSense 1.9.7)
+  if(REALSENSE_FOUND)
+    list(APPEND GRABBERS_SRC realsense_grabber.cpp)
+    list(APPEND GRABBERS_DEPS realsense)
+  endif()
 endif()
 
 add_library(grabbers ${GRABBERS_SRC})

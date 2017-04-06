@@ -31,8 +31,10 @@ endif()
 
 add_definitions(-Wall -Wextra -std=c++11)
 
-RADICAL_OPTION(BUILD_APPS                        "Build apps"                ON)
-RADICAL_OPTION(BUILD_TESTS                       "Build tests"              OFF)
+RADICAL_OPTION(BUILD_APPS            "Build apps"                                      ON)
+RADICAL_OPTION(BUILD_TESTS           "Build tests"                                    OFF)
+RADICAL_OPTION(WITH_OPENNI2          "Enable support for OpenNI2 cameras"              ON)
+RADICAL_OPTION(WITH_REALSENSE        "Enable support for RealSense cameras"            ON)
 
 find_package(OpenCV COMPONENTS core imgproc REQUIRED)
 
