@@ -28,9 +28,15 @@
 
 namespace utils {
 
-void plotRadiometricResponse(const cv::Mat& response, cv::Mat& canvas);
+/** Plot (inverse) radiometric response (specified as a LUT) to a given canvas.
+  *
+  * If the response has a single channel, then \arg color should specify the color of the plotted curve. If the response
+  * has three channels, then \arg color will be ignored and the curves will be plotted with Brue, Green, Red colors
+  * respectively. */
+void plotRadiometricResponse(const cv::Mat& response, cv::Mat& canvas, const cv::Scalar& color = {0, 0, 0, 0});
 
-cv::Mat plotRadiometricResponse(const cv::Mat& response, cv::Size size = {512, 512});
+cv::Mat plotRadiometricResponse(const cv::Mat& response, const cv::Size& size = {512, 512},
+                                const cv::Scalar& color = {0, 0, 0, 0});
 
 cv::Mat plotRadiometricResponse(const radical::RadiometricResponse& rr, cv::Size size = {512, 512});
 }

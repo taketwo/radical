@@ -30,31 +30,35 @@
 
 namespace utils {
 
-void plotRadiometricResponse(const cv::Mat& response, cv::Mat& canvas) {
-  Check("Radiometric response", response).hasType(CV_32FC3).hasSize(256);
+void plotRadiometricResponse(const cv::Mat& response, cv::Mat& canvas, const cv::Scalar& color) {
+  Check("Radiometric response", response).hasDepth(CV_32F).hasSize(256);
   Check("Canvas", canvas).notEmpty().hasType(CV_8UC3);
 
   double min;
   double max;
   cv::minMaxLoc(response.reshape(1), &min, &max);
 
-  auto size = canvas.size();
-  float x_scale = static_cast<float>(size.width) / 256;
-  float y_scale = static_cast<float>(size.height) / (max - min);
+  float x_scale = static_cast<float>(canvas.cols) / 256;
+  float y_scale = static_cast<float>(canvas.rows) / (max - min);
 
-  for (size_t i = 0; i < 256; ++i) {
-    auto pt = response.at<cv::Vec3f>(i);
-    for (int c = 0; c < 3; ++c)
-      cv::circle(canvas, cv::Point(i * x_scale, size.height - pt[c] * y_scale), std::ceil(x_scale),
-                 utils::colors::BGR[c], -1);
+  auto circle = [&canvas, x_scale, y_scale](float x, float y, const cv::Scalar& color) {
+    cv::circle(canvas, cv::Point(x * x_scale, canvas.size().height - y * y_scale), std::ceil(x_scale), color, -1);
+  };
+
+  for (int i = 0; i < 256; ++i) {
+    if (response.channels() == 1)
+      circle(i, response.at<float>(i), color);
+    else
+      for (int c = 0; c < response.channels(); ++c)
+        circle(i, response.at<cv::Vec3f>(i)[c], utils::colors::BGR[c]);
   }
 }
 
-cv::Mat plotRadiometricResponse(const cv::Mat& response, cv::Size size) {
+cv::Mat plotRadiometricResponse(const cv::Mat& response, const cv::Size& size, const cv::Scalar& color) {
   BOOST_ASSERT(size.area() > 0);
   cv::Mat canvas(size, CV_8UC3);
   canvas.setTo(255);
-  plotRadiometricResponse(response, canvas);
+  plotRadiometricResponse(response, canvas, color);
   return canvas;
 }
 
