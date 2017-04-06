@@ -75,7 +75,7 @@ int main(int argc, const char** argv) {
   std::cout << "Loaded radiometric response from file \"" << options.r_response << "\"" << std::endl;
   std::cout << "Irradiance range: " << min_radiance << " - " << max_radiance << std::endl;
 
-  auto plot = plotRadiometricResponse(rr);
+  auto plot = utils::plotRadiometricResponse(rr);
 
   if (options.save) {
     auto output = options.r_response + ".png";

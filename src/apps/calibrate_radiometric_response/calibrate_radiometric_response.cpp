@@ -355,7 +355,7 @@ int main(int argc, const char** argv) {
       cv::Mat response_double;
       cv::merge(response_channels, response_double);
       response_double.convertTo(response, CV_32FC3);
-      imshow(plotRadiometricResponse(response), 1);
+      imshow(utils::plotRadiometricResponse(response), 1);
 
       bool converged = true;
       for (size_t c = 0; c < opts.size(); ++c)
@@ -386,7 +386,7 @@ int main(int argc, const char** argv) {
   radical::RadiometricResponse rr(response);
   rr.save(options.output);
 
-  imshow(plotRadiometricResponse(rr));
+  imshow(utils::plotRadiometricResponse(rr));
 
   return 0;
 }
