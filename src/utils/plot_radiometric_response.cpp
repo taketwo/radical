@@ -41,8 +41,8 @@ void plotRadiometricResponse(const cv::Mat& response, cv::Mat& canvas, const cv:
   float x_scale = static_cast<float>(canvas.cols) / 256;
   float y_scale = static_cast<float>(canvas.rows) / (max - min);
 
-  auto circle = [&canvas, x_scale, y_scale](float x, float y, const cv::Scalar& color) {
-    cv::circle(canvas, cv::Point(x * x_scale, canvas.size().height - y * y_scale), std::ceil(x_scale), color, -1);
+  auto circle = [&canvas, x_scale, y_scale, min](float x, float y, const cv::Scalar& color) {
+    cv::circle(canvas, cv::Point(x * x_scale, canvas.size().height - (y - min) * y_scale), std::ceil(x_scale), color, -1);
   };
 
   for (int i = 0; i < 256; ++i) {
