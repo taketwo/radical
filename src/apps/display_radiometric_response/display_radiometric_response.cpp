@@ -42,7 +42,7 @@ class Options : public OptionsBase {
  protected:
   virtual void addOptions(boost::program_options::options_description& desc) override {
     namespace po = boost::program_options;
-    desc.add_options()("save,s", po::bool_switch(&save), "Save to PNG file");
+    desc.add_options()("save,s", po::bool_switch(&save), "Save to PNG file and exit");
   }
 
   virtual void addPositional(boost::program_options::options_description& desc,
@@ -55,10 +55,10 @@ class Options : public OptionsBase {
   virtual void printHelp() override {
     std::cout << "Usage: display_radiometric_response [options] <radiometric-response>" << std::endl;
     std::cout << "" << std::endl;
-    std::cout << "Visualizes radiometric response stored in a calibration file." << std::endl;
+    std::cout << "Plots radiometric response stored in a calibration file and displays it on the screen." << std::endl;
     std::cout << "" << std::endl;
-    std::cout << "With the --save option the displayed image will also be written to the disk." << std::endl;
-    std::cout << "File name is constructed by appending \".png\" to the input file path." << std::endl;
+    std::cout << "With the --save option the plot will be written to the disk instead of showing on the screen." << std::endl;
+    std::cout << "Output file name is constructed by appending \".png\" to the input file path." << std::endl;
     std::cout << "" << std::endl;
   }
 };
@@ -81,10 +81,10 @@ int main(int argc, const char** argv) {
     auto output = options.r_response + ".png";
     cv::imwrite(output, plot);
     std::cout << "Saved radiometric response visualization to file \"" << output << "\"" << std::endl;
+  } else {
+    cv::imshow("Radiometric response", plot);
+    cv::waitKey(-1);
   }
-
-  cv::imshow("Radiometric response", plot);
-  cv::waitKey(-1);
 
   return 0;
 }
