@@ -7,6 +7,16 @@ endif()
 find_package(OpenCV COMPONENTS ${OpenCV_COMPONENTS} REQUIRED)
 find_package(Boost COMPONENTS program_options filesystem system REQUIRED)
 
+if(WITH_CERES)
+  find_package(Ceres CONFIG)
+  if(Ceres_FOUND)
+    set_target_properties(ceres
+      PROPERTIES
+        INTERFACE_INCLUDE_DIRECTORIES "${CERES_INCLUDE_DIRS}"
+        INTERFACE_COMPILE_DEFINITIONS "HAVE_CERES")
+  endif()
+endif()
+
 include_directories(${CMAKE_CURRENT_LIST_DIR})
 
 macro(APP_ADD _name)
@@ -27,14 +37,19 @@ macro(APP_ADD _name)
   endif()
   if(_enabled)
     set(_executable ${_name})
+    foreach(_lib ${APP_ADD_LINK_WITH})
+      if(TARGET ${_lib})
+        list(APPEND _link_with ${_lib})
+      endif()
+    endforeach()
     foreach(_lib ${_opencv_link})
-      list(APPEND APP_ADD_LINK_WITH "opencv_${_lib}")
+      list(APPEND _link_with "opencv_${_lib}")
     endforeach()
     file(GLOB _sources *.cpp)
     add_executable(${_executable} ${_sources})
     target_link_libraries(${_executable}
       ${LIB_NAME}
-      ${APP_ADD_LINK_WITH}
+      ${_link_with}
       ${Boost_LIBRARIES}
     )
   endif()
