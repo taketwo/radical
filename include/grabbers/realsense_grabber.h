@@ -48,6 +48,12 @@ class RealSenseGrabber : public Grabber {
 
   virtual std::pair<int, int> getExposureRange() const override;
 
+  virtual void setGain(int gain) override;
+
+  virtual int getGain() const override;
+
+  virtual std::pair<int, int> getGainRange() const override;
+
   virtual std::string getCameraModelName() const override;
 
   virtual std::string getCameraSerialNumber() const override;

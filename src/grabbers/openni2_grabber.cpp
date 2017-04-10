@@ -156,6 +156,20 @@ std::pair<int, int> OpenNI2Grabber::getExposureRange() const {
   return {1, 150};
 }
 
+void OpenNI2Grabber::setGain(int gain) {
+  p->color_stream.getCameraSettings()->setGain(gain);
+}
+
+int OpenNI2Grabber::getGain() const {
+  return p->color_stream.getCameraSettings()->getGain();
+}
+
+std::pair<int, int> OpenNI2Grabber::getGainRange() const {
+  // These values were found experimentally.
+  // The camera seems to ignore requests to set gain outside of this range.
+  return {100, 1587};
+}
+
 std::string OpenNI2Grabber::getCameraModelName() const {
   std::string name = p->device.getDeviceInfo().getName();
   boost::algorithm::to_lower(name);

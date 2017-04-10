@@ -60,6 +60,12 @@ class Grabber {
 
   virtual std::pair<int, int> getExposureRange() const = 0;
 
+  virtual void setGain(int gain) = 0;
+
+  virtual int getGain() const = 0;
+
+  virtual std::pair<int, int> getGainRange() const = 0;
+
   virtual std::string getCameraModelName() const = 0;
 
   virtual std::string getCameraSerialNumber() const = 0;

@@ -125,6 +125,20 @@ std::pair<int, int> RealSenseGrabber::getExposureRange() const {
   return {min, max};
 }
 
+void RealSenseGrabber::setGain(int gain) {
+  p->device->set_option(rs::option::color_gain, gain);
+}
+
+int RealSenseGrabber::getGain() const {
+  return p->device->get_option(rs::option::color_gain);
+}
+
+std::pair<int, int> RealSenseGrabber::getGainRange() const {
+  double min, max, step;
+  p->device->get_option_range(rs::option::color_gain, min, max, step);
+  return {min, max};
+}
+
 std::string RealSenseGrabber::getCameraModelName() const {
   std::string expected_prefix = "Intel RealSense ";
   std::string name = p->device->get_name();
