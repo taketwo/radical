@@ -39,29 +39,22 @@
 
 #include "grabbers/grabber.h"
 
-#include "utils/mean_image.h"
 #include "utils/plot_radiometric_response.h"
 #include "utils/program_options.h"
 
 #include "dataset.h"
+#include "dataset_collection.h"
 #include "optimization.h"
 
 class Options : public OptionsBase {
  public:
   std::string data_source = "";
   std::string output;
-  unsigned int valid_min = 1;
-  unsigned int valid_max = 254;
-  int exposure_min;
-  int exposure_max;
-  float exposure_factor;
-  unsigned int num_average_frames = 5;
-  unsigned int num_images = 5;
-  unsigned int exposure_control_lag = 10;
   double convergence_threshold = 1e-5;
   std::string calibration_method = "engel";
   bool no_visualization = false;
   std::string save_dataset = "";
+  DatasetCollection::Parameters dc;
 
  protected:
   virtual void addOptions(boost::program_options::options_description& desc) override {
@@ -69,10 +62,6 @@ class Options : public OptionsBase {
     desc.add_options()("output,o", po::value<std::string>(&output),
                        "Output filename with calibrated response function (default: camera model name + \".\" + camera "
                        "serial number + \".crf\" suffix)");
-    desc.add_options()("valid-min", po::value<unsigned int>(&valid_min)->default_value(valid_min),
-                       "Minimum valid intensity value of the sensor");
-    desc.add_options()("valid-max", po::value<unsigned int>(&valid_max)->default_value(valid_max),
-                       "Maximum valid intensity value of the sensor");
     desc.add_options()("threshold,t", po::value<double>(&convergence_threshold),
                        "Threshold for energy update after which convergence is declared (default: 1e-5)");
     desc.add_options()("method,m", po::value<std::string>(&calibration_method),
@@ -82,20 +71,28 @@ class Options : public OptionsBase {
     desc.add_options()("save-dataset,s", po::value<std::string>(&save_dataset),
                        "Save collected dataset in the given directory");
 
-    boost::program_options::options_description dc("Data collection");
-    dc.add_options()("exposure-min", po::value<int>(&exposure_min),
-                     "Minimum exposure (default: depends on the camera)");
-    dc.add_options()("exposure-max", po::value<int>(&exposure_max),
-                     "Maximum exposure (default: depends on the camera)");
-    dc.add_options()("factor,f", po::value<float>(&exposure_factor),
-                     "Multiplication factor for exposure (default: to cover desired exposure range in 30 steps)");
-    dc.add_options()("average,a", po::value<unsigned int>(&num_average_frames)->default_value(num_average_frames),
-                     "Number of consecutive frames to average into each image");
-    dc.add_options()("images,i", po::value<unsigned int>(&num_images)->default_value(num_images),
-                     "Number of images to take at each exposure setting");
-    dc.add_options()("lag,l", po::value<unsigned int>(&exposure_control_lag)->default_value(exposure_control_lag),
-                     "Number of frames to skip after changing exposure setting");
-    desc.add(dc);
+    boost::program_options::options_description dcopt("Data collection");
+    dcopt.add_options()("exposure-min", po::value<int>(&dc.exposure_min),
+                        "Minimum exposure (default: depends on the camera)");
+    dcopt.add_options()("exposure-max", po::value<int>(&dc.exposure_max),
+                        "Maximum exposure (default: depends on the camera)");
+    dcopt.add_options()("factor,f", po::value<float>(&dc.exposure_factor),
+                        "Multiplication factor for exposure (default: to cover desired exposure range in 30 steps)");
+    dcopt.add_options()("average,a",
+                        po::value<unsigned int>(&dc.num_average_frames)->default_value(dc.num_average_frames),
+                        "Number of consecutive frames to average into each image");
+    dcopt.add_options()("images,i", po::value<unsigned int>(&dc.num_images)->default_value(dc.num_images),
+                        "Number of images to take at each exposure setting");
+    dcopt.add_options()("lag,l",
+                        po::value<unsigned int>(&dc.exposure_control_lag)->default_value(dc.exposure_control_lag),
+                        "Number of frames to skip after changing exposure setting");
+    dcopt.add_options()("valid-min",
+                        po::value<unsigned int>(&dc.valid_intensity_min)->default_value(dc.valid_intensity_min),
+                        "Minimum valid intensity value of the sensor");
+    dcopt.add_options()("valid-max",
+                        po::value<unsigned int>(&dc.valid_intensity_max)->default_value(dc.valid_intensity_max),
+                        "Maximum valid intensity value of the sensor");
+    desc.add(dcopt);
   }
 
   virtual void addPositional(boost::program_options::options_description& desc,
@@ -118,76 +115,6 @@ class Options : public OptionsBase {
     std::cout << "irradiance computation, however radiometric response is estimated for them as well." << std::endl;
     std::cout << "" << std::endl;
   }
-};
-
-class DataCollection {
- public:
-  using Ptr = std::shared_ptr<DataCollection>;
-  using ExposureRange = std::pair<int, int>;
-
-  DataCollection(grabbers::Grabber::Ptr grabber, ExposureRange range, float factor, unsigned int average_frames,
-                 unsigned int images, unsigned int control_lag, unsigned int valid_max)
-  : grabber_(grabber), range_(range), factor_(factor), lag_(control_lag), mean_(false, average_frames), dataset_(new Dataset),
-    num_images_(images), max_valid_intensity_(valid_max) {
-    BOOST_ASSERT(range.first <= range.second);
-    BOOST_ASSERT(factor > 1.0);
-    exposure_ = range_.first;
-    skip_frames_ = lag_;
-    images_to_accumulate_ = num_images_;
-    std::cout << "Starting data collection" << std::endl;
-    std::cout << "Exposure range: " << range.first << " → " << range.second << " with factor " << factor << std::endl;
-    std::cout << "Exposure: " << exposure_ << std::flush;
-  }
-
-  bool addFrame(const cv::Mat& frame) {
-    if (skip_frames_-- > 0)
-      return false;
-
-    if (!mean_.add(dilateOverexposedAreas(frame)))
-        return false;
-
-    dataset_->insert(exposure_, mean_.getMean().clone());
-
-    if (--images_to_accumulate_ > 0)
-      return false;
-
-    exposure_ += std::ceil(exposure_ * (factor_ - 1.0));
-    skip_frames_ = lag_;
-    images_to_accumulate_ = num_images_;
-    grabber_->setExposure(exposure_);
-    std::cout << " " << exposure_ << std::flush;
-
-    if (exposure_ > range_.second) {
-      std::cout << std::endl;
-      return true;
-    }
-    return false;
-  }
-
-  Dataset::Ptr getDataset() const {
-    return dataset_;
-  }
-
- private:
-  cv::Mat dilateOverexposedAreas(const cv::Mat& image) {
-    static const cv::Mat morph = cv::getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(5, 5), cv::Point(2, 2));
-    cv::Mat dilated;
-    cv::threshold(image, dilated, max_valid_intensity_, 255, cv::THRESH_BINARY);
-    cv::dilate(dilated, dilated, morph);
-    return cv::max(image, dilated);
-  }
-
-  grabbers::Grabber::Ptr grabber_;
-  ExposureRange range_;
-  float factor_;
-  const unsigned int lag_;
-  utils::MeanImage mean_;
-  int exposure_;
-  Dataset::Ptr dataset_;
-  int skip_frames_;
-  const unsigned int num_images_;
-  int images_to_accumulate_;
-  unsigned int max_valid_intensity_;
 };
 
 int main(int argc, const char** argv) {
@@ -227,33 +154,30 @@ int main(int argc, const char** argv) {
     if (!options("output"))
       options.output = grabber->getCameraUID() + ".crf";
     if (!options("exposure-min"))
-      options.exposure_min = grabber->getExposureRange().first;
+      options.dc.exposure_min = grabber->getExposureRange().first;
     if (!options("exposure-max"))
-      options.exposure_max = grabber->getExposureRange().second;
+      options.dc.exposure_max = grabber->getExposureRange().second;
     if (!options("factor"))
-      options.exposure_factor = std::pow(options.exposure_max / options.exposure_min, 1.0 / 30);
+      options.dc.exposure_factor = std::pow(options.dc.exposure_max / options.dc.exposure_min, 1.0 / 30);
 
     // Change exposure to requested min value, wait some time until it works
     cv::Mat frame;
     for (size_t i = 0; i < 100; ++i) {
       grabber->grabFrame(frame);
       imshow(frame, 30);
-      grabber->setExposure(options.exposure_min);
+      grabber->setExposure(options.dc.exposure_min);
     }
 
-    DataCollection::Ptr data_collection;
-    data_collection.reset(new DataCollection(grabber, {options.exposure_min, options.exposure_max},
-                                             options.exposure_factor, options.num_average_frames, options.num_images,
-                                             options.exposure_control_lag, options.valid_max));
+    DatasetCollection data_collection(grabber, options.dc);
 
     while (grabber->hasMoreFrames()) {
       grabber->grabFrame(frame);
       imshow(frame, 30);
-      if (data_collection->addFrame(frame))
+      if (data_collection.addFrame(frame))
         break;
     }
 
-    data = data_collection->getDataset();
+    data = data_collection.getDataset();
   }
 
   cv::Mat response;
@@ -281,7 +205,7 @@ int main(int argc, const char** argv) {
 
     std::vector<Optimization> opts;
     for (const auto& data : data_channels)
-      opts.emplace_back(&data, options.valid_min, options.valid_max);
+      opts.emplace_back(&data, options.dc.valid_intensity_min, options.dc.valid_intensity_max);
 
     boost::format fmt_header1("| %=5s | %=72s |");
     boost::format fmt_header2("| %=5s | %=22s | %=22s | %=22s |");
