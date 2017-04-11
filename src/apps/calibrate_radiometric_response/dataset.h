@@ -59,14 +59,8 @@ class Dataset {
     * times. This format is compatible with OpenCV built-in CRF calibration algorithms. */
   void asImageAndExposureTimeVectors(std::vector<cv::Mat>& images, std::vector<int>& exposure_times) const;
 
-  /** Dataset formats supported by save/load functions. */
-  enum Format {
-    PNG,  ///< Images are stored as PNG files (compressed)
-    MAT,  ///< Images are stored as binary MAT files (raw)
-  };
-
-  /** Save the dataset in a given format to the disk. */
-  void save(const std::string& path, Format format) const;
+  /** Save the dataset to the disk. */
+  void save(const std::string& path) const;
 
   /** Load a dataset from the disk. */
   static Ptr load(const std::string& path);

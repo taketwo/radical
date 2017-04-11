@@ -21,21 +21,16 @@
  ******************************************************************************/
 
 #include <algorithm>
-#include <map>
 
 #include <boost/assert.hpp>
-
-#if CV_MAJOR_VERSION >= 3
-#include <opencv2/imgcodecs/imgcodecs.hpp>
-#else
-#include <opencv2/highgui/highgui.hpp>
-#endif
 
 #include <opencv2/core/core.hpp>
 
 #include <boost/filesystem.hpp>
 #include <boost/format.hpp>
 #include <boost/lexical_cast.hpp>
+
+#include <radical/exceptions.h>
 
 #include "utils/mat_io.h"
 
@@ -106,20 +101,16 @@ void Dataset::asImageAndExposureTimeVectors(std::vector<cv::Mat>& images, std::v
   }
 }
 
-void Dataset::save(const std::string& path, Format format) const {
+void Dataset::save(const std::string& path) const {
   namespace fs = boost::filesystem;
   fs::path dir(path);
   if (!fs::exists(dir))
     fs::create_directories(dir);
-  boost::format fmt("%1$06d_%2$03d.%3$s");
-  auto extension = format == PNG ? "png" : "mat";
+  boost::format fmt("%1$06d_%2$03d.mat");
   for (const auto& time_images : data_)
     for (size_t i = 0; i < time_images.second.size(); ++i) {
-      auto filename = (dir / boost::str(fmt % time_images.first % i % extension)).native();
-      if (format == PNG)
-        cv::imwrite(filename, time_images.second[i]);
-      else
-        utils::writeMat(filename, time_images.second[i]);
+      auto filename = (dir / boost::str(fmt % time_images.first % i)).native();
+      utils::writeMat(filename, time_images.second[i]);
     }
 }
 
@@ -134,12 +125,10 @@ Dataset::Ptr Dataset::load(const std::string& path) {
       try {
         auto exposure = boost::lexical_cast<int>(stem.substr(0, 6));
         cv::Mat image;
-        if (extension == ".png")
-          image = cv::imread(iter->path().string());
-        else
-          image = utils::readMat(iter->path().string());
+        image = utils::readMat(iter->path().string());
         dataset->insert(exposure, image);
       } catch (boost::bad_lexical_cast& e) {
+      } catch (radical::SerializationException& e) {
       }
     }
     return dataset;
