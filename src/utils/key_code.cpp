@@ -44,10 +44,10 @@ bool KeyCode::operator==(Key key) const {
       return code_lsb_ == 81;
     case Key::PLUS:
       return code_lsb_ == 171     // Numpad (Ubuntu + OpenCV 2)
-             || code_lsb_ == 45;  // Numpad (Ubuntu + OpenCV 3)
+             || code_lsb_ == 43;  // Numpad (Ubuntu + OpenCV 3)
     case Key::MINUS:
       return code_lsb_ == 173     // Numpad (Ubuntu + OpenCV 2)
-             || code_lsb_ == 43;  // Numpad (Ubuntu + OpenCV 3)
+             || code_lsb_ == 45;  // Numpad (Ubuntu + OpenCV 3)
   }
   return false;
 }
