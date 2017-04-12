@@ -48,7 +48,7 @@ class Options : public OptionsBase {
     namespace po = boost::program_options;
     desc.add_options()("fused,f", po::bool_switch(&fused), "Display response channels fused as an RGB image")(
         "colormap,c", po::value<std::string>(&colormap), "Display response channels with color map")(
-        "save,s", po::bool_switch(&save), "Save to PNG file");
+        "save,s", po::bool_switch(&save), "Save to PNG file and exit");
   }
 
   virtual void addPositional(boost::program_options::options_description& desc,
@@ -66,8 +66,9 @@ class Options : public OptionsBase {
     std::cout << "separately (Red, Green, Blue). In the latter mode optionally a color map can be" << std::endl;
     std::cout << "applied (supported only with OpenCV >= 3.0). Color maps: parula, autumn, summer." << std::endl;
     std::cout << "" << std::endl;
-    std::cout << "With the --save option the displayed image will also be written to the disk." << std::endl;
-    std::cout << "File name is constructed by appending \".png\" to the input file path." << std::endl;
+    std::cout << "With the --save option the plotted response will be written to the disk instead" << std::endl;
+    std::cout << "of showing on the screen. Output file name is constructed by appending \".png\"" << std::endl;
+    std::cout << "to the input file path." << std::endl;
     std::cout << "" << std::endl;
   }
 
@@ -94,12 +95,9 @@ int main(int argc, const char** argv) {
     return 1;
 
   radical::VignettingResponse::Ptr vr;
-  try
-  {
+  try {
     vr.reset(new radical::VignettingResponse(options.v_response));
-  }
-  catch (radical::SerializationException& e)
-  {
+  } catch (radical::SerializationException& e) {
     std::cerr << e.what() << std::endl;
     return 1;
   }
@@ -143,10 +141,10 @@ int main(int argc, const char** argv) {
     auto output = options.v_response + ".png";
     cv::imwrite(output, response);
     std::cout << "Saved vignetting response visualization to file \"" << output << "\"" << std::endl;
+  } else {
+    cv::imshow("Vignetting response", response);
+    cv::waitKey(-1);
   }
-
-  cv::imshow("Vignetting response", response);
-  cv::waitKey(-1);
 
   return 0;
 }
