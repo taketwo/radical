@@ -92,6 +92,8 @@ class Options : public OptionsBase {
     dcopt.add_options()("valid-max",
                         po::value<unsigned int>(&dc.valid_intensity_max)->default_value(dc.valid_intensity_max),
                         "Maximum valid intensity value of the sensor");
+    dcopt.add_options()("bloom-radius", po::value<unsigned int>(&dc.bloom_radius)->default_value(dc.bloom_radius),
+                        "Radius of the blooming effect");
     desc.add(dcopt);
   }
 

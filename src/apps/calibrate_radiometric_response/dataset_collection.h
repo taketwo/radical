@@ -37,6 +37,7 @@ class DatasetCollection {
     unsigned int num_images = 5;
     unsigned int valid_intensity_min = 1;
     unsigned int valid_intensity_max = 254;
+    unsigned int bloom_radius = 25;
   };
 
   DatasetCollection(grabbers::Grabber::Ptr grabber, const Parameters& params);
@@ -46,14 +47,16 @@ class DatasetCollection {
   Dataset::Ptr getDataset() const;
 
  private:
-  cv::Mat dilateOverexposedAreas(const cv::Mat& image);
+  cv::Mat computeSaturationMask(const cv::Mat& image);
 
   grabbers::Grabber::Ptr grabber_;
   Parameters params_;
 
   Dataset::Ptr dataset_;
   utils::MeanImage mean_;
+  utils::MeanImage mean_mask_;
   int exposure_;
   int skip_frames_;
   int images_to_accumulate_;
+  const cv::Mat morph_;
 };

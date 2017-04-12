@@ -29,7 +29,9 @@
 #include "dataset_collection.h"
 
 DatasetCollection::DatasetCollection(grabbers::Grabber::Ptr grabber, const Parameters& params)
-: grabber_(grabber), params_(params), dataset_(new Dataset), mean_(false, params.num_average_frames) {
+: grabber_(grabber), params_(params), dataset_(new Dataset), mean_(false, params.num_average_frames),
+  mean_mask_(false, params.num_average_frames),
+  morph_(cv::getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(params_.bloom_radius * 2, params_.bloom_radius * 2))) {
   BOOST_ASSERT(params_.exposure_min <= params_.exposure_max);
   BOOST_ASSERT(params_.exposure_factor > 1.0);
   exposure_ = params_.exposure_min;
@@ -45,10 +47,16 @@ bool DatasetCollection::addFrame(const cv::Mat& frame) {
   if (skip_frames_-- > 0)
     return false;
 
-  if (!mean_.add(dilateOverexposedAreas(frame)))
+  auto averaging_done = mean_.add(frame);
+  mean_mask_.add(computeSaturationMask(frame));
+  if (!averaging_done)
     return false;
 
-  dataset_->insert(exposure_, mean_.getMean().clone());
+  auto mask = mean_mask_.getMean();  // everything below 255 was saturated in at least one frame
+  cv::threshold(mask, mask, 254, 255, cv::THRESH_BINARY_INV);
+  auto mean = mean_.getMean().clone();
+  mean.reshape(1, 1).setTo(0, mask.reshape(1, 1));  // reshape to single-channel, otherwise masking will not work
+  dataset_->insert(exposure_, mean);
 
   if (--images_to_accumulate_ > 0)
     return false;
@@ -70,10 +78,17 @@ Dataset::Ptr DatasetCollection::getDataset() const {
   return dataset_;
 }
 
-cv::Mat DatasetCollection::dilateOverexposedAreas(const cv::Mat& image) {
-  static const cv::Mat morph = cv::getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(5, 5), cv::Point(2, 2));
-  cv::Mat dilated;
-  cv::threshold(image, dilated, params_.valid_intensity_max, 255, cv::THRESH_BINARY);
-  cv::dilate(dilated, dilated, morph);
-  return cv::max(image, dilated);
+cv::Mat DatasetCollection::computeSaturationMask(const cv::Mat& image) {
+  static std::vector<cv::Mat> mask_channels;
+  cv::Mat mask;
+  // Set overexposed (per channel) pixels to 0, everything else to 255
+  cv::threshold(image, mask, params_.valid_intensity_max, 255, cv::THRESH_BINARY_INV);
+  cv::split(mask, mask_channels);
+  // Pixels that overexposed in all channels are set to 0
+  cv::Mat bloom_mask = mask_channels[0] | mask_channels[1] | mask_channels[2];
+  cv::erode(bloom_mask, bloom_mask, morph_);
+  for (auto& mask : mask_channels)
+    mask &= bloom_mask;
+  cv::merge(mask_channels, mask);
+  return mask;
 }
