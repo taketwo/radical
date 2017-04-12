@@ -41,6 +41,7 @@
 #include "utils/plot_polynomial_vignetting_model.h"
 #include "utils/program_options.h"
 #include "utils/key_code.h"
+#include "utils/colors.h"
 
 #include "blob_tracker.h"
 #include "model_fitting.h"
@@ -198,7 +199,7 @@ int main(int argc, const char** argv) {
     cv::cvtColor(m8u, m8u, CV_GRAY2BGR);  // duplicate channels
     for (auto i = m8u.begin<cv::Vec3b>(); i != m8u.end<cv::Vec3b>(); ++i)
       if (*i == cv::Vec3b(255, 255, 255))
-        *i = cv::Vec3b(77, 175, 74);
+        *i = cv::Vec3b(utils::colors::BGR[1][0], utils::colors::BGR[1][1], utils::colors::BGR[1][2]);
 
     auto m = arrangeImagesInGrid({frame, masked, m8u, mean_color}, {2, 2});
     imshow(m, 30);
