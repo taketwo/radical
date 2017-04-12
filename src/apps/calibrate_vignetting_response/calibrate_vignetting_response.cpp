@@ -114,8 +114,6 @@ int main(int argc, const char** argv) {
     return cv::waitKey(w);
   };
 
-  cv::Mat data;
-
   grabbers::Grabber::Ptr grabber;
 
   try {
@@ -145,13 +143,17 @@ int main(int argc, const char** argv) {
 
   auto range = grabber->getExposureRange();
 
+  cv::Mat frame;
+
   // Change exposure to requested initial value and let user adjust it
   int exposure = options.exposure;
   KeyCode key = 0;
   while (key != KeyCode::ENTER) {
     int old_exposure = exposure;
-    cv::Mat frame;
+    cv::Mat mask;
     grabber->grabFrame(frame);
+    maskSaturatedPixels(frame, mask, 1, 0);
+    frame.setTo(utils::colors::BGR[2], mask);
     key = imshow(frame, 30);
     if (key == KeyCode::PLUS || key == KeyCode::ARROW_UP || key == KeyCode::ARROW_RIGHT)
       ++exposure;
@@ -164,6 +166,7 @@ int main(int argc, const char** argv) {
         exposure = range.first;
       else {
         grabber->setExposure(exposure);
+        grabber->setGain(100);
         std::cout << "Exposure: " << old_exposure << " → " << exposure << std::endl;
       }
     }
@@ -174,7 +177,6 @@ int main(int argc, const char** argv) {
   utils::MeanImage mean(false, options.num_samples);
   BlobTracker tracker;
 
-  cv::Mat frame;
   cv::Mat mask;
   cv::Mat irradiance;
   cv::Mat mean_color;
@@ -205,7 +207,7 @@ int main(int argc, const char** argv) {
     imshow(m, 30);
   }
 
-  data = mean.getMean();
+  auto data = mean.getMean();
 
   // Normalize each channel separately
   std::vector<cv::Mat> channels;
