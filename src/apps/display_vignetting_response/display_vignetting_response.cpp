@@ -115,13 +115,12 @@ int main(int argc, const char** argv) {
 
   std::cout << "Display mode: " << mode << std::endl;
 
-  cv::Mat response = vr->getResponse();
+  cv::Mat response;
+  vr->getResponse().convertTo(response, CV_8UC3, 255);
 
   if (!options.fused) {
-    cv::Mat uchars;
-    response.convertTo(uchars, CV_8UC3, 255);
     std::vector<cv::Mat> channels;
-    cv::split(uchars, channels);
+    cv::split(response, channels);
     cv::Mat stacked;
     for (size_t i = 0; i < channels.size(); ++i)
       stacked.push_back(channels[2 - i]);
