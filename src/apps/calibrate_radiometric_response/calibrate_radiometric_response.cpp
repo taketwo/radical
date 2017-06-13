@@ -21,6 +21,8 @@
  ******************************************************************************/
 
 #include <cmath>
+#include <fstream>
+#include <iostream>
 #include <iostream>
 #include <string>
 #include <vector>
@@ -180,14 +182,24 @@ int main(int argc, const char** argv) {
     }
 
     data = data_collection.getDataset();
+
+    if (options.save_dataset != "") {
+      std::cout << "Saving dataset to: " << options.save_dataset << std::endl;
+      data->save(options.save_dataset);
+      std::ofstream file(options.save_dataset + "/DESCRIPTION.txt");
+      if (file.is_open()) {
+        file << "Camera: " << grabber->getCameraUID() << std::endl;
+        file << "Resolution: " << data->getImageSize() << std::endl;
+        file << "Exposure range: " << options.dc.exposure_min << " " << options.dc.exposure_max << std::endl;
+        file << "Exposure factor: " << options.dc.exposure_factor << std::endl;
+        file << "Images per exposure time: " << options.dc.num_images << std::endl;
+        file << "Frames averaged into an image: " << options.dc.num_average_frames << std::endl;
+        file.close();
+      }
+    }
   }
 
   cv::Mat response;
-
-  if (options.save_dataset != "") {
-    std::cout << "Saving dataset to: " << options.save_dataset << std::endl;
-    data->save(options.save_dataset);
-  }
 
   if (options.calibration_method == "debevec") {
 #if CV_MAJOR_VERSION >= 3
