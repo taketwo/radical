@@ -68,10 +68,11 @@ std::vector<cv::Mat> Dataset::getImages(int exposure_time) const {
 }
 
 std::vector<int> Dataset::getExposureTimes() const {
-  std::vector<int> exposures;
-  std::transform(data_.begin(), data_.end(), std::back_inserter(exposures),
+  std::vector<int> times;
+  std::transform(data_.begin(), data_.end(), std::back_inserter(times),
                  [](const std::pair<int, std::vector<cv::Mat>>& p) { return p.first; });
-  return exposures;
+  std::sort(times.begin(), times.end(), std::greater<int>());
+  return times;
 }
 
 std::vector<Dataset> Dataset::splitChannels() const {

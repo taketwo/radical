@@ -152,7 +152,6 @@ void DebevecCalibration::selectPixels() {
 
   locations_.clear();
   auto times = dataset_->getExposureTimes();
-  std::sort(times.begin(), times.end(), std::greater<int>());
 
   const int M = num_pixels_;
   std::vector<int> hist(256, 0);

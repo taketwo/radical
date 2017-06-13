@@ -49,7 +49,7 @@ class Dataset {
   /** Get all images taken at a given exposure time. */
   std::vector<cv::Mat> getImages(int exposure_time) const;
 
-  /** Get all exposure times present in the dataset. */
+  /** Get all exposure times present in the dataset, sorted in ascending order. */
   std::vector<int> getExposureTimes() const;
 
   /** Split a dataset with multi-channel images into multiple single-channel datasets. */
