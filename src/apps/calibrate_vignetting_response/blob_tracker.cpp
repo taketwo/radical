@@ -38,7 +38,7 @@ void BlobTracker::operator()(cv::InputArray _image, cv::OutputArray _mask) {
   cv::Mat mask(image.rows + 2, image.cols + 2, CV_8UC1);
   mask.setTo(0);
   cv::Rect box;
-  cv::floodFill(image, mask, position_, cv::Scalar(255, 40, 20), &box, cv::Scalar(3, 3, 3), cv::Scalar(3, 3, 3),
+  cv::floodFill(image, mask, position_, cv::Scalar(255, 40, 20), &box, cv::Scalar(5, 5, 5), cv::Scalar(5, 5, 5),
                 8 | (255 << 8) | cv::FLOODFILL_MASK_ONLY);
   cv::dilate(mask, mask, dilate_element_);
   cv::erode(mask, mask, erode_element_);
