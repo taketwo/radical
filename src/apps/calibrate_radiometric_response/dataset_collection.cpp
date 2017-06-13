@@ -84,8 +84,10 @@ cv::Mat DatasetCollection::computeSaturationMask(const cv::Mat& image) {
   // Set overexposed (per channel) pixels to 0, everything else to 255
   cv::threshold(image, mask, params_.valid_intensity_max, 255, cv::THRESH_BINARY_INV);
   cv::split(mask, mask_channels);
-  // Pixels that overexposed in all channels are set to 0
-  cv::Mat bloom_mask = mask_channels[0] | mask_channels[1] | mask_channels[2];
+  // Pixels that are overexposed in all channels are set to 0
+  cv::Mat bloom_mask = mask_channels[0];
+  for (size_t i = 1; i < mask_channels.size(); ++i)
+    bloom_mask |= mask_channels[i];
   cv::erode(bloom_mask, bloom_mask, morph_);
   for (auto& mask : mask_channels)
     mask &= bloom_mask;
