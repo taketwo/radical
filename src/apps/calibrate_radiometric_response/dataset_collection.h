@@ -33,8 +33,8 @@ class DatasetCollection {
     int exposure_max;
     float exposure_factor;
     unsigned int exposure_control_lag = 10;
-    unsigned int num_average_frames = 5;
-    unsigned int num_images = 5;
+    unsigned int num_average_frames = 25;
+    unsigned int num_images = 1;
     unsigned int valid_intensity_min = 1;
     unsigned int valid_intensity_max = 254;
     unsigned int bloom_radius = 25;
