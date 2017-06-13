@@ -33,10 +33,6 @@
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 
-#if CV_MAJOR_VERSION >= 3
-#include <opencv2/photo.hpp>  // Debevec calibration
-#endif
-
 #include <radical/radiometric_response.h>
 
 #include "grabbers/grabber.h"
@@ -44,19 +40,31 @@
 #include "utils/plot_radiometric_response.h"
 #include "utils/program_options.h"
 
+#include "calibration.h"
 #include "dataset.h"
 #include "dataset_collection.h"
-#include "optimization.h"
+#include "engel_calibration.h"
+
+#if HAVE_CERES
+#include "debevec_calibration.h"
+#define DEFAULT_METHOD "debevec"
+#else
+#define DEFAULT_METHOD "engel"
+#endif
 
 class Options : public OptionsBase {
  public:
   std::string data_source = "";
   std::string output;
   double convergence_threshold = 1e-5;
-  std::string calibration_method = "engel";
+  std::string calibration_method = DEFAULT_METHOD;
   bool no_visualization = false;
   std::string save_dataset = "";
   DatasetCollection::Parameters dc;
+  unsigned int verbosity = 1;
+  unsigned int num_pixels = 5;
+  bool interactive = false;
+  double smoothing = 50;
 
  protected:
   virtual void addOptions(boost::program_options::options_description& desc) override {
@@ -72,6 +80,12 @@ class Options : public OptionsBase {
                        "Do not visualize the calibration process and results");
     desc.add_options()("save-dataset,s", po::value<std::string>(&save_dataset),
                        "Save collected dataset in the given directory");
+    desc.add_options()("verbosity,v", po::value<unsigned int>(&verbosity)->default_value(verbosity),
+                       "Verbosity level for optimization procedure");
+    desc.add_options()("num-pixels", po::value<unsigned int>(&num_pixels)->default_value(num_pixels),
+                       "Number of pixels");
+    desc.add_options()("interactive", po::bool_switch(&interactive), "Interactive");
+    desc.add_options()("smoothing", po::value<double>(&smoothing)->default_value(smoothing), "Smoothing lambda");
 
     boost::program_options::options_description dcopt("Data collection");
     dcopt.add_options()("exposure-min", po::value<int>(&dc.exposure_min),
@@ -199,117 +213,41 @@ int main(int argc, const char** argv) {
     }
   }
 
-  cv::Mat response;
+  Calibration::Ptr calibration;
 
-  if (options.calibration_method == "debevec") {
-#if CV_MAJOR_VERSION >= 3
+  if (options.calibration_method == "engel") {
+    std::cout << "Starting Engel calibration procedure" << std::endl;
+    auto cal = std::make_shared<EngelCalibration>();
+    cal->setConvergenceThreshold(options.convergence_threshold);
+    calibration = cal;
+  } else if (options.calibration_method == "debevec") {
+#if HAVE_CERES
     std::cout << "Starting Debevec calibration procedure" << std::endl;
-    std::vector<cv::Mat> images;
-    std::vector<int> exposure_times;
-    data->asImageAndExposureTimeVectors(images, exposure_times);
-    auto debevec = cv::createCalibrateDebevec();
-    debevec->process(images, response, exposure_times);
+    auto cal = std::make_shared<DebevecCalibration>();
+    cal->setNumPixels(options.num_pixels);
+    cal->setSmoothingLambda(options.smoothing);
+    calibration = cal;
 #else
-    std::cerr << "Debevec calibration is supported only with OpenCV 3.0 and above.\n";
+    std::cerr << "Debevec calibration is not supported because the project was compiled without Ceres.\n";
     return 2;
 #endif
-  } else if (options.calibration_method == "engel") {
-    std::cout << "Starting Engel calibration procedure" << std::endl;
-    auto data_channels = data->splitChannels();
-
-    std::vector<Optimization> opts;
-    for (const auto& data : data_channels)
-      opts.emplace_back(&data, options.dc.valid_intensity_min, options.dc.valid_intensity_max);
-
-    boost::format fmt_header1("| %=5s | %=72s |");
-    boost::format fmt_header2("| %=5s | %=22s | %=22s | %=22s |");
-    boost::format fmt_line("|  %2i %s |");
-    boost::format fmt_channel_update("%10.6f | %10.6f");
-    boost::format fmt_channel_converged("%=23s");
-
-    std::cout << boost::str(fmt_header1 % "Iter" % "Energy / Diff") << std::endl;
-    std::cout << boost::str(fmt_header2 % "" % "Blue" % "Green" % "Red") << std::endl;
-
-    std::vector<double> energy(opts.size(), 0);
-    std::vector<double> diff(opts.size(), 0);
-
-    for (size_t i = 1; i < 100; ++i) {
-      std::cout << boost::str(fmt_line % i % "B") << std::flush;
-
-      for (size_t c = 0; c < opts.size(); ++c) {
-        std::string info;
-        if (opts[c].converged()) {
-          info = boost::str(fmt_channel_converged % "*");
-        } else {
-          opts[c].optimizeIrradiance();
-          auto e = opts[c].computeEnergy();
-          if (energy[c] > 0) {
-            diff[c] = energy[c] - e;
-            if (diff[c] < options.convergence_threshold)
-              opts[c].converged(true);
-          }
-          energy[c] = e;
-          info = boost::str(fmt_channel_update % e % diff[c]);
-        }
-        std::cout << info << " |" << std::flush;
-      }
-
-      std::cout << std::endl;
-      std::cout << boost::str(fmt_line % i % "U") << std::flush;
-
-      for (size_t c = 0; c < opts.size(); ++c) {
-        std::string info;
-        if (opts[c].converged()) {
-          info = boost::str(fmt_channel_converged % "*");
-        } else {
-          opts[c].optimizeInverseResponse();
-          auto e = opts[c].computeEnergy();
-          diff[c] = energy[c] - e;
-          if (energy[c] > 0 && diff[c] < options.convergence_threshold)
-            opts[c].converged(true);
-          energy[c] = e;
-          info = boost::str(fmt_channel_update % e % diff[c]);
-        }
-        std::cout << info << " |" << std::flush;
-      }
-
-      std::cout << std::endl;
-
-      for (auto& p : opts)
-        p.rescale();
-
-      std::vector<cv::Mat> response_channels;
-      for (auto& p : opts)
-        response_channels.push_back(p.getOptimizedInverseResponse());
-      cv::Mat response_double;
-      cv::merge(response_channels, response_double);
-      response_double.convertTo(response, CV_32FC3);
-      imshow(utils::plotRadiometricResponse(response), 1);
-
-      bool converged = true;
-      for (size_t c = 0; c < opts.size(); ++c)
-        converged &= opts[c].converged();
-
-      if (converged)
-        break;
-    }
   } else {
     std::cerr << "Unknown calibration method: " << options.calibration_method
               << ". Please specify \"engel\" or \"debevec\".\n";
     return 1;
   }
 
-  // Post-process the response:
-  //  * sort to ensure invertability
-  //  * there is no useful mapping for 0 brightness, extrapolate for 1 and 2
-  //  * shift and rescale response to 0..1 range
-  std::vector<cv::Mat> channels;
-  cv::split(response, channels);
-  for (size_t i = 0; i < 3; ++i) {
-    cv::sort(channels[i], channels[i], CV_SORT_EVERY_ROW | CV_SORT_ASCENDING);
-    cv::divide(channels[i], channels[i].at<float>(255), channels[i]);
-  }
-  cv::merge(channels, response);
+  auto limshow = [=](const cv::Mat& image) {
+    cv::imshow("Calibration", image);
+    cv::waitKey(options.interactive ? -1 : 1);
+  };
+
+  calibration->setValidPixelRange(options.dc.valid_intensity_min, options.dc.valid_intensity_max);
+  calibration->setVerbosity(options.verbosity);
+  if (!options.no_visualization)
+    calibration->setVisualizeProgress(limshow);
+
+  cv::Mat response = calibration->calibrate(*data);
 
   std::cout << "Done, writing response to: " << options.output << std::endl;
   radical::RadiometricResponse rr(response);

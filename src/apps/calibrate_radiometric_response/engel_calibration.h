@@ -24,39 +24,34 @@
 
 #include <array>
 
-#include <opencv2/core/core.hpp>
+#include "calibration.h"
 
-#include "dataset.h"
-
-class Optimization {
+class EngelCalibration : public Calibration {
  public:
-  Optimization(const Dataset* data, uint8_t min_valid_intensity, uint8_t max_valid_intensity);
+  void setConvergenceThreshold(double threshold);
 
-  bool isValid(uint8_t intensity);
+ protected:
+  virtual cv::Mat calibrateChannel(const Dataset& dataset) override;
 
+ private:
   void optimizeInverseResponse();
 
   void optimizeIrradiance();
 
-  void rescale();
-
   double computeEnergy();
 
-  bool converged() const;
+  void rescale();
 
-  void converged(bool state);
+  void visualizeProgress();
 
-  cv::Mat getOptimizedInverseResponse() const;
+  const Dataset* dataset_ = nullptr;
 
-  cv::Mat getOptimizedIrradiance() const;
-
- private:
-  const Dataset* dataset_;
-  uint8_t min_valid_;
-  uint8_t max_valid_;
   bool converged_;
   cv::Mat B_;  // irradiance
   cv::Mat U_;  // inverse response
+
+  double energy_, delta_;
+  double convergence_threshold_ = 1e-5;
 
   // Storage for temporary matrices to avoid re-allocation
   cv::Mat_<double> sum_t2_i_;

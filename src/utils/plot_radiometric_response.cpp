@@ -35,7 +35,10 @@ void plotRadiometricResponse(const cv::Mat& response, cv::Mat& canvas, const cv:
   Check("Canvas", canvas).notEmpty().hasType(CV_8UC3);
 
   auto x_scale = static_cast<float>(canvas.cols) / 256.0f;
-  auto y_scale = static_cast<float>(canvas.rows);
+  double min, max;
+  cv::minMaxIdx(response, &min, &max);
+  // auto y_scale = static_cast<float>(canvas.rows) / 1.2;
+  auto y_scale = static_cast<float>(canvas.rows) / max;
 
   auto circle = [&canvas, x_scale, y_scale](float x, float y, const cv::Scalar& color) {
     cv::circle(canvas, cv::Point(x * x_scale, canvas.size().height - y * y_scale), std::ceil(x_scale), color, -1);

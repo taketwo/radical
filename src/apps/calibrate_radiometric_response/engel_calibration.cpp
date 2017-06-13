@@ -20,30 +20,72 @@
  * SOFTWARE.
  ******************************************************************************/
 
-#include <opencv2/imgproc/imgproc.hpp>
+#include "engel_calibration.h"
 
-#include "optimization.h"
+#include "utils/colors.h"
+#include "utils/plot_radiometric_response.h"
 
-Optimization::Optimization(const Dataset* data, uint8_t min_valid_intensity, uint8_t max_valid_intensity)
-: dataset_(data), min_valid_(min_valid_intensity), max_valid_(max_valid_intensity), converged_(false) {
-  B_.create(data->getImageSize(), CV_64FC1);
+cv::Mat EngelCalibration::calibrateChannel(const Dataset& dataset) {
+  dataset_ = &dataset;
+  converged_ = false;
+  energy_ = 0;
+  delta_ = 0;
+
+  B_.create(dataset_->getImageSize(), CV_64FC1);
   B_.setTo(0);
-  for (const auto& t : data->getExposureTimes())
-    for (const auto& image : data->getImages(t))
+  double scaling = 256.0 / dataset_->getNumImages();
+  for (const auto& t : dataset_->getExposureTimes())
+    for (const auto& image : dataset_->getImages(t))
       for (int i = 0; i < image.rows; ++i)
         for (int j = 0; j < image.cols; ++j)
-          B_.at<double>(i, j) += static_cast<double>(image.at<uint8_t>(i, j)) / data->getNumImages() / 256;
+          B_.at<double>(i, j) += static_cast<double>(image.at<uint8_t>(i, j)) * scaling;
 
   U_.create(1, 256, CV_64FC1);
   for (int i = 0; i < 256; ++i)
     U_.at<double>(i) = (1.0 / 255.0) * i;
+
+  printHeader();
+
+  size_t iteration = 0;
+  while (iteration < max_num_iterations_) {
+    optimizeIrradiance();
+    auto e = computeEnergy();
+    if (iteration > 0) {
+      delta_ = energy_ - e;
+      if (delta_ < convergence_threshold_)
+        converged_ = true;
+    }
+    energy_ = e;
+    printIteration(++iteration, energy_, delta_, 'B');
+
+    optimizeInverseResponse();
+    e = computeEnergy();
+    delta_ = energy_ - e;
+    if (energy_ > 0 && delta_ < convergence_threshold_)
+      converged_ = true;
+    energy_ = e;
+    printIteration(++iteration, energy_, delta_, 'U');
+
+    rescale();
+    visualizeProgress();
+
+    if (converged_)
+      break;
+  }
+
+  printFooter();
+  visualizeProgress();
+
+  cv::Mat response;
+  U_.convertTo(response, CV_32F);
+  return response;
 }
 
-bool Optimization::isValid(uint8_t intensity) {
-  return intensity < min_valid_ || intensity > max_valid_;
+void EngelCalibration::setConvergenceThreshold(double threshold) {
+  convergence_threshold_ = threshold;
 }
 
-void Optimization::optimizeInverseResponse() {
+void EngelCalibration::optimizeInverseResponse() {
   // Eqn. 7
   sum_omega_k_.fill(0);
   size_omega_k_.fill(0);
@@ -57,17 +99,16 @@ void Optimization::optimizeInverseResponse() {
           size_omega_k_[p] += 1;
         }
 
-  // There is no useful data for 255, so force extrapolation
-  size_omega_k_[255] = 0;
-
-  for (int k = 1; k < 256; ++k) {
+  U_.setTo(0);
+  for (int k = min_valid_; k <= max_valid_; ++k)
     U_.at<double>(k) = sum_omega_k_[k] /= size_omega_k_[k];
-    if (!std::isfinite(U_.at<double>(k)) && k > 1)
-      U_.at<double>(k) = 2 * U_.at<double>(k - 1) - U_.at<double>(k - 2);
-  }
+
+  double max = 2 * U_.at<double>(max_valid_) - U_.at<double>(max_valid_ - 1);
+  for (int k = max_valid_ + 1; k < 256; ++k)
+    U_.at<double>(k) = max;
 }
 
-void Optimization::optimizeIrradiance() {
+void EngelCalibration::optimizeIrradiance() {
   // Eqn. 8
   sum_t2_i_.create(dataset_->getImageSize());
   sum_t2_i_.setTo(0);
@@ -78,7 +119,7 @@ void Optimization::optimizeIrradiance() {
       for (int i = 0; i < image.rows; ++i)
         for (int j = 0; j < image.cols; ++j) {
           const auto& p = image.at<uint8_t>(i, j);
-          if (isValid(p))
+          if (!isPixelValid(p))
             continue;
           B_.at<double>(i, j) += U_.at<double>(p) * t;
           sum_t2_i_(i, j) += t * t;
@@ -87,22 +128,14 @@ void Optimization::optimizeIrradiance() {
   cv::divide(B_, sum_t2_i_, B_);
 }
 
-void Optimization::rescale() {
-  double min, max;
-  cv::minMaxLoc(U_, &min, &max);
-  auto scale = 1.0 / max;
-  cv::multiply(U_, scale, U_);
-  cv::multiply(B_, scale, B_);
-}
-
-double Optimization::computeEnergy() {
+double EngelCalibration::computeEnergy() {
   long double energy = 0;
   long unsigned int num = 0;
   for (const auto& t : dataset_->getExposureTimes())
     for (const auto& image : dataset_->getImages(t))
       for (int i = 0; i < image.rows; ++i)
         for (int j = 0; j < image.cols; ++j)
-          if (!isValid(image.at<uint8_t>(i, j))) {
+          if (isPixelValid(image.at<uint8_t>(i, j))) {
             long double r = U_.at<double>(image.at<uint8_t>(i, j)) - t * B_.at<double>(i, j);
             energy += r * r;
             num += 1;
@@ -110,18 +143,18 @@ double Optimization::computeEnergy() {
   return std::sqrt(energy / num);
 }
 
-bool Optimization::converged() const {
-  return converged_;
+void EngelCalibration::rescale() {
+  auto scale = 1.0 / U_.at<double>(128);
+  cv::multiply(U_, scale, U_);
+  cv::multiply(B_, scale, B_);
+  // Rescaling changes the energy, adjust without recomputing
+  energy_ *= (scale * scale);
 }
 
-void Optimization::converged(bool state) {
-  converged_ = state;
-}
-
-cv::Mat Optimization::getOptimizedInverseResponse() const {
-  return U_;
-}
-
-cv::Mat Optimization::getOptimizedIrradiance() const {
-  return B_;
+void EngelCalibration::visualizeProgress() {
+  if (imshow_) {
+    cv::Mat response;
+    U_.convertTo(response, CV_32F);
+    imshow_(utils::plotRadiometricResponse(response, cv::Size(500, 500), utils::colors::BGR[channel_]));
+  }
 }
