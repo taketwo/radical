@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright (c) 2016 Sergey Alexandrov
+ * Copyright (c) 2016-2017 Sergey Alexandrov
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to
@@ -23,10 +23,10 @@
 #include <cmath>
 #include <fstream>
 #include <iostream>
-#include <iostream>
 #include <string>
 #include <vector>
 
+#include <boost/filesystem.hpp>
 #include <boost/format.hpp>
 
 #include <opencv2/core/core.hpp>
@@ -150,9 +150,8 @@ int main(int argc, const char** argv) {
   auto data = Dataset::load(options.data_source);
   if (data) {
     if (!options("output")) {
-      std::cerr << "When calibrating from existing dataset, output calibration filename should be explicitly set"
-                << std::endl;
-      return 2;
+      auto dir = boost::filesystem::canonical(options.data_source);
+      options.output = (dir / dir.filename()).native() + ".crf";
     }
     std::cout << "Loaded dataset from: " << options.data_source << std::endl;
   } else {
