@@ -75,8 +75,8 @@ class Options : public OptionsBase {
                        "serial number + \".crf\" suffix)");
     desc.add_options()("threshold,t", po::value<double>(&convergence_threshold),
                        "Threshold for energy update after which convergence is declared (default: 1e-5)");
-    desc.add_options()("method,m", po::value<std::string>(&calibration_method),
-                       "Calibration method to use (default: engel)");
+    desc.add_options()("method,m", po::value<std::string>(&calibration_method)->default_value(calibration_method),
+                       "Calibration method to use");
     desc.add_options()("no-visualization", po::bool_switch(&no_visualization),
                        "Do not visualize the calibration process and results");
     desc.add_options()("save-dataset,s", po::value<std::string>(&save_dataset),
@@ -85,7 +85,7 @@ class Options : public OptionsBase {
                        "Verbosity level (0 - silent, 1 - normal, 2 - verbose)");
     desc.add_options()("num-pixels", po::value<unsigned int>(&num_pixels)->default_value(num_pixels),
                        "Number of pixels");
-    desc.add_options()("interactive", po::bool_switch(&interactive), "Interactive");
+    desc.add_options()("interactive", po::bool_switch(&interactive), "Wait for a keypress after each optimization iteration");
     desc.add_options()("smoothing", po::value<double>(&smoothing)->default_value(smoothing), "Smoothing lambda");
     desc.add_options()("print", po::bool_switch(&print), "Print calibrated response function to stdout");
 
