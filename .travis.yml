@@ -17,5 +17,6 @@ cache:
     - $HOME/eigen
     - $HOME/glog
     - $HOME/ceres
+    - $HOME/git-lfs
 script:
   - bash .travis.sh

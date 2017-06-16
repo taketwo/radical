@@ -5,10 +5,12 @@ CMAKE_DIR=$HOME/cmake
 EIGEN_DIR=$HOME/eigen
 GLOG_DIR=$HOME/glog
 CERES_DIR=$HOME/ceres
+GIT_LFS_DIR=$HOME/git-lfs
 DOWNLOAD_DIR=$HOME/download
 
 function test()
 {
+  git lfs pull
   make tests
 }
 
@@ -196,6 +198,32 @@ function install_ceres()
   return $?
 }
 
+function install_git_lfs() {
+  local pkg_ver=${GIT_LFS_VERSION}
+  local pkg_url="https://github.com/git-lfs/git-lfs/releases/download/v${pkg_ver}/git-lfs-linux-amd64-${pkg_ver}.tar.gz"
+  local pkg_md5sum="c9b605a02dd68537d028e8a446fdee14"
+  local pkg_src_dir=${DOWNLOAD_DIR}/git-lfs-${pkg_ver}
+  local pkg_install_dir=${GIT_LFS_DIR}/${pkg_ver}
+  local git_lfs_exe=$pkg_install_dir/git-lfs
+  echo "Installing git-lfs ${pkg_ver}"
+  if [[ -e ${git_lfs_exe} ]]; then
+    local version=`$git_lfs_exe | grep -Po "(?<=git-lfs/).*(?= \()"`
+    if [[ "$version" = "$pkg_ver" ]]; then
+      local modified=`stat -c %y ${git_lfs_exe} | cut -d ' ' -f1`
+      echo " > Found cached installation of git-lfs"
+      echo " > Version ${pkg_ver}, downloaded on ${modified}"
+      return 0
+    fi
+  fi
+  download ${pkg_url} ${pkg_md5sum}
+  if [[ $? -ne 0 ]]; then
+    return $?
+  fi
+  tar xzf pkg
+  mkdir -p $pkg_install_dir && cp ${pkg_src_dir}/git-lfs $pkg_install_dir
+  return $?
+}
+
 function download()
 {
   mkdir -p $DOWNLOAD_DIR && cd $DOWNLOAD_DIR && rm -rf *
@@ -218,6 +246,7 @@ CMAKE_VERSION="2.8.12.2"
 EIGEN_VERSION="3.2.10"
 GLOG_VERSION="0.3.5"
 CERES_VERSION="1.10.0"
-export PATH=$CMAKE_DIR/$CMAKE_VERSION/bin:$PATH
+GIT_LFS_VERSION="2.1.1"
+export PATH=$CMAKE_DIR/$CMAKE_VERSION/bin:$GIT_LFS_DIR/$GIT_LFS_VERSION:$PATH
 
-install_cmake && install_opencv && install_eigen && install_glog && install_ceres && build && test
+install_cmake && install_opencv && install_eigen && install_glog && install_ceres && install_git_lfs && build && test
