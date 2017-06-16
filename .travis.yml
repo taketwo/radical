@@ -9,12 +9,13 @@ addons:
     sources:
       - boost-latest
     packages:
-      - libboost1.55-dev libboost-filesystem1.55-dev libboost-program-options1.55-dev libboost-system1.55-dev libboost-test1.55-dev
+      - libboost1.55-dev libboost-filesystem1.55-dev libboost-program-options1.55-dev libboost-system1.55-dev libboost-test1.55-dev libsuitesparse-dev
 cache:
   directories:
     - $HOME/opencv
     - $HOME/cmake
     - $HOME/eigen
+    - $HOME/glog
     - $HOME/ceres
 script:
   - bash .travis.sh
