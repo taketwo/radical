@@ -24,10 +24,21 @@ macro(TEST_ADD _name)
   )
   add_test(NAME ${_name} COMMAND ${_executable})
   add_dependencies(tests ${_executable})
-endmacro(TEST_ADD)
+endmacro()
 
 TEST_ADD(radiometric_response LINK_WITH radical)
 TEST_ADD(vignetting_response LINK_WITH radical)
 TEST_ADD(nonparametric_vignetting_model LINK_WITH radical)
 TEST_ADD(polynomial_vignetting_model LINK_WITH radical)
 TEST_ADD(mean_image LINK_WITH utils)
+
+if(BUILD_APPS)
+
+  macro(APP_TEST_ADD _name)
+    set(_script "${CMAKE_CURRENT_SOURCE_DIR}/test_${_name}.sh")
+    add_test(NAME ${_name} COMMAND ${_script} $<TARGET_FILE:${_name}> ${TEST_DATA_DIR})
+    add_dependencies(tests ${_name})
+  endmacro()
+
+  APP_TEST_ADD(calibrate_radiometric_response)
+endif()
