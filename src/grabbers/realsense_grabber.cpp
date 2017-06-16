@@ -46,7 +46,7 @@ struct RealSenseGrabber::Impl {
 
     device = ctx.get_device(0);
     // device->enable_stream(rs::stream::color, rs::preset::best_quality);
-    device->enable_stream(rs::stream::color, 640, 480, rs::format::bgr8, 30);
+    device->enable_stream(rs::stream::color, 640, 480, rs::format::bgr8, 15);
 
     if (!device->is_stream_enabled(rs::stream::color) ||
         device->get_stream_format(rs::stream::color) != rs::format::bgr8)
