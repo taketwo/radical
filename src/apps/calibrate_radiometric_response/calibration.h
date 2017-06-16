@@ -46,6 +46,8 @@ class Calibration {
     * \param[i] imshow a function that can display a given cv::Mat */
   void setVisualizeProgress(const std::function<void(const cv::Mat&)>& imshow);
 
+  virtual std::string getMethodName() const = 0;
+
  protected:
   /** Calibrate a single color channel.
     * This should be implemented by deriving classes. The dataset is guaranteed to have a single color channel. */

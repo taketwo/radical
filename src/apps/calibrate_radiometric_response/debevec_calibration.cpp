@@ -135,10 +135,8 @@ cv::Mat DebevecCalibration::calibrateChannel(const Dataset& dataset) {
 
   printFooter();
 
-  if (verbosity_ > 2)
+  if (verbosity_ > 1)
     std::cout << summary.FullReport() << std::endl;
-  else if (verbosity_ > 1)
-    std::cout << summary.BriefReport() << std::endl;
 
   cv::Mat response;
   U_.convertTo(response, CV_32F);

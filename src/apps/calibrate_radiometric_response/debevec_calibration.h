@@ -32,6 +32,8 @@ class DebevecCalibration : public Calibration {
 
   void setSmoothingLambda(double lambda);
 
+  virtual std::string getMethodName() const override { return "Debevec"; }
+
  protected:
   virtual cv::Mat calibrateChannel(const Dataset& data) override;
 

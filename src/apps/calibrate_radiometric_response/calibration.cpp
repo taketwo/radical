@@ -32,6 +32,9 @@ using boost::str;
 static const char* NAMES[] = {"Blue", "Green", "Red"};
 
 cv::Mat Calibration::calibrate(const Dataset& data) {
+  if (verbosity_)
+    std::cout << "Starting " << getMethodName() << " calibration procedure" << std::endl;
+
   auto datasets = data.splitChannels();
 
   std::vector<cv::Mat> response_channels;

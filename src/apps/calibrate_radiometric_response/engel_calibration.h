@@ -30,6 +30,8 @@ class EngelCalibration : public Calibration {
  public:
   void setConvergenceThreshold(double threshold);
 
+  virtual std::string getMethodName() const override { return "Engel"; }
+
  protected:
   virtual cv::Mat calibrateChannel(const Dataset& dataset) override;
 

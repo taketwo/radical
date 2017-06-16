@@ -81,7 +81,7 @@ class Options : public OptionsBase {
     desc.add_options()("save-dataset,s", po::value<std::string>(&save_dataset),
                        "Save collected dataset in the given directory");
     desc.add_options()("verbosity,v", po::value<unsigned int>(&verbosity)->default_value(verbosity),
-                       "Verbosity level for optimization procedure");
+                       "Verbosity level (0 - silent, 1 - normal, 2 - verbose)");
     desc.add_options()("num-pixels", po::value<unsigned int>(&num_pixels)->default_value(num_pixels),
                        "Number of pixels");
     desc.add_options()("interactive", po::bool_switch(&interactive), "Interactive");
@@ -153,7 +153,8 @@ int main(int argc, const char** argv) {
       auto dir = boost::filesystem::canonical(options.data_source);
       options.output = (dir / dir.filename()).native() + ".crf";
     }
-    std::cout << "Loaded dataset from: " << options.data_source << std::endl;
+    if (options.verbosity)
+      std::cout << "Loaded dataset from: " << options.data_source << std::endl;
   } else {
     grabbers::Grabber::Ptr grabber;
 
@@ -197,7 +198,8 @@ int main(int argc, const char** argv) {
     data = data_collection.getDataset();
 
     if (options.save_dataset != "") {
-      std::cout << "Saving dataset to: " << options.save_dataset << std::endl;
+      if (options.verbosity)
+        std::cout << "Saving dataset to: " << options.save_dataset << std::endl;
       data->save(options.save_dataset);
       std::ofstream file(options.save_dataset + "/DESCRIPTION.txt");
       if (file.is_open()) {
@@ -215,13 +217,11 @@ int main(int argc, const char** argv) {
   Calibration::Ptr calibration;
 
   if (options.calibration_method == "engel") {
-    std::cout << "Starting Engel calibration procedure" << std::endl;
     auto cal = std::make_shared<EngelCalibration>();
     cal->setConvergenceThreshold(options.convergence_threshold);
     calibration = cal;
   } else if (options.calibration_method == "debevec") {
 #if HAVE_CERES
-    std::cout << "Starting Debevec calibration procedure" << std::endl;
     auto cal = std::make_shared<DebevecCalibration>();
     cal->setNumPixels(options.num_pixels);
     cal->setSmoothingLambda(options.smoothing);
@@ -248,7 +248,8 @@ int main(int argc, const char** argv) {
 
   cv::Mat response = calibration->calibrate(*data);
 
-  std::cout << "Done, writing response to: " << options.output << std::endl;
+  if (options.verbosity)
+    std::cout << "Done, writing response to: " << options.output << std::endl;
   radical::RadiometricResponse rr(response);
   rr.save(options.output);
 
