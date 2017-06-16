@@ -65,6 +65,7 @@ class Options : public OptionsBase {
   unsigned int num_pixels = 5;
   bool interactive = false;
   double smoothing = 50;
+  bool print = false;
 
  protected:
   virtual void addOptions(boost::program_options::options_description& desc) override {
@@ -86,6 +87,7 @@ class Options : public OptionsBase {
                        "Number of pixels");
     desc.add_options()("interactive", po::bool_switch(&interactive), "Interactive");
     desc.add_options()("smoothing", po::value<double>(&smoothing)->default_value(smoothing), "Smoothing lambda");
+    desc.add_options()("print", po::bool_switch(&print), "Print calibrated response function to stdout");
 
     boost::program_options::options_description dcopt("Data collection");
     dcopt.add_options()("exposure-min", po::value<int>(&dc.exposure_min),
@@ -254,6 +256,16 @@ int main(int argc, const char** argv) {
   rr.save(options.output);
 
   imshow(utils::plotRadiometricResponse(rr));
+
+  if (options.print) {
+    std::vector<cv::Mat> response_channels;
+    cv::split(response, response_channels);
+    for (const auto& ch : response_channels) {
+      for (size_t i = 0; i < ch.total(); ++i)
+        std::cout << ch.at<float>(i) << " ";
+      std::cout << std::endl;
+    }
+  }
 
   return 0;
 }
