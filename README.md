@@ -2,10 +2,12 @@
 [![License](https://img.shields.io/badge/license-MIT-green.svg?style=flat)](https://github.com/taketwo/radical/blob/master/LICENSE.md)
 
 Consumer-grade color cameras suffer from significant optical nonlinearities,
-often referred to as vignetting effects. For example, in Asus Xtion Live Pro
+often referred to as vignetting effects. For example, in Asus Xtion Pro Live
 cameras the pixels in the corners are two times darker than those in the center
 of the image. Luckily, it is possible to calibrate the camera and remove the
 effects from the images.
+
+![Vignetting responses](doc/vignetting-responses.png "Vignetting responses")
 
 This repository contains a collection of apps to calibrate radiometric and
 vignetting responses of a camera and a runtime library that you can link into
@@ -26,7 +28,8 @@ You need a compiler that supports C++11.
   * Boost
   * OpenNI2 (optional, only if you want to calibrate an Asus Xtion camera)
   * librealsense (optional, only if you want to calibrate a RealSense camera)
-  * Ceres (optional, only for fitting polynomial vignetting model)
+  * Ceres (optional, needed for radiometric calibration with Debevec method and
+    for vignetting calibration with polynomial vignetting model)
 
 # Installation
 
@@ -40,9 +43,9 @@ You need a compiler that supports C++11.
    cmake .. -DBUILD_APPS=OFF
    ```
 
-   Note that if you want to enable support for fitting polynomial vignetting
-   model in the calibration app, you need to tell CMake where Ceres is
-   installed:
+   Note that if you want to enable support for Debevec camera response function
+   calibration and fitting of polynomial vignetting model in the calibration
+   app, you need to tell CMake where Ceres is installed:
 
    ```bash
    cmake .. -DCeres_DIR=<CERES_INSTALL_PATH>/share/Ceres
