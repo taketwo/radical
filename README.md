@@ -4,10 +4,15 @@
 Consumer-grade color cameras suffer from significant optical nonlinearities,
 often referred to as vignetting effects. For example, in Asus Xtion Pro Live
 cameras the pixels in the corners are two times darker than those in the center
-of the image. Luckily, it is possible to calibrate the camera and remove the
-effects from the images.
+of the image. The vignetting effects in Intel RealSense cameras are less severe,
+but are still noticeable, as can be seen below:
 
 ![Vignetting responses](doc/vignetting-responses.png "Vignetting responses")
+
+Luckily, it is possible to calibrate the camera and remove the effects from the
+images:
+
+<p align="center"><img src ="doc/pioneer.gif"/></p>
 
 This repository contains a collection of apps to calibrate radiometric and
 vignetting responses of a camera and a runtime library that you can link into
