@@ -1,6 +1,9 @@
 sudo: false
 language: cpp
 compiler: clang
+git:
+  depth: 1
+  lfs_skip_smudge: true
 env:
   - OPENCV_VERSION=2.4.8
   - OPENCV_VERSION=3.1.0
