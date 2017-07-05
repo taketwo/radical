@@ -10,18 +10,13 @@ include("${CMAKE_SOURCE_DIR}/cmake/Utils.cmake")
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
-# Extract version from header
-execute_process(
-  COMMAND grep "RADICAL_VERSION " include/radical/version.h
-  WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-  RESULT_VARIABLE GREP_VERSION_RESULT
-  OUTPUT_VARIABLE PROJECT_VERSION
-  OUTPUT_STRIP_TRAILING_WHITESPACE
-)
-if(NOT GREP_VERSION_RESULT EQUAL 0)
-  message(SEND_ERROR "Cannot extract version number: ${GREP_VERSION_RESULT}")
-endif()
-string(REGEX REPLACE ".*\"(.*)\".*" "\\1" PROJECT_VERSION "${PROJECT_VERSION}" )
+# Library version
+set(RADICAL_VERSION_MAJOR 1)
+set(RADICAL_VERSION_MINOR 0)
+set(RADICAL_VERSION_PATCH 0)
+set(RADICAL_VERSION "${RADICAL_VERSION_MAJOR}.${RADICAL_VERSION_MINOR}.${RADICAL_VERSION_PATCH}")
+set(RADICAL_VERSION_SO "${RADICAL_VERSION_MAJOR}.${RADICAL_VERSION_MINOR}")
+set(RADICAL_VERSION_LIB "${RADICAL_VERSION_MAJOR}.${RADICAL_VERSION_MINOR}.${RADICAL_VERSION_PATCH}")
 
 # Set build type to Release if not specified by user
 if(NOT CMAKE_BUILD_TYPE)
@@ -52,7 +47,11 @@ set(RADICAL_SRC
 )
 
 add_library(${LIB_NAME} SHARED ${RADICAL_SRC})
-set_target_properties(${LIB_NAME} PROPERTIES VERSION "${PROJECT_VERSION}" SOVERSION 1)
+set_target_properties(
+  ${LIB_NAME} PROPERTIES
+    VERSION "${RADICAL_VERSION_LIB}"
+    SOVERSION "${RADICAL_VERSION_SO}"
+)
 target_compile_definitions(${LIB_NAME} PUBLIC "RADICAL_DEBUG=$<CONFIG:Debug>")
 target_include_directories(
   ${LIB_NAME} PUBLIC
@@ -98,7 +97,7 @@ set(_targets_export_name "${PROJECT_NAME}-targets")
 include(CMakePackageConfigHelpers)
 write_basic_package_version_file(
   "${_version_config_file}"
-  VERSION ${PROJECT_VERSION}
+  VERSION ${RADICAL_VERSION}
   COMPATIBILITY AnyNewerVersion
 )
 
