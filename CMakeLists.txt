@@ -20,7 +20,7 @@ set(RADICAL_VERSION_LIB "${RADICAL_VERSION_MAJOR}.${RADICAL_VERSION_MINOR}.${RAD
 
 # Set build type to Release if not specified by user
 if(NOT CMAKE_BUILD_TYPE)
-  message("-- No build type specified; defaulting to CMAKE_BUILD_TYPE=Release")
+  message(STATUS "-- No build type specified; defaulting to CMAKE_BUILD_TYPE=Release")
   set(CMAKE_BUILD_TYPE Release CACHE STRING "Choose the type of build, options are: None Debug Release RelWithDebInfo MinSizeRel" FORCE)
 endif()
 
