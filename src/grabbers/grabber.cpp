@@ -25,6 +25,7 @@
 #include <grabbers/grabber.h>
 #include <grabbers/openni2_grabber.h>
 #include <grabbers/realsense_grabber.h>
+#include <grabbers/pylon_grabber.h>
 
 namespace grabbers {
 
@@ -48,6 +49,12 @@ Grabber::Ptr createGrabber(const std::string& uri) {
       return Grabber::Ptr(new OpenNI2Grabber);
     else
       return Grabber::Ptr(new OpenNI2Grabber(uri));
+  } catch (GrabberException&) {
+  }
+#endif
+#if HAVE_PYLON
+  try {
+    return Grabber::Ptr(new PylonGrabber);
   } catch (GrabberException&) {
   }
 #endif
