@@ -1,6 +1,3 @@
-# Actually, we need Boost exceptions, but they are header-only
-find_package(Boost COMPONENTS system REQUIRED)
-
 set(GRABBERS_SRC grabber.cpp)
 
 if(WITH_OPENNI2)

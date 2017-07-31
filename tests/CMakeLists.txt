@@ -1,5 +1,3 @@
-find_package(Boost COMPONENTS system filesystem unit_test_framework REQUIRED)
-
 get_filename_component(TEST_DATA_DIR "data" ABSOLUTE)
 configure_file(test.h.in test.h)
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
@@ -14,12 +12,13 @@ macro(TEST_ADD _name)
 
   set(_executable test_${_name})
   add_executable(${_executable} ${_executable}.cpp)
+  target_include_directories(${_executable} PRIVATE ${Boost_INCLUDE_DIRS})
   target_compile_definitions(${_executable}
     PRIVATE "-DBOOST_TEST_MODULE=${_name}"
     PRIVATE "-DBOOST_TEST_DYN_LINK"
   )
   target_link_libraries(${_executable}
-    ${Boost_FILESYSTEM_LIBRARY} ${Boost_SYSTEM_LIBRARY} ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY}
+    ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY} ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY}
     ${TEST_ADD_LINK_WITH}
   )
   add_test(NAME ${_name} COMMAND ${_executable})

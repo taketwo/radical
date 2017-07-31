@@ -50,6 +50,17 @@ RADICAL_OPTION(WITH_CERES            "Enable features requiring Google Ceres sol
 
 find_package(OpenCV COMPONENTS core imgproc REQUIRED)
 
+if(BUILD_APPS OR BUILD_TESTS)
+  set(Boost_COMPONENTS system filesystem)
+  if(BUILD_APPS)
+    list(APPEND Boost_COMPONENTS program_options)
+  endif()
+  if(BUILD_TESTS)
+    list(APPEND Boost_COMPONENTS unit_test_framework)
+  endif()
+  find_package(Boost COMPONENTS ${Boost_COMPONENTS} REQUIRED)
+endif()
+
 include_directories("${PROJECT_SOURCE_DIR}/include")
 
 add_subdirectory(src/utils)

@@ -5,7 +5,6 @@ else()
 endif()
 
 find_package(OpenCV COMPONENTS ${OpenCV_COMPONENTS} REQUIRED)
-find_package(Boost COMPONENTS program_options filesystem system REQUIRED)
 
 if(WITH_CERES)
   find_package(Ceres CONFIG)
