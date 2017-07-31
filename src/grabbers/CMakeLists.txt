@@ -18,7 +18,7 @@ endif()
 
 add_library(grabbers ${GRABBERS_SRC})
 target_include_directories(grabbers PUBLIC ${Boost_INCLUDE_DIRS})
-target_link_libraries(grabbers ${OpenCV_LIBS} ${GRABBERS_DEPS})
+target_link_libraries(grabbers opencv_core ${GRABBERS_DEPS})
 
 foreach(grabber openni2 realsense)
   string(TOUPPER ${grabber} GRABBER)
