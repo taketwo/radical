@@ -24,11 +24,14 @@
 
 #include <opencv2/imgproc/imgproc.hpp>
 
-#include "utils/check.h"
+#include <radical/check.h>
+
 #include "utils/colors.h"
 #include "utils/plot_radiometric_response.h"
 
 namespace utils {
+
+using radical::Check;
 
 void plotRadiometricResponse(const cv::Mat& response, cv::Mat& canvas, const cv::Scalar& color) {
   Check("Radiometric response", response).hasDepth(CV_32F).hasSize(256);

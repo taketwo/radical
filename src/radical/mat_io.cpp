@@ -24,13 +24,10 @@
 #include <iostream>
 
 #include <radical/exceptions.h>
+#include <radical/check.h>
+#include <radical/mat_io.h>
 
-#include "utils/check.h"
-#include "utils/mat_io.h"
-
-using namespace radical;
-
-namespace utils {
+namespace radical {
 
 static const uint32_t MAGIC = 0xC4A1FDD9;
 
@@ -79,4 +76,4 @@ cv::Mat readMat(std::ifstream& file) {
   return mat;
 }
 
-}  // namespace utils
+}  // namespace radical

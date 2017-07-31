@@ -27,8 +27,7 @@
 #include <radical/exceptions.h>
 #include <radical/vignetting_model.h>
 #include <radical/vignetting_response.h>
-
-#include "utils/check.h"
+#include <radical/check.h>
 
 // Custom hasher to allow unordered map with cv::Size keys.
 namespace std {
@@ -118,7 +117,7 @@ void VignettingResponse::remove(cv::InputArray _E, cv::OutputArray _L) const {
     _L.clear();
     return;
   }
-  utils::Check("Irradiance image", _E).hasType(CV_32FC3);
+  Check("Irradiance image", _E).hasType(CV_32FC3);
   cv::divide(_E, getResponse(_E.size()), _L);
 }
 
@@ -127,7 +126,7 @@ void VignettingResponse::removeLog(cv::InputArray _E, cv::OutputArray _L) const 
     _L.clear();
     return;
   }
-  utils::Check("Irradiance image", _E).hasType(CV_32FC3);
+  Check("Irradiance image", _E).hasType(CV_32FC3);
   cv::subtract(_E, getLogResponse(_E.size()), _L);
 }
 
@@ -136,7 +135,7 @@ void VignettingResponse::add(cv::InputArray _L, cv::OutputArray _E) const {
     _E.clear();
     return;
   }
-  utils::Check("Radiance image", _L).hasType(CV_32FC3);
+  Check("Radiance image", _L).hasType(CV_32FC3);
   cv::multiply(_L, getResponse(_L.size()), _E);
 }
 
@@ -145,7 +144,7 @@ void VignettingResponse::addLog(cv::InputArray _L, cv::OutputArray _E) const {
     _E.clear();
     return;
   }
-  utils::Check("Radiance image", _L).hasType(CV_32FC3);
+  Check("Radiance image", _L).hasType(CV_32FC3);
   cv::add(_L, getLogResponse(_L.size()), _E);
 }
 

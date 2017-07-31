@@ -31,8 +31,7 @@
 #include <boost/lexical_cast.hpp>
 
 #include <radical/exceptions.h>
-
-#include "utils/mat_io.h"
+#include <radical/mat_io.h>
 
 #include "dataset.h"
 
@@ -111,7 +110,7 @@ void Dataset::save(const std::string& path) const {
   for (const auto& time_images : data_)
     for (size_t i = 0; i < time_images.second.size(); ++i) {
       auto filename = (dir / boost::str(fmt % time_images.first % i)).string();
-      utils::writeMat(filename, time_images.second[i]);
+      radical::writeMat(filename, time_images.second[i]);
     }
 }
 
@@ -126,7 +125,7 @@ Dataset::Ptr Dataset::load(const std::string& path) {
       try {
         auto exposure = boost::lexical_cast<int>(stem.substr(0, 6));
         cv::Mat image;
-        image = utils::readMat(iter->path().string());
+        image = radical::readMat(iter->path().string());
         dataset->insert(exposure, image);
       } catch (boost::bad_lexical_cast&) {
       } catch (radical::SerializationException&) {

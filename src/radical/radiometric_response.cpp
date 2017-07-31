@@ -25,11 +25,8 @@
 #include <opencv2/imgproc/imgproc.hpp>
 
 #include <radical/radiometric_response.h>
-
-#include "utils/check.h"
-#include "utils/mat_io.h"
-
-using namespace utils;
+#include <radical/check.h>
+#include <radical/mat_io.h>
 
 /** Helper function for inverse look-up in a table (cv::Vec3f → Vec3b). */
 inline cv::Vec3b inverseLUT(const std::vector<cv::Mat>& lut, const cv::Vec3f& in) {
@@ -45,13 +42,13 @@ inline cv::Vec3b inverseLUT(const std::vector<cv::Mat>& lut, const cv::Vec3f& in
 namespace radical {
 
 RadiometricResponse::RadiometricResponse(cv::InputArray _response) {
-  utils::Check("Radiometric response", _response).hasSize(256).hasType(CV_32FC3);
+  Check("Radiometric response", _response).hasSize(256).hasType(CV_32FC3);
   response_ = _response.getMat();
   cv::log(response_, log_response_);
   cv::split(response_, response_channels_);
 }
 
-RadiometricResponse::RadiometricResponse(const std::string& filename) : RadiometricResponse(utils::readMat(filename)) {}
+RadiometricResponse::RadiometricResponse(const std::string& filename) : RadiometricResponse(readMat(filename)) {}
 
 RadiometricResponse::~RadiometricResponse() {}
 
@@ -60,7 +57,7 @@ cv::Mat RadiometricResponse::getInverseResponse() const {
 }
 
 void RadiometricResponse::save(const std::string& filename) const {
-  utils::writeMat(filename, response_);
+  writeMat(filename, response_);
 }
 
 cv::Vec3b RadiometricResponse::directMap(const cv::Vec3f& E) const {
@@ -72,7 +69,7 @@ void RadiometricResponse::directMap(cv::InputArray _E, cv::OutputArray _I) const
     _I.clear();
     return;
   }
-  utils::Check("Irradiance image", _E).hasType(CV_32FC3);
+  Check("Irradiance image", _E).hasType(CV_32FC3);
   auto E = _E.getMat();
   _I.create(_E.size(), CV_8UC3);
   auto I = _I.getMat();
@@ -99,7 +96,7 @@ void RadiometricResponse::inverseMap(cv::InputArray _I, cv::OutputArray _E) cons
     _E.clear();
     return;
   }
-  utils::Check("Brightness image", _I).hasType(CV_8UC3);
+  Check("Brightness image", _I).hasType(CV_8UC3);
   cv::LUT(_I, response_, _E);
 }
 
@@ -116,7 +113,7 @@ void RadiometricResponse::inverseLogMap(cv::InputArray _I, cv::OutputArray _E) c
     _E.clear();
     return;
   }
-  utils::Check("Brightness image", _I).hasType(CV_8UC3);
+  Check("Brightness image", _I).hasType(CV_8UC3);
   cv::LUT(_I, log_response_, _E);
 }
 

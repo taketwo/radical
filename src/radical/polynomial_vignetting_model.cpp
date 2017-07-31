@@ -26,15 +26,14 @@
 
 #include <radical/exceptions.h>
 #include <radical/polynomial_vignetting_model.h>
-
-#include "utils/check.h"
-#include "utils/mat_io.h"
+#include <radical/check.h>
+#include <radical/mat_io.h>
 
 namespace radical {
 
 template <unsigned int Degree>
 PolynomialVignettingModel<Degree>::PolynomialVignettingModel(cv::InputArray _coefficients, cv::Size image_size) {
-  utils::Check("Polynomial vignetting model", _coefficients).notEmpty().hasSize(Degree + 2).hasType(CV_64FC3);
+  Check("Polynomial vignetting model", _coefficients).notEmpty().hasSize(Degree + 2).hasType(CV_64FC3);
   coefficients_ = _coefficients.getMat();
   image_size_ = image_size;
 }
@@ -55,7 +54,7 @@ PolynomialVignettingModel<Degree>::PolynomialVignettingModel(const std::string& 
       }
     }
     image_size_ = cv::Size(width, height);
-    coefficients_ = utils::readMat(file);
+    coefficients_ = readMat(file);
     // TODO: Check read coefficients
     file.close();
   } else {
@@ -75,7 +74,7 @@ void PolynomialVignettingModel<Degree>::save(const std::string& filename) const 
   std::ofstream file(filename);
   if (file.is_open()) {
     file << "PolynomialVignettingModel " << Degree << " " << image_size_.width << " " << image_size_.height << "\n";
-    utils::writeMat(file, coefficients_);
+    writeMat(file, coefficients_);
     file.close();
   } else {
     throw SerializationException("Unable to open file to save vignetting model", filename);

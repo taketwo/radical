@@ -27,7 +27,7 @@
 
 #include <opencv2/core/core.hpp>
 
-namespace utils {
+namespace radical {
 
 /** Write a given cv::Mat to a file in binary format.
   * The cv::Mat is expected to:
@@ -43,4 +43,4 @@ cv::Mat readMat(const std::string& filename);
 
 cv::Mat readMat(std::ifstream& file);
 
-}  // namespace utils
+}  // namespace radical

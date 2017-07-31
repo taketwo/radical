@@ -29,10 +29,8 @@ TEST_ADD(radiometric_response LINK_WITH radical)
 TEST_ADD(vignetting_response LINK_WITH radical)
 TEST_ADD(nonparametric_vignetting_model LINK_WITH radical)
 TEST_ADD(polynomial_vignetting_model LINK_WITH radical)
-TEST_ADD(mean_image LINK_WITH utils)
 
 if(BUILD_APPS)
-
   macro(APP_TEST_ADD _name)
     set(_script "${CMAKE_CURRENT_SOURCE_DIR}/test_${_name}.sh")
     add_test(NAME ${_name} COMMAND ${_script} $<TARGET_FILE:${_name}> ${TEST_DATA_DIR})
@@ -40,4 +38,5 @@ if(BUILD_APPS)
   endmacro()
 
   APP_TEST_ADD(calibrate_radiometric_response)
+  TEST_ADD(mean_image LINK_WITH radical utils)
 endif()

@@ -22,10 +22,13 @@
 
 #include <opencv2/imgproc/imgproc.hpp>
 
-#include "utils/check.h"
+#include <radical/check.h>
+
 #include "utils/mean_image.h"
 
 namespace utils {
+
+using radical::Check;
 
 MeanImage::MeanImage(bool compute_variance, unsigned int num_samples)
 : compute_variance_(compute_variance), num_samples_(num_samples), done_(true), type_(-1), size_(0, 0) {}
@@ -40,11 +43,11 @@ bool MeanImage::addWeighted(cv::InputArray _image, cv::InputArray _weights, cv::
   if (done_)
     reset(_image.size(), _image.type());
   else
-    utils::Check("Input image", _image).hasSize(size_).hasType(type_);
+    Check("Input image", _image).hasSize(size_).hasType(type_);
 
   cv::Mat mask;
   if (!_mask.empty()) {
-    utils::Check("Mask", _mask).hasSize(size_).hasType(CV_8UC1);
+    Check("Mask", _mask).hasSize(size_).hasType(CV_8UC1);
     mask = _mask.getMat();
   }
 
@@ -59,8 +62,8 @@ bool MeanImage::addWeighted(cv::InputArray _image, cv::InputArray _weights, cv::
     if (w == 1)
       unity = true;
   } else {
-    utils::Check("Image", _image).hasChannels(1);  // per-pixel weights are supported only with single-channel images
-    utils::Check("Weights", _weights).hasSize(size_).hasType(CV_64FC1);
+    Check("Image", _image).hasChannels(1);  // per-pixel weights are supported only with single-channel images
+    Check("Weights", _weights).hasSize(size_).hasType(CV_64FC1);
     weights.convertTo(weights_32f_, CV_32F);
     cv::threshold(weights_32f_, weights_32f_, 0, 255, cv::THRESH_BINARY);
     weights_32f_.convertTo(mask_, CV_8U);

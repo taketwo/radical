@@ -21,12 +21,9 @@
  ******************************************************************************/
 
 #include <radical/exceptions.h>
+#include <radical/check.h>
 
-#include "utils/check.h"
-
-using namespace radical;
-
-namespace utils {
+namespace radical {
 
 Check::Check(const std::string& name, cv::InputArray m) : name_(name), m_(std::cref(m)) {}
 
@@ -82,4 +79,4 @@ const Check& Check::notEmpty() const {
   return *this;
 }
 
-}  // namespace utils
+}  // namespace radical
