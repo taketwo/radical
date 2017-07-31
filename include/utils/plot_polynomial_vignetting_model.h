@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright (c) 2016 Sergey Alexandrov
+ * Copyright (c) 2016-2017 Sergey Alexandrov
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to
@@ -22,7 +22,7 @@
 
 #pragma once
 
-#include <boost/assert.hpp>
+#include <cassert>
 
 #include <opencv2/core/core.hpp>
 
@@ -33,7 +33,7 @@
 template <unsigned int Degree>
 inline cv::Mat plotPolynomialVignettingModel(const radical::PolynomialVignettingModel<Degree>& pvm,
                                              cv::Size plot_size) {
-  BOOST_ASSERT(plot_size.area() > 0);
+  assert(plot_size.area() > 0);
 
   cv::Mat plot(plot_size, CV_8UC3);
   plot.setTo(255);

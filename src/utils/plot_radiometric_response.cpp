@@ -20,7 +20,7 @@
  * SOFTWARE.
  ******************************************************************************/
 
-#include <boost/assert.hpp>
+#include <cassert>
 
 #include <opencv2/imgproc/imgproc.hpp>
 
@@ -54,7 +54,7 @@ void plotRadiometricResponse(const cv::Mat& response, cv::Mat& canvas, const cv:
 }
 
 cv::Mat plotRadiometricResponse(const cv::Mat& response, const cv::Size& size, const cv::Scalar& color) {
-  BOOST_ASSERT(size.area() > 0);
+  assert(size.area() > 0);
   cv::Mat canvas(size, CV_8UC3);
   canvas.setTo(255);
   plotRadiometricResponse(response, canvas, color);
