@@ -15,6 +15,14 @@ include("${CMAKE_SOURCE_DIR}/cmake/Utils.cmake")
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
+# On Windows we build a static library with statically linked dependencies and
+# on Linux we build a shared library.
+if(WIN32)
+  set(LIB_TYPE STATIC)
+else()
+  set(LIB_TYPE SHARED)
+endif()
+
 # Library version
 set(RADICAL_VERSION_MAJOR 1)
 set(RADICAL_VERSION_MINOR 0)
@@ -58,6 +66,11 @@ if(BUILD_APPS OR BUILD_TESTS)
   if(BUILD_TESTS)
     list(APPEND Boost_COMPONENTS unit_test_framework)
   endif()
+  if(LIB_TYPE EQUAL STATIC)
+    set(Boost_USE_STATIC_LIBS ON)
+    set(Boost_USE_STATIC_RUNTIME OFF)
+    set(BOOST_ALL_DYN_LINK OFF)
+  endif()
   find_package(Boost COMPONENTS ${Boost_COMPONENTS} REQUIRED)
 endif()
 
@@ -70,10 +83,10 @@ set(RADICAL_SRC
   src/radical/nonparametric_vignetting_model.cpp
   src/radical/polynomial_vignetting_model.cpp
   src/radical/mat_io.cpp
-  src/radical/check.cpp 
+  src/radical/check.cpp
 )
 
-add_library(${LIB_NAME} SHARED ${RADICAL_SRC})
+add_library(${LIB_NAME} ${LIB_TYPE} ${RADICAL_SRC})
 set_target_properties(
   ${LIB_NAME} PROPERTIES
     VERSION "${RADICAL_VERSION_LIB}"
