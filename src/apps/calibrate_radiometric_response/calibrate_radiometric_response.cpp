@@ -162,7 +162,7 @@ int main(int argc, const char** argv) {
   if (data) {
     if (!options("output")) {
       auto dir = boost::filesystem::canonical(options.data_source);
-      options.output = (dir / dir.filename()).native() + ".crf";
+      options.output = (dir / dir.filename()).string() + ".crf";
     }
     if (options.verbosity)
       std::cout << "Loaded dataset from: " << options.data_source << std::endl;

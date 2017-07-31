@@ -110,7 +110,7 @@ void Dataset::save(const std::string& path) const {
   boost::format fmt("%1$06d_%2$03d.mat");
   for (const auto& time_images : data_)
     for (size_t i = 0; i < time_images.second.size(); ++i) {
-      auto filename = (dir / boost::str(fmt % time_images.first % i)).native();
+      auto filename = (dir / boost::str(fmt % time_images.first % i)).string();
       utils::writeMat(filename, time_images.second[i]);
     }
 }
