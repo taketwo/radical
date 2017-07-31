@@ -1,7 +1,7 @@
 if(OpenCV_VERSION VERSION_LESS 3.0.0)
   set(OpenCV_COMPONENTS highgui)
 else()
-  set(OpenCV_COMPONENTS imgcodecs highgui photo)
+  set(OpenCV_COMPONENTS imgcodecs highgui)
 endif()
 
 find_package(OpenCV COMPONENTS ${OpenCV_COMPONENTS} REQUIRED)
