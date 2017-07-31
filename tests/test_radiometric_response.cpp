@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright (c) 2016 Sergey Alexandrov
+ * Copyright (c) 2016-2017 Sergey Alexandrov
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to
@@ -31,12 +31,12 @@ BOOST_AUTO_TEST_CASE(MatConstructor) {
   // Invalid initialization, should throw
   cv::Mat m;
   BOOST_CHECK_THROW(RadiometricResponse rr(m), MatException);
-  m.create(1, 100, CV_32FC1);
-  BOOST_CHECK_THROW(RadiometricResponse rr(m), MatException);
+  m.create(1, 100, CV_32FC3);
+  BOOST_CHECK_THROW(RadiometricResponse rr(m), MatSizeException);
   m.create(1, 256, CV_32FC1);
-  BOOST_CHECK_THROW(RadiometricResponse rr(m), MatException);
+  BOOST_CHECK_THROW(RadiometricResponse rr(m), MatTypeException);
   m.create(1, 256, CV_8UC3);
-  BOOST_CHECK_THROW(RadiometricResponse rr(m), MatException);
+  BOOST_CHECK_THROW(RadiometricResponse rr(m), MatTypeException);
   // Valid initialization
   m.create(1, 256, CV_32FC3);
   m.setTo(1.0f);
@@ -92,7 +92,7 @@ BOOST_AUTO_TEST_CASE(DirectMapImageInvalid) {
 }
 
 BOOST_AUTO_TEST_CASE(InverseMapPixel) {
-  auto log = [](const cv::Vec3f& v){ return cv::Vec3f(std::log(v[0]), std::log(v[1]), std::log(v[2])); };
+  auto log = [](const cv::Vec3f& v) { return cv::Vec3f(std::log(v[0]), std::log(v[1]), std::log(v[2])); };
   {
     RadiometricResponse rr(getTestFilename("radiometric_response_identity.crf"));
     // Normal map
@@ -142,11 +142,10 @@ BOOST_AUTO_TEST_CASE(InverseMapImageInvalid) {
   rr.inverseLogMap(I, E);
   BOOST_CHECK(E.empty());
   I.create(10, 10, CV_8UC1);
-  BOOST_CHECK_THROW(rr.directMap(I, E), MatException);
+  BOOST_CHECK_THROW(rr.directMap(I, E), MatTypeException);
 }
 
-BOOST_AUTO_TEST_CASE(SaveLoad)
-{
+BOOST_AUTO_TEST_CASE(SaveLoad) {
   cv::Mat response(256, 1, CV_32FC3);
   response.setTo(10);
   auto f = getTemporaryFilename();
@@ -154,4 +153,3 @@ BOOST_AUTO_TEST_CASE(SaveLoad)
   RadiometricResponse rr(f);
   BOOST_CHECK_EQUAL_MAT(rr.getInverseResponse(), response, cv::Vec3f);
 }
-

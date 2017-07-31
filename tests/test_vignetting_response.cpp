@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright (c) 2016 Sergey Alexandrov
+ * Copyright (c) 2016-2017 Sergey Alexandrov
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to
@@ -93,11 +93,11 @@ BOOST_AUTO_TEST_CASE(RemoveInvalid) {
   vm.remove(E, L);
   BOOST_CHECK(L.empty());
   E.create(10, 10, CV_32FC2);
-  BOOST_CHECK_THROW(vm.remove(E, L), MatException); // wrong type
-  BOOST_CHECK_THROW(vm.removeLog(E, L), MatException); // wrong type
+  BOOST_CHECK_THROW(vm.remove(E, L), MatTypeException);
+  BOOST_CHECK_THROW(vm.removeLog(E, L), MatTypeException);
   E.create(20, 10, CV_32FC3);
-  BOOST_CHECK_THROW(vm.remove(E, L), Exception); // invalid aspect ratio
-  BOOST_CHECK_THROW(vm.removeLog(E, L), Exception); // invalid aspect ratio
+  BOOST_CHECK_THROW(vm.remove(E, L), Exception);     // invalid aspect ratio
+  BOOST_CHECK_THROW(vm.removeLog(E, L), Exception);  // invalid aspect ratio
 }
 
 BOOST_AUTO_TEST_CASE(RemoveIdentity) {
@@ -119,11 +119,11 @@ BOOST_AUTO_TEST_CASE(AddInvalid) {
   vm.add(L, E);
   BOOST_CHECK(E.empty());
   L.create(10, 10, CV_32FC2);
-  BOOST_CHECK_THROW(vm.add(L, E), MatException); // wrong type
-  BOOST_CHECK_THROW(vm.addLog(L, E), MatException); // wrong type
+  BOOST_CHECK_THROW(vm.add(L, E), MatTypeException);
+  BOOST_CHECK_THROW(vm.addLog(L, E), MatTypeException);
   L.create(10, 20, CV_32FC2);
-  BOOST_CHECK_THROW(vm.add(L, E), Exception); // invalid aspect ratio
-  BOOST_CHECK_THROW(vm.addLog(L, E), Exception); // invalid aspect ratio
+  BOOST_CHECK_THROW(vm.add(L, E), Exception);     // invalid aspect ratio
+  BOOST_CHECK_THROW(vm.addLog(L, E), Exception);  // invalid aspect ratio
 }
 
 BOOST_AUTO_TEST_CASE(AddIdentity) {
@@ -138,4 +138,3 @@ BOOST_AUTO_TEST_CASE(AddIdentity) {
   vm.addLog(L, E);
   BOOST_CHECK_EQUAL_MAT(E, L, cv::Vec3f);
 }
-

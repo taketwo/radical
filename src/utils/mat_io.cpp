@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright (c) 2016 Sergey Alexandrov
+ * Copyright (c) 2016-2017 Sergey Alexandrov
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to
@@ -20,13 +20,12 @@
  * SOFTWARE.
  ******************************************************************************/
 
+#include <cassert>
 #include <iostream>
-
-#include <boost/assert.hpp>
-#include <boost/throw_exception.hpp>
 
 #include <radical/exceptions.h>
 
+#include "utils/check.h"
 #include "utils/mat_io.h"
 
 using namespace radical;
@@ -38,19 +37,13 @@ static const uint32_t MAGIC = 0xC4A1FDD9;
 void writeMat(const std::string& filename, const cv::Mat& mat) {
   std::ofstream file(filename, std::ios::out | std::ios::binary);
   if (!file.is_open())
-    BOOST_THROW_EXCEPTION(SerializationException("Failed to open file for writing cv::Mat")
-                          << SerializationException::Filename(filename));
+    throw SerializationException("Failed to open file for writing cv::Mat", filename);
 
   writeMat(file, mat);
 }
 
 void writeMat(std::ofstream& file, const cv::Mat& mat) {
-  if (mat.empty())
-    BOOST_THROW_EXCEPTION(SerializationException("cv::Mat should not be empty"));
-  if (mat.dims > 2)
-    BOOST_THROW_EXCEPTION(SerializationException("cv::Mat should be 1- or 2-dimensional"));
-  if (!mat.isContinuous())
-    BOOST_THROW_EXCEPTION(SerializationException("cv::Mat should be continuous"));
+  Check("Serialized mat", mat).notEmpty().isContinuous().hasMaxDimensions(2);
 
   uint32_t type = mat.type();
   file.write((const char*)(&MAGIC), sizeof(uint32_t));
@@ -64,29 +57,23 @@ void writeMat(std::ofstream& file, const cv::Mat& mat) {
 cv::Mat readMat(const std::string& filename) {
   std::ifstream file(filename, std::ios::in | std::ios::binary);
   if (!file.is_open())
-    BOOST_THROW_EXCEPTION(SerializationException("Failed to open file for reading cv::Mat")
-                          << SerializationException::Filename(filename));
-
-  try {
-    return readMat(file);
-  } catch (SerializationException& e) {
-    throw e << SerializationException::Filename(filename);
-  }
+    throw SerializationException("Failed to open file for reading cv::Mat", filename);
+  return readMat(file);
 }
 
 cv::Mat readMat(std::ifstream& file) {
   uint32_t magic, type, dims, rows, cols;
   file.read((char*)(&magic), sizeof(uint32_t));
   if (magic != MAGIC)
-    BOOST_THROW_EXCEPTION(SerializationException("File does not contain a cv::Mat"));
+    throw SerializationException("File does not contain a cv::Mat");
   file.read((char*)(&type), sizeof(uint32_t));
   file.read((char*)(&dims), sizeof(uint32_t));
   if (dims > 2)
-    BOOST_THROW_EXCEPTION(SerializationException("File contains a cv::Mat that is not 1- or 2-dimensional"));
+    throw SerializationException("File contains a cv::Mat that is not 1- or 2-dimensional");
   file.read((char*)(&rows), sizeof(uint32_t));
   file.read((char*)(&cols), sizeof(uint32_t));
   cv::Mat mat(rows, cols, type);
-  BOOST_ASSERT(mat.isContinuous());
+  assert(mat.isContinuous());
   file.read((char*)(mat.data), mat.elemSize() * mat.total());
   file.close();
   return mat;

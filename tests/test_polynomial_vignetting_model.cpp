@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright (c) 2016 Sergey Alexandrov
+ * Copyright (c) 2016-2017 Sergey Alexandrov
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to
@@ -32,12 +32,12 @@ BOOST_AUTO_TEST_CASE(MatConstructor) {
   cv::Mat m;
   cv::Size s(100, 100);
   BOOST_CHECK_THROW(PolynomialVignettingModel<3> vm(m, s), MatException);
-  m.create(10, 10, CV_8UC3);
-  BOOST_CHECK_THROW(PolynomialVignettingModel<3> vm(m, s), MatException);
+  m.create(10, 10, CV_64FC3);
+  BOOST_CHECK_THROW(PolynomialVignettingModel<3> vm(m, s), MatSizeException);
   m.create(1, 4, CV_64FC3);
-  BOOST_CHECK_THROW(PolynomialVignettingModel<3> vm(m, s), MatException);
+  BOOST_CHECK_THROW(PolynomialVignettingModel<3> vm(m, s), MatSizeException);
   m.create(1, 5, CV_32FC1);
-  BOOST_CHECK_THROW(PolynomialVignettingModel<3> vm(m, s), MatException);
+  BOOST_CHECK_THROW(PolynomialVignettingModel<3> vm(m, s), MatTypeException);
   // Valid initialization
   m.create(1, 5, CV_64FC3);
   m.setTo(1.0f);
@@ -49,8 +49,10 @@ BOOST_AUTO_TEST_CASE(MatConstructor) {
 
 BOOST_AUTO_TEST_CASE(LoadConstructor) {
   // Invalid initialization, should throw
-  BOOST_CHECK_THROW(PolynomialVignettingModel<3> vm(getTestFilename("file_that_does_not_exist.vgn")), SerializationException);
-  BOOST_CHECK_THROW(PolynomialVignettingModel<3> vm(getTestFilename("vignetting_model_empty.vgn")), SerializationException);
+  BOOST_CHECK_THROW(PolynomialVignettingModel<3> vm(getTestFilename("file_that_does_not_exist.vgn")),
+                    SerializationException);
+  BOOST_CHECK_THROW(PolynomialVignettingModel<3> vm(getTestFilename("vignetting_model_empty.vgn")),
+                    SerializationException);
   // Valid initialization
   BOOST_CHECK_NO_THROW(PolynomialVignettingModel<3> vm(getTestFilename("polynomial_vignetting_model_identity.vgn")));
 }

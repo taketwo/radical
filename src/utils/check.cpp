@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright (c) 2016 Sergey Alexandrov
+ * Copyright (c) 2016-2017 Sergey Alexandrov
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to
@@ -20,8 +20,6 @@
  * SOFTWARE.
  ******************************************************************************/
 
-#include <boost/throw_exception.hpp>
-
 #include <radical/exceptions.h>
 
 #include "utils/check.h"
@@ -32,16 +30,27 @@ namespace utils {
 
 Check::Check(const std::string& name, cv::InputArray m) : name_(name), m_(std::cref(m)) {}
 
-const Check& Check::notEmpty() const {
-  if (m_.get().empty())
-    BOOST_THROW_EXCEPTION(MatException(name_ + " is empty"));
+const Check& Check::hasChannels(int channels) const {
+  if (m_.get().channels() != channels)
+    throw MatChannelsException(name_, channels, m_.get().channels());
+  return *this;
+}
+
+const Check& Check::hasDepth(int depth) const {
+  if (m_.get().depth() != depth)
+    throw MatDepthException(name_, depth, m_.get().depth());
+  return *this;
+}
+
+const Check& Check::hasMaxDimensions(int max_dims) const {
+  if (m_.get().getMat().dims > max_dims)
+    throw MatMaxDimensionsException(name_, max_dims, m_.get().getMat().dims);
   return *this;
 }
 
 const Check& Check::hasSize(cv::Size size) const {
   if (m_.get().size() != size)
-    BOOST_THROW_EXCEPTION(MatException(name_ + " does not have expected size")
-                          << MatException::ExpectedSize(size) << MatException::ActualSize(m_.get().size()));
+    throw MatSizeException(name_, size, m_.get().size());
   return *this;
 }
 
@@ -51,39 +60,25 @@ const Check& Check::hasSize(int width, int height) const {
 
 const Check& Check::hasSize(int total) const {
   if (static_cast<int>(m_.get().total()) != total)
-    BOOST_THROW_EXCEPTION(MatException(name_ + " does not have expected size")
-                          << MatException::ExpectedSize({total, 1}) << MatException::ActualSize(m_.get().size()));
+    throw MatSizeException(name_, {total, 1}, m_.get().size());
   return *this;
 }
 
 const Check& Check::hasType(int type) const {
   if (m_.get().type() != type)
-    BOOST_THROW_EXCEPTION(MatException(name_ + " does not have expected type")
-                          << MatException::ExpectedType(type) << MatException::ActualType(m_.get().type()));
+    throw MatTypeException(name_, type, m_.get().type());
   return *this;
 }
 
-const Check& Check::hasType(std::initializer_list<int> types) const {
-  bool condition = false;
-  for (const auto& type : types)
-    condition |= type == m_.get().type();
-  if (!condition)
-    BOOST_THROW_EXCEPTION(MatException(name_ + " does not have any of expected types")
-                          << MatException::ActualType(m_.get().type()));
+const Check& Check::isContinuous() const {
+  if (!m_.get().getMat().isContinuous())
+    throw MatException(name_ + " is not continuous");
   return *this;
 }
 
-const Check& Check::hasChannels(int channels) const {
-  if (m_.get().channels() != channels)
-    BOOST_THROW_EXCEPTION(MatException(name_ + " does not have expected number of channels")
-                          << MatException::ExpectedChannels(channels) << MatException::ActualChannels(m_.get().channels()));
-  return *this;
-}
-
-const Check& Check::hasDepth(int depth) const {
-  if (m_.get().depth() != depth)
-    BOOST_THROW_EXCEPTION(MatException(name_ + " does not have expected depth")
-                          << MatException::ExpectedDepth(depth) << MatException::ActualDepth(m_.get().depth()));
+const Check& Check::notEmpty() const {
+  if (m_.get().empty())
+    throw MatException(name_ + " is empty");
   return *this;
 }
 

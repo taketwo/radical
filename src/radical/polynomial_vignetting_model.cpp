@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright (c) 2016 Sergey Alexandrov
+ * Copyright (c) 2016-2017 Sergey Alexandrov
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to
@@ -22,8 +22,7 @@
 
 #include <fstream>
 #include <iostream>
-
-#include <boost/lexical_cast.hpp>
+#include <sstream>
 
 #include <radical/exceptions.h>
 #include <radical/polynomial_vignetting_model.h>
@@ -35,7 +34,7 @@ namespace radical {
 
 template <unsigned int Degree>
 PolynomialVignettingModel<Degree>::PolynomialVignettingModel(cv::InputArray _coefficients, cv::Size image_size) {
-  utils::Check("Polynomial vignetting model", _coefficients).hasSize(Degree + 2).hasType(CV_64FC3);
+  utils::Check("Polynomial vignetting model", _coefficients).notEmpty().hasSize(Degree + 2).hasType(CV_64FC3);
   coefficients_ = _coefficients.getMat();
   image_size_ = image_size;
 }
@@ -49,25 +48,26 @@ PolynomialVignettingModel<Degree>::PolynomialVignettingModel(const std::string& 
     {
       std::getline(file, line);
       std::stringstream(line) >> name >> degree >> width >> height;
-      if (name != "PolynomialVignettingModel" || degree != Degree)
-        BOOST_THROW_EXCEPTION(
-            SerializationException("Vignetting model stored in the file is not polynomial of degree " +
-                                   boost::lexical_cast<std::string>(Degree))
-            << SerializationException::Filename(filename));
+      if (name != "PolynomialVignettingModel" || degree != Degree) {
+        std::stringstream msg;
+        msg << "Vignetting model stored in the file is not polynomial of degree " << Degree;
+        throw SerializationException(msg.str(), filename);
+      }
     }
     image_size_ = cv::Size(width, height);
     coefficients_ = utils::readMat(file);
     // TODO: Check read coefficients
     file.close();
   } else {
-    BOOST_THROW_EXCEPTION(SerializationException("Unable to open vignetting model file")
-                          << SerializationException::Filename(filename));
+    throw SerializationException("Unable to open vignetting model file", filename);
   }
 }
 
 template <unsigned int Degree>
 std::string PolynomialVignettingModel<Degree>::getName() const {
-  return "polynomial " + boost::lexical_cast<std::string>(Degree);
+  std::stringstream name;
+  name << "polynomial " << Degree;
+  return name.str();
 }
 
 template <unsigned int Degree>
@@ -78,8 +78,7 @@ void PolynomialVignettingModel<Degree>::save(const std::string& filename) const 
     utils::writeMat(file, coefficients_);
     file.close();
   } else {
-    BOOST_THROW_EXCEPTION(SerializationException("Unable to open file to save vignetting model")
-                          << SerializationException::Filename(filename));
+    throw SerializationException("Unable to open file to save vignetting model", filename);
   }
 }
 

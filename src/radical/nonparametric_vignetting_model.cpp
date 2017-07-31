@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright (c) 2016 Sergey Alexandrov
+ * Copyright (c) 2016-2017 Sergey Alexandrov
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to
@@ -44,14 +44,12 @@ NonparametricVignettingModel::NonparametricVignettingModel(const std::string& fi
       std::getline(file, line);
       std::stringstream(line) >> name;
       if (name != "NonparametricVignettingModel")
-        BOOST_THROW_EXCEPTION(SerializationException("Vignetting model stored in the file is not nonparametric")
-                              << SerializationException::Filename(filename));
+        throw SerializationException("Vignetting model stored in the file is not nonparametric", filename);
     }
     coefficients_ = utils::readMat(file);
     file.close();
   } else {
-    BOOST_THROW_EXCEPTION(SerializationException("Unable to open vignetting model file")
-                          << SerializationException::Filename(filename));
+    throw SerializationException("Unable to open vignetting model file", filename);
   }
 }
 
@@ -66,8 +64,7 @@ void NonparametricVignettingModel::save(const std::string& filename) const {
     utils::writeMat(file, coefficients_);
     file.close();
   } else {
-    BOOST_THROW_EXCEPTION(SerializationException("Unable to open file to save vignetting model")
-                          << SerializationException::Filename(filename));
+    throw SerializationException("Unable to open file to save vignetting model", filename);
   }
 }
 

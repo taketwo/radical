@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright (c) 2016 Sergey Alexandrov
+ * Copyright (c) 2016-2017 Sergey Alexandrov
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to
@@ -24,7 +24,6 @@
 
 #include <string>
 #include <functional>
-#include <initializer_list>
 
 #include <opencv2/core/core.hpp>
 
@@ -34,7 +33,11 @@ class Check {
  public:
   Check(const std::string& name, cv::InputArray m);
 
-  const Check& notEmpty() const;
+  const Check& hasChannels(int channels) const;
+
+  const Check& hasDepth(int depth) const;
+
+  const Check& hasMaxDimensions(int max_dims) const;
 
   const Check& hasSize(cv::Size size) const;
 
@@ -44,11 +47,9 @@ class Check {
 
   const Check& hasType(int type) const;
 
-  const Check& hasType(std::initializer_list<int> types) const;
+  const Check& isContinuous() const;
 
-  const Check& hasChannels(int channels) const;
-
-  const Check& hasDepth(int depth) const;
+  const Check& notEmpty() const;
 
  private:
   std::string name_;
