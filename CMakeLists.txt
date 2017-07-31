@@ -80,9 +80,11 @@ set_target_properties(
     SOVERSION "${RADICAL_VERSION_SO}"
 )
 target_compile_definitions(${LIB_NAME} PUBLIC "RADICAL_DEBUG=$<CONFIG:Debug>")
-target_include_directories(
-  ${LIB_NAME} PUBLIC
-  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
+target_include_directories(${LIB_NAME}
+  PUBLIC
+    "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
+    ${OpenCV_INCLUDE_DIRS} # Should be picked up automatically from linking, but
+                           # does not work reliably on Windows
 )
 
 target_link_libraries(${LIB_NAME} PUBLIC opencv_core opencv_imgproc)
