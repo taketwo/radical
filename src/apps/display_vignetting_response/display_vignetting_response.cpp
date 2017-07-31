@@ -124,7 +124,7 @@ int main(int argc, const char** argv) {
     cv::Mat stacked;
     for (size_t i = 0; i < channels.size(); ++i)
       stacked.push_back(channels[2 - i]);
-    stacked.reshape(response.rows, response.cols * channels.size());
+    stacked.reshape(response.rows, response.cols * static_cast<int>(channels.size()));
     if (options.colormap_id == -1) {
       response = stacked;
     } else {

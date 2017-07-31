@@ -118,7 +118,7 @@ int main(int argc, const char** argv) {
 
   try {
     grabber = grabbers::createGrabber(options.camera);
-  } catch (grabbers::GrabberException& e) {
+  } catch (grabbers::GrabberException&) {
     std::cerr << "Failed to create a grabber" << (options.camera != "" ? " for camera " + options.camera : "")
               << std::endl;
     return 1;

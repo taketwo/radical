@@ -69,7 +69,7 @@ void NonparametricVignettingModel::save(const std::string& filename) const {
 }
 
 cv::Vec3f NonparametricVignettingModel::operator()(const cv::Vec2f& p) const {
-  return coefficients_.at<cv::Vec3f>(std::floor(p[1]), std::floor(p[0]));
+  return coefficients_.at<cv::Vec3f>(static_cast<int>(std::floor(p[1])), static_cast<int>(std::floor(p[0])));
 }
 
 cv::Size NonparametricVignettingModel::getImageSize() const {

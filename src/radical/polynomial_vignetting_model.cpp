@@ -85,7 +85,7 @@ void PolynomialVignettingModel<Degree>::save(const std::string& filename) const 
 template <unsigned int Degree>
 cv::Vec3f PolynomialVignettingModel<Degree>::operator()(const cv::Vec2f& p) const {
   cv::Vec3f result = {1.0, 1.0, 1.0};
-  for (size_t i = 0; i < 3; ++i) {
+  for (int i = 0; i < 3; ++i) {
     auto coeff = coefficients_.ptr<cv::Vec3d>();
     auto dx = coeff[0][i] - p[0];
     auto dy = coeff[1][i] - p[1];

@@ -171,7 +171,7 @@ int main(int argc, const char** argv) {
 
     try {
       grabber = grabbers::createGrabber(options.data_source);
-    } catch (grabbers::GrabberException& e) {
+    } catch (grabbers::GrabberException&) {
       std::cerr << "Failed to create a grabber"
                 << (options.data_source != "" ? " for camera " + options.data_source : "") << std::endl;
       return 1;
@@ -187,7 +187,7 @@ int main(int argc, const char** argv) {
     if (!options("exposure-max"))
       options.dc.exposure_max = grabber->getExposureRange().second;
     if (!options("factor"))
-      options.dc.exposure_factor = std::pow(options.dc.exposure_max / options.dc.exposure_min, 1.0 / 30);
+      options.dc.exposure_factor = std::pow(1.0f * options.dc.exposure_max / options.dc.exposure_min, 1.0f / 30);
 
     // Change exposure to requested min value, wait some time until it works
     cv::Mat frame;
@@ -270,7 +270,7 @@ int main(int argc, const char** argv) {
     std::vector<cv::Mat> response_channels;
     cv::split(response, response_channels);
     for (const auto& ch : response_channels) {
-      for (size_t i = 0; i < ch.total(); ++i)
+      for (int i = 0; i < ch.total(); ++i)
         std::cout << ch.at<float>(i) << " ";
       std::cout << std::endl;
     }

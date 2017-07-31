@@ -31,7 +31,7 @@ namespace radical {
   if (!model)                              \
     try {                                  \
       model.reset(new Model(filename));    \
-    } catch (SerializationException & e) { \
+    } catch (SerializationException&) {    \
     }
 
 VignettingModel::Ptr VignettingModel::load(const std::string& filename) {

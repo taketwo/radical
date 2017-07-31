@@ -61,7 +61,7 @@ bool DatasetCollection::addFrame(const cv::Mat& frame) {
   if (--images_to_accumulate_ > 0)
     return false;
 
-  exposure_ += std::ceil(exposure_ * (params_.exposure_factor - 1.0));
+  exposure_ += static_cast<int>(std::ceil(exposure_ * (params_.exposure_factor - 1.0)));
   skip_frames_ = params_.exposure_control_lag;
   images_to_accumulate_ = params_.num_images;
   grabber_->setExposure(exposure_);
@@ -89,8 +89,8 @@ cv::Mat DatasetCollection::computeSaturationMask(const cv::Mat& image) {
   for (size_t i = 1; i < mask_channels.size(); ++i)
     bloom_mask |= mask_channels[i];
   cv::erode(bloom_mask, bloom_mask, morph_);
-  for (auto& mask : mask_channels)
-    mask &= bloom_mask;
+  for (auto& mask_channel : mask_channels)
+    mask_channel &= bloom_mask;
   cv::merge(mask_channels, mask);
   return mask;
 }

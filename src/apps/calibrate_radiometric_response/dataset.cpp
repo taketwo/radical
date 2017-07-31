@@ -128,8 +128,8 @@ Dataset::Ptr Dataset::load(const std::string& path) {
         cv::Mat image;
         image = utils::readMat(iter->path().string());
         dataset->insert(exposure, image);
-      } catch (boost::bad_lexical_cast& e) {
-      } catch (radical::SerializationException& e) {
+      } catch (boost::bad_lexical_cast&) {
+      } catch (radical::SerializationException&) {
       }
     }
     return dataset;

@@ -46,7 +46,7 @@ cv::Mat EngelCalibration::calibrateChannel(const Dataset& dataset) {
 
   printHeader();
 
-  size_t iteration = 0;
+  unsigned int iteration = 0;
   while (iteration < max_num_iterations_) {
     optimizeIrradiance();
     auto e = computeEnergy();
@@ -140,7 +140,7 @@ double EngelCalibration::computeEnergy() {
             energy += r * r;
             num += 1;
           }
-  return std::sqrt(energy / num);
+  return static_cast<double>(std::sqrt(energy / num));
 }
 
 void EngelCalibration::rescale() {

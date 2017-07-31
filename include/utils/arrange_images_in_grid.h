@@ -63,7 +63,7 @@ cv::Mat arrangeImagesInGrid(const std::vector<cv::Mat>& images, cv::Size grid, i
   int width = grid.width * size.width, height = grid.height * size.height;
   out.create(height, width, type);
   out.setTo(0);
-  for (size_t i = 0; i < homogenized_images.size(); ++i) {
+  for (int i = 0; i < static_cast<int>(homogenized_images.size()); ++i) {
     int y = i / grid.width;
     int x = i % grid.width;
     cv::Mat roi(out, cv::Rect(x * size.width, y * size.height, size.width, size.height));

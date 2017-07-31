@@ -43,7 +43,7 @@ void maskSaturatedPixels(cv::InputArray _image, cv::InputOutputArray _mask, uint
 
 #if CV_MAJOR_VERSION > 2
   image.forEach<cv::Vec3b>([&mask, mask_value, min, max](const cv::Vec3b& v, const int* p) {
-    for (size_t c = 0; c < 3; ++c)
+    for (int c = 0; c < 3; ++c)
       if (v[c] < min || v[c] > max) {
         mask.at<uint8_t>(p) = mask_value;
         break;
