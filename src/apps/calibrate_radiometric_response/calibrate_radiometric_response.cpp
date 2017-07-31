@@ -270,7 +270,7 @@ int main(int argc, const char** argv) {
     std::vector<cv::Mat> response_channels;
     cv::split(response, response_channels);
     for (const auto& ch : response_channels) {
-      for (int i = 0; i < ch.total(); ++i)
+      for (int i = 0; i < static_cast<int>(ch.total()); ++i)
         std::cout << ch.at<float>(i) << " ";
       std::cout << std::endl;
     }
