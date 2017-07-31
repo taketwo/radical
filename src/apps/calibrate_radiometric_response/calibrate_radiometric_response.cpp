@@ -135,6 +135,15 @@ class Options : public OptionsBase {
     std::cout << "irradiance computation, however radiometric response is estimated for them as well." << std::endl;
     std::cout << "" << std::endl;
   }
+
+  virtual void validate() override {
+    if (dc.valid_intensity_max > 255) {
+      throw boost::program_options::error("maximum valid intensity can not exceed 255");
+    }
+    if (dc.valid_intensity_min > 255) {
+      throw boost::program_options::error("minimum valid intensity can not exceed 255");
+    }
+  }
 };
 
 int main(int argc, const char** argv) {
@@ -243,7 +252,7 @@ int main(int argc, const char** argv) {
     cv::waitKey(options.interactive ? -1 : 1);
   };
 
-  calibration->setValidPixelRange(options.dc.valid_intensity_min, options.dc.valid_intensity_max);
+  calibration->setValidPixelRange(static_cast<unsigned char>(options.dc.valid_intensity_min), static_cast<unsigned char>(options.dc.valid_intensity_max));
   calibration->setVerbosity(options.verbosity);
   if (!options.no_visualization)
     calibration->setVisualizeProgress(limshow);
