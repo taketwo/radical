@@ -47,6 +47,7 @@ macro(APP_ADD _name)
     endforeach()
     file(GLOB _sources *.cpp)
     add_executable(${_executable} ${_sources})
+    target_include_directories(${_executable} PUBLIC ${Boost_INCLUDE_DIRS})
     target_link_libraries(${_executable}
       ${LIB_NAME}
       ${_link_with}

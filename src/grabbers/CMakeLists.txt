@@ -1,3 +1,6 @@
+# Actually, we need Boost exceptions, but they are header-only
+find_package(Boost COMPONENTS system REQUIRED)
+
 set(GRABBERS_SRC grabber.cpp)
 
 if(WITH_OPENNI2)
@@ -17,6 +20,7 @@ if(WITH_REALSENSE)
 endif()
 
 add_library(grabbers ${GRABBERS_SRC})
+target_include_directories(grabbers PUBLIC ${Boost_INCLUDE_DIRS})
 target_link_libraries(grabbers ${OpenCV_LIBS} ${GRABBERS_DEPS})
 
 foreach(grabber openni2 realsense)
