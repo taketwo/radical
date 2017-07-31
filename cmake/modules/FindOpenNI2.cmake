@@ -34,9 +34,11 @@ if(WIN32)
     find_file(OPENNI2_INCLUDES "OpenNI.h" PATHS $ENV{OPENNI2_INCLUDE64} "$ENV{OPEN_NI_INSTALL_PATH64}Include" DOC "OpenNI2 c++ interface header")
     find_library(OPENNI2_LIBRARY "OpenNI2" PATHS $ENV{OPENNI2_LIB64} DOC "OpenNI2 library")
   endif()
+  set(LIBRARY_TYPE STATIC)
 elseif(UNIX OR APPLE)
   find_file(OPENNI2_INCLUDES "OpenNI.h" PATHS "/usr/include/ni2" "/usr/include/openni2" $ENV{OPENNI2_INCLUDE} DOC "OpenNI2 c++ interface header")
   find_library(OPENNI2_LIBRARY "OpenNI2" PATHS "/usr/lib" $ENV{OPENNI2_REDIST} DOC "OpenNI2 library")
+  set(LIBRARY_TYPE SHARED)
 endif()
 
 if(OPENNI2_LIBRARY AND OPENNI2_INCLUDES)
@@ -69,7 +71,7 @@ mark_as_advanced(FORCE OPENNI2_INCLUDES)
 if(HAVE_OPENNI2)
 
   ## Imported target
-  add_library(openni2 SHARED IMPORTED)
+  add_library(openni2 ${LIBRARY_TYPE} IMPORTED)
   set_property(TARGET openni2 PROPERTY INTERFACE_INCLUDE_DIRECTORIES ${OPENNI2_INCLUDE_DIR})
   set_property(TARGET openni2 PROPERTY IMPORTED_LOCATION ${OPENNI2_LIBRARY})
 
