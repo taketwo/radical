@@ -13,10 +13,10 @@ macro(TEST_ADD _name)
   set(_executable test_${_name})
   add_executable(${_executable} ${_executable}.cpp)
   target_include_directories(${_executable} PRIVATE ${Boost_INCLUDE_DIRS})
-  target_compile_definitions(${_executable}
-    PRIVATE "-DBOOST_TEST_MODULE=${_name}"
-    PRIVATE "-DBOOST_TEST_DYN_LINK"
-  )
+  target_compile_definitions(${_executable} PRIVATE "-DBOOST_TEST_MODULE=${_name}")
+  if(LIB_TYPE STREQUAL SHARED)
+    target_compile_definitions(${_executable} PRIVATE "-DBOOST_TEST_DYN_LINK")
+  endif()
   target_link_libraries(${_executable}
     ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY} ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY}
     ${TEST_ADD_LINK_WITH}
