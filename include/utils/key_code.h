@@ -37,6 +37,7 @@ class KeyCode {
     ARROW_DOWN,
     ARROW_RIGHT,
     ARROW_LEFT,
+    NO_KEY,
   };
 
   bool operator==(Key key) const;
