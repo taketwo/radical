@@ -40,7 +40,7 @@ PolynomialVignettingModel<Degree>::PolynomialVignettingModel(cv::InputArray _coe
 
 template <unsigned int Degree>
 PolynomialVignettingModel<Degree>::PolynomialVignettingModel(const std::string& filename) {
-  std::ifstream file(filename);
+  std::ifstream file(filename, std::ios::in | std::ios::binary);
   if (file.is_open()) {
     std::string line, name;
     unsigned int degree, width, height;
@@ -71,9 +71,12 @@ std::string PolynomialVignettingModel<Degree>::getName() const {
 
 template <unsigned int Degree>
 void PolynomialVignettingModel<Degree>::save(const std::string& filename) const {
-  std::ofstream file(filename);
+  std::ofstream file(filename, std::ios::out | std::ios::binary);
   if (file.is_open()) {
-    file << "PolynomialVignettingModel " << Degree << " " << image_size_.width << " " << image_size_.height << "\n";
+    std::stringstream header;
+    header << "PolynomialVignettingModel " << Degree << " " << image_size_.width << " " << image_size_.height << "\n";
+    auto str = header.str();
+    file.write(str.c_str(), str.size());
     writeMat(file, coefficients_);
     file.close();
   } else {

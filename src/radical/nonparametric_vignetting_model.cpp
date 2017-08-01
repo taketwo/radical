@@ -37,7 +37,7 @@ NonparametricVignettingModel::NonparametricVignettingModel(cv::InputArray _coeff
 }
 
 NonparametricVignettingModel::NonparametricVignettingModel(const std::string& filename) {
-  std::ifstream file(filename);
+  std::ifstream file(filename, std::ios::in | std::ios::binary);
   if (file.is_open()) {
     std::string line, name;
     {
@@ -58,7 +58,7 @@ std::string NonparametricVignettingModel::getName() const {
 }
 
 void NonparametricVignettingModel::save(const std::string& filename) const {
-  std::ofstream file(filename);
+  std::ofstream file(filename, std::ios::out | std::ios::binary);
   if (file.is_open()) {
     file << "NonparametricVignettingModel\n";
     writeMat(file, coefficients_);
