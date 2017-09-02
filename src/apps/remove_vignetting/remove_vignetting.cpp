@@ -46,8 +46,9 @@ struct Options : public OptionsBase {
   std::string crf = "";
   std::string vgn = "";
   std::string source = "";
-  float scale = 0.7;
   bool alternate = false;
+  float scale = 0.7;
+  bool save = false;
 
   virtual void addOptions(boost::program_options::options_description& desc) override {
     namespace po = boost::program_options;
@@ -55,6 +56,7 @@ struct Options : public OptionsBase {
                        "Alternate between original and cleared images on keypress");
     desc.add_options()("scale,s", po::value<float>(&scale)->default_value(scale),
                        "Scale the cleared irradiance map before re-applying camera response function");
+    desc.add_options()("save", po::bool_switch(&save), "Save the cleared image");
   }
 
   virtual void addPositional(boost::program_options::options_description& desc,
@@ -73,12 +75,17 @@ struct Options : public OptionsBase {
     std::cout << "Usage: remove_vignetting [options] <radiometric-response> <vignetting-response> <image-source>"
               << std::endl;
     std::cout << "" << std::endl;
-    std::cout << "Remove vignetting effects from a given image stored in the filesystem, or from images " << std::endl;
-    std::cout << "streamed by a camera. The original and cleared images are displayed either side-by-side" << std::endl;
-    std::cout << "or alternatively (toggled by a keypress)." << std::endl;
+    std::cout << "Remove vignetting effects from a given image (png, jpg, or mat) stored in the " << std::endl;
+    std::cout << "filesystem, or from images streamed by a camera. The original and cleared images are " << std::endl;
+    std::cout << "displayed either side-by-side or alternatively (toggled by a keypress)." << std::endl;
     std::cout << "" << std::endl;
     std::cout << "The --scale option allows to adjust the brightness before re-applying the camera " << std::endl;
-    std::cout << "response function. The end effect is same as chaning the exposure time." << std::endl;
+    std::cout << "response function. The end effect is same as changing the exposure time." << std::endl;
+    std::cout << "" << std::endl;
+    std::cout << "The --save option enables writing of the cleared image to the filesystem. The output " << std::endl;
+    std::cout << "file will have the same extension as the input, and the \".clear\" suffix will be " << std::endl;
+    std::cout << "added to the file stem. Note that this option is valid only for a single file input, " << std::endl;
+    std::cout << "not a camera stream." << std::endl;
     std::cout << "" << std::endl;
     std::cout << "To exit the app press Esc." << std::endl;
     std::cout << "" << std::endl;
@@ -137,15 +144,23 @@ int main(int argc, const char** argv) {
     return img_cleared;
   };
 
+  auto addSuffix = [](const std::string& path) {
+    return path.substr(0, path.length() - 4) + ".clear" + path.substr(path.length() - 4);
+  };
+
   ImageDisplay display(!options.alternate);
 
   cv::Mat img;
   if (boost::ends_with(options.source, ".png") || boost::ends_with(options.source, ".jpg")) {
     img = cv::imread(options.source);
     display(img, remove(img));
+    if (options.save)
+      cv::imwrite(addSuffix(options.source), remove(img));
   } else if (boost::ends_with(options.source, ".mat")) {
     img = radical::readMat(options.source);
     display(img, remove(img));
+    if (options.save)
+      radical::writeMat(addSuffix(options.source), remove(img));
   } else {
     grabbers::Grabber::Ptr grabber;
 
@@ -161,6 +176,11 @@ int main(int argc, const char** argv) {
       grabber->grabFrame(img);
       if (display(img, remove(img), 30))
         break;
+    }
+
+    if (options.save) {
+      std::cerr << "Saving cleared images is not supported when the input is a camera stream" << std::endl;
+      return 2;
     }
   }
 
