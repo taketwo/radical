@@ -1,7 +1,7 @@
 dist: trusty
 sudo: false
 language: cpp
-compiler: clang
+compiler: gcc
 git:
   depth: 1
   lfs_skip_smudge: true
