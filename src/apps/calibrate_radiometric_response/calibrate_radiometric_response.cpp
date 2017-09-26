@@ -85,7 +85,8 @@ class Options : public OptionsBase {
                        "Verbosity level (0 - silent, 1 - normal, 2 - verbose)");
     desc.add_options()("num-pixels", po::value<unsigned int>(&num_pixels)->default_value(num_pixels),
                        "Number of pixels");
-    desc.add_options()("interactive", po::bool_switch(&interactive), "Wait for a keypress after each optimization iteration");
+    desc.add_options()("interactive", po::bool_switch(&interactive),
+                       "Wait for a keypress after each optimization iteration");
     desc.add_options()("smoothing", po::value<double>(&smoothing)->default_value(smoothing), "Smoothing lambda");
     desc.add_options()("print", po::bool_switch(&print), "Print calibrated response function to stdout");
 
@@ -252,7 +253,8 @@ int main(int argc, const char** argv) {
     cv::waitKey(options.interactive ? -1 : 1);
   };
 
-  calibration->setValidPixelRange(static_cast<unsigned char>(options.dc.valid_intensity_min), static_cast<unsigned char>(options.dc.valid_intensity_max));
+  calibration->setValidPixelRange(static_cast<unsigned char>(options.dc.valid_intensity_min),
+                                  static_cast<unsigned char>(options.dc.valid_intensity_max));
   calibration->setVerbosity(options.verbosity);
   if (!options.no_visualization)
     calibration->setVisualizeProgress(limshow);
