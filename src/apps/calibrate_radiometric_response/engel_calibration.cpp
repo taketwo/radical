@@ -30,6 +30,7 @@ cv::Mat EngelCalibration::calibrateChannel(const Dataset& dataset) {
   converged_ = false;
   energy_ = 0;
   delta_ = 0;
+  scale_ = 1.0;
 
   U_.create(1, 256, CV_64FC1);
   for (int i = 0; i < 256; ++i)
@@ -133,15 +134,16 @@ double EngelCalibration::computeEnergy() {
             energy += r * r;
             num += 1;
           }
-  return static_cast<double>(std::sqrt(energy / num));
+  // Scale the energy to account for all the rescalings that happened along the way
+  return static_cast<double>(std::sqrt(energy / num) / scale_);
 }
 
 void EngelCalibration::rescale() {
   auto scale = 1.0 / U_.at<double>(128);
   cv::multiply(U_, scale, U_);
   cv::multiply(B_, scale, B_);
-  // Rescaling changes the energy, adjust without recomputing
-  energy_ *= (scale * scale);
+  // Remember the total scale relative to the initial energy
+  scale_ *= scale;
 }
 
 void EngelCalibration::visualizeProgress() {

@@ -56,6 +56,7 @@ class EngelCalibration : public Calibration {
 
   double energy_, delta_;
   double convergence_threshold_ = 1e-5;
+  double scale_;
 
   // Storage for temporary matrices to avoid re-allocation
   cv::Mat_<double> sum_t2_i_;
