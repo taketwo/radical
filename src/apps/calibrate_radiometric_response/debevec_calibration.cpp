@@ -151,7 +151,7 @@ void DebevecCalibration::selectPixels() {
   locations_.clear();
   auto times = dataset_->getExposureTimes();
 
-  const int M = num_pixels_;
+  const int M = min_samples_;
   std::vector<int> hist(256, 0);
 
   for (size_t i = 0; i < times.size(); ++i) {
@@ -225,8 +225,8 @@ void DebevecCalibration::visualizeProgress() {
   imshow_(canvas);
 }
 
-void DebevecCalibration::setNumPixels(unsigned int num_pixels) {
-  num_pixels_ = num_pixels;
+void DebevecCalibration::setMinSamplesPerIntensityLevel(unsigned int min_samples) {
+  min_samples_ = min_samples;
 }
 
 void DebevecCalibration::setSmoothingLambda(double lambda) {

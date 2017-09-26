@@ -62,7 +62,7 @@ class Options : public OptionsBase {
   std::string save_dataset = "";
   DatasetCollection::Parameters dc;
   unsigned int verbosity = 1;
-  unsigned int num_pixels = 5;
+  unsigned int min_samples = 5;
   bool interactive = false;
   double smoothing = 50;
   bool print = false;
@@ -77,14 +77,14 @@ class Options : public OptionsBase {
                        "Threshold for energy update after which convergence is declared (default: 1e-5)");
     desc.add_options()("method,m", po::value<std::string>(&calibration_method)->default_value(calibration_method),
                        "Calibration method to use");
+    desc.add_options()("min-samples", po::value<unsigned int>(&min_samples)->default_value(min_samples),
+                       "Min number of samples per intensity level (only for debevec method)");
     desc.add_options()("no-visualization", po::bool_switch(&no_visualization),
                        "Do not visualize the calibration process and results");
     desc.add_options()("save-dataset,s", po::value<std::string>(&save_dataset),
                        "Save collected dataset in the given directory");
     desc.add_options()("verbosity,v", po::value<unsigned int>(&verbosity)->default_value(verbosity),
                        "Verbosity level (0 - silent, 1 - normal, 2 - verbose)");
-    desc.add_options()("num-pixels", po::value<unsigned int>(&num_pixels)->default_value(num_pixels),
-                       "Number of pixels");
     desc.add_options()("interactive", po::bool_switch(&interactive),
                        "Wait for a keypress after each optimization iteration");
     desc.add_options()("smoothing", po::value<double>(&smoothing)->default_value(smoothing), "Smoothing lambda");
@@ -235,7 +235,7 @@ int main(int argc, const char** argv) {
   } else if (options.calibration_method == "debevec") {
 #if HAVE_CERES
     auto cal = std::make_shared<DebevecCalibration>();
-    cal->setNumPixels(options.num_pixels);
+    cal->setMinSamplesPerIntensityLevel(options.min_samples);
     cal->setSmoothingLambda(options.smoothing);
     calibration = cal;
 #else

@@ -28,7 +28,10 @@ struct CeresIterationCallback;
 
 class DebevecCalibration : public Calibration {
  public:
-  void setNumPixels(unsigned int num_pixels);
+  /** Set the minimum number of samples per each intensity level used for optimization.
+    * A subset of all image pixels is used in the optimization. The sampling procedure ensures that at least this many
+    * observations per each intensity level (from min to max valid) is taken. */
+  void setMinSamplesPerIntensityLevel(unsigned int min_samples);
 
   void setSmoothingLambda(double lambda);
 
@@ -44,7 +47,7 @@ class DebevecCalibration : public Calibration {
 
   void visualizeProgress();
 
-  unsigned int num_pixels_ = 5;
+  unsigned int min_samples_ = 5;
   double lambda_ = 20;
 
   const Dataset* dataset_ = nullptr;
