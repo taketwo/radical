@@ -79,15 +79,14 @@ class Options : public OptionsBase {
                        "Calibration method to use");
     desc.add_options()("min-samples", po::value<unsigned int>(&min_samples)->default_value(min_samples),
                        "Min number of samples per intensity level (only for debevec method)");
+    desc.add_options()("smoothing", po::value<double>(&smoothing)->default_value(smoothing),
+                       "Smoothing lambda (only for debevec method)");
     desc.add_options()("no-visualization", po::bool_switch(&no_visualization),
                        "Do not visualize the calibration process and results");
-    desc.add_options()("save-dataset,s", po::value<std::string>(&save_dataset),
-                       "Save collected dataset in the given directory");
     desc.add_options()("verbosity,v", po::value<unsigned int>(&verbosity)->default_value(verbosity),
                        "Verbosity level (0 - silent, 1 - normal, 2 - verbose)");
     desc.add_options()("interactive", po::bool_switch(&interactive),
                        "Wait for a keypress after each optimization iteration");
-    desc.add_options()("smoothing", po::value<double>(&smoothing)->default_value(smoothing), "Smoothing lambda");
     desc.add_options()("print", po::bool_switch(&print), "Print calibrated response function to stdout");
 
     boost::program_options::options_description dcopt("Data collection");
@@ -113,6 +112,8 @@ class Options : public OptionsBase {
                         "Maximum valid intensity value of the sensor");
     dcopt.add_options()("bloom-radius", po::value<unsigned int>(&dc.bloom_radius)->default_value(dc.bloom_radius),
                         "Radius of the blooming effect");
+    dcopt.add_options()("save-dataset,s", po::value<std::string>(&save_dataset),
+                        "Save collected dataset in the given directory");
     desc.add(dcopt);
   }
 
