@@ -31,18 +31,11 @@ cv::Mat EngelCalibration::calibrateChannel(const Dataset& dataset) {
   energy_ = 0;
   delta_ = 0;
 
-  B_.create(dataset_->getImageSize(), CV_64FC1);
-  B_.setTo(0);
-  double scaling = 256.0 / dataset_->getNumImages();
-  for (const auto& t : dataset_->getExposureTimes())
-    for (const auto& image : dataset_->getImages(t))
-      for (int i = 0; i < image.rows; ++i)
-        for (int j = 0; j < image.cols; ++j)
-          B_.at<double>(i, j) += static_cast<double>(image.at<uint8_t>(i, j)) * scaling;
-
   U_.create(1, 256, CV_64FC1);
   for (int i = 0; i < 256; ++i)
     U_.at<double>(i) = (1.0 / 255.0) * i;
+
+  B_.create(dataset_->getImageSize(), CV_64FC1);
 
   printHeader();
 
