@@ -60,7 +60,7 @@ function install_opencv()
   local pkg_url="https://github.com/opencv/opencv/archive/${pkg_ver}.tar.gz"
   case $pkg_ver in
     "2.4.8") local pkg_md5sum="9b8f1426bc01a1ae1e8b3bce11dc1e1c";;
-    "3.1.0") local pkg_md5sum="70e1dd07f0aa06606f1bc0e3fa15abd3";;
+    "3.1.0") local pkg_md5sum="a0669e22172dfc3225835b180744c9f0";;
   esac
   local pkg_src_dir=${DOWNLOAD_DIR}/opencv-${pkg_ver}
   local pkg_install_dir=$OPENCV_DIR/${pkg_ver}
