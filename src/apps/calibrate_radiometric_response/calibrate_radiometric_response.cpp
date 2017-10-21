@@ -183,9 +183,6 @@ int main(int argc, const char** argv) {
       return 1;
     }
 
-    grabber->setAutoExposureEnabled(false);
-    grabber->setAutoWhiteBalanceEnabled(false);
-
     if (!options("output"))
       options.output = grabber->getCameraUID() + ".crf";
     if (!options("exposure-min"))
@@ -195,11 +192,23 @@ int main(int argc, const char** argv) {
     if (!options("factor"))
       options.dc.exposure_factor = std::pow(1.0f * options.dc.exposure_max / options.dc.exposure_min, 1.0f / 30);
 
-    // Change exposure to requested min value, wait some time until it works
     cv::Mat frame;
-    for (size_t i = 0; i < 100; ++i) {
+
+    // Disable AEC but enable AWB so that colors are balanced
+    grabber->setAutoExposureEnabled(false);
+    grabber->setAutoWhiteBalanceEnabled(true);
+
+    // Wait
+    grabber->grabFrame(frame);
+    imshow(frame, 400);
+
+    // Disable AWB
+    grabber->setAutoWhiteBalanceEnabled(false);
+
+    // Change exposure to requested min value, wait some time until it works
+    for (size_t i = 0; i < 12; ++i) {
       grabber->grabFrame(frame);
-      imshow(frame, 30);
+      imshow(frame, 400);
       grabber->setExposure(options.dc.exposure_min);
     }
 
