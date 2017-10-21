@@ -19,24 +19,39 @@ vignetting responses of a camera and a runtime library that you can link into
 your project to load calibration files and radiometrically rectify the images
 delivered by the camera.
 
-# Requirements
+Table of contents
+-----------------
+
+* [Requirements](#requirements)
+* [Installation](#installation)
+* [Calibration](#calibration)
+    * [Radiometric response](doc/calibrate-radiometric-response.md)
+    * [Vignetting response](doc/calibrate-vignetting-response.md)
+* [Library usage](#library-usage)
+* [Citing](#citing)
+* [License](#license)
+
+Requirements
+------------
 
 You need a compiler that supports C++11.
 
-## Runtime library:
+### Runtime library:
 
   * OpenCV (2 or 3)
 
-## Calibration apps:
+### Calibration apps:
 
   * OpenCV (2 or 3)
   * Boost
   * OpenNI2 (optional, only if you want to calibrate an Asus Xtion camera)
   * librealsense (optional, only if you want to calibrate a RealSense camera)
+  * Pylon SDK (optional, only if you want to calibrate a Pylon camera)
   * Ceres (optional, needed for radiometric calibration with Debevec method and
     for vignetting calibration with polynomial vignetting model)
 
-# Installation
+Installation
+------------
 
 1. Clone this repository.
 
@@ -58,9 +73,18 @@ You need a compiler that supports C++11.
 
 3. Install the project with `make install`.
 
-# Usage
+Calibration
+-----------
 
-## Runtime library
+In order to radiometrically rectify images (e.g. invert the non-linear camera
+response function and correct the vignetting effects), one needs to calibrate
+the camera. Refer to the instructions below:
+
+* [Calibrate radiometric response](doc/calibrate-radiometric-response.md)
+* [Calibrate vignetting response](doc/calibrate-vignetting-response.md)
+
+Library usage
+-------------
 
 In your *CMakeLists.txt* find the library as follows:
 
@@ -105,45 +129,15 @@ Undo vignetting effects in frames coming from the camera:
    rr.directMap(radiance, frame_corrected);
    ```
 
-## Calibration apps
-
-### Radiometric response calibration
-
-Supports OpenNI2 and RealSense cameras. Fix your camera in front of a static
-scene and run the app. It will take multiple images of the scene at different
-exposure times and compute the radiometric response of the camera. The response
-will be stored in a calibration file named after the camera (model type + serial
-number). Run with `--help` to see different options.
-
-### Vignetting response calibration
-
-Supports OpenNI2 and RealSense cameras. Get a sheet of white paper and fix it on
-a table so it is uniformly lit by the light sources in your office. If your
-table has a bright color, it is better to make a contour around the paper with
-black tape to make sure that the blob detector is able to distinguish between
-the white paper and the table.
-
-Point the camera at the paper and start the app. Adjust the exposure time with
-up and down arrows. We want the exposure time to be as large as possible,
-however there should be no saturated pixels. For your convenience, overexposed
-pixels will be highlighted with red color. After adjusting the exposure time so
-that there are no red pixels on the calibration target, press Enter to start
-data collection. Move the camera around so that the paper is observed through
-every camera pixel. Take care to move the camera so that it does not cast
-shadows onto the paper. In the bottom-left corner the amount of collected
-samples per pixels is visualized. By default, we aim to collect 100 samples per
-pixel. Once this amount is collected, the corresponding pixel will turn green.
-After the required number of samples is collected for every pixel, the
-vignetting response will be calibrated and stored in a file named after the
-camera (model type + serial number). Run with `--help` to see different options.
-
-# Citing
+Citing
+------
 
 If you use this in the academic context, please cite the following paper:
 
 > **Calibration and Correction of Vignetting Effects with an Application to 3D
 Mapping**, *S. V. Alexandrov, J. Prankl, M. Zillich, M. Vincze*, IROS'16
 
-# Licence
+Licence
+-------
 
 MIT
