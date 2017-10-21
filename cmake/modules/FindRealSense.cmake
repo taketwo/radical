@@ -60,3 +60,6 @@ find_package_handle_standard_args(RealSense
   VERSION_VAR REALSENSE_API_VERSION
 )
 
+if(REALSENSE_FOUND AND NOT RealSense_FIND_QUIETLY)
+  message(STATUS "Found RealSense (version: ${REALSENSE_API_VERSION}, location: ${REALSENSE_LIBRARY})")
+endif()

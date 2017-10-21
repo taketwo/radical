@@ -71,3 +71,7 @@ find_package_handle_standard_args(Pylon
   REQUIRED_VARS PYLON_LIBRARIES PYLON_INCLUDE_DIR
   VERSION_VAR PYLON_VERSION
 )
+
+if(PYLON_FOUND AND NOT Pylon_FIND_QUIETLY)
+  message(STATUS "Found Pylon (version: ${PYLON_VERSION}, location: ${_LIBRARY})")
+endif()

@@ -91,3 +91,6 @@ find_package_handle_standard_args(OpenNI2
   VERSION_VAR OPENNI2_VERSION
 )
 
+if(OPENNI2_FOUND AND NOT OpenNI2_FIND_QUIETLY)
+  message(STATUS "Found OpenNI2 (version: ${OPENNI2_VERSION}, location: ${OPENNI2_LIBRARY})")
+endif()
