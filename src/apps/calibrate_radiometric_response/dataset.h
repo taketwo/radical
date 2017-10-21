@@ -59,6 +59,10 @@ class Dataset {
     * times. This format is compatible with OpenCV built-in CRF calibration algorithms. */
   void asImageAndExposureTimeVectors(std::vector<cv::Mat>& images, std::vector<int>& exposure_times) const;
 
+  /** Compute per-channel histogram of intensities of all images in the dataset.
+    * Returns a matrix of size 1 x 256 with as many channels as the dataset images have. */
+  cv::Mat computeIntensityHistogram() const;
+
   /** Save the dataset to the disk. */
   void save(const std::string& path) const;
 

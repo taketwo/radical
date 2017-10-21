@@ -25,6 +25,7 @@
 #include <boost/assert.hpp>
 
 #include <opencv2/core/core.hpp>
+#include <opencv2/imgproc/imgproc.hpp>
 
 #include <boost/filesystem.hpp>
 #include <boost/format.hpp>
@@ -99,6 +100,26 @@ void Dataset::asImageAndExposureTimeVectors(std::vector<cv::Mat>& images, std::v
       exposure_times.push_back(time_images.first);
     }
   }
+}
+
+cv::Mat Dataset::computeIntensityHistogram() const {
+  if (data_.empty())
+    return cv::Mat::zeros(256, 1, CV_32FC1);
+  int num_channels = data_.begin()->second.begin()->channels();
+  std::vector<cv::Mat> histogram_channels(num_channels);
+  for (const auto& d : data_)
+    for (const auto& img : d.second) {
+      for (int i = 0; i < num_channels; ++i) {
+        const int channels[] = {i};
+        const int size[] = {256};
+        const float range[] = {0, 256};
+        const float* ranges[] = {range};
+        cv::calcHist(&img, 1, channels, cv::noArray(), histogram_channels[i], 1, size, ranges, true, true);
+      }
+    }
+  cv::Mat histogram;
+  cv::merge(histogram_channels, histogram);
+  return histogram;
 }
 
 void Dataset::save(const std::string& path) const {
