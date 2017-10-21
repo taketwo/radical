@@ -37,6 +37,8 @@
 
 #include "grabbers/grabber.h"
 
+#include "utils/arrange_images_in_grid.h"
+#include "utils/plot_histogram.h"
 #include "utils/plot_radiometric_response.h"
 #include "utils/program_options.h"
 
@@ -168,6 +170,9 @@ int main(int argc, const char** argv) {
     }
     if (options.verbosity)
       std::cout << "Loaded dataset from: " << options.data_source << std::endl;
+
+    auto hist = data->computeIntensityHistogram();
+    imshow(utils::plotHistogram(hist.rowRange(options.dc.valid_intensity_min, options.dc.valid_intensity_max), 2, 256));
   } else {
     grabbers::Grabber::Ptr grabber;
 
@@ -201,11 +206,15 @@ int main(int argc, const char** argv) {
 
     DatasetCollection data_collection(grabber, options.dc);
 
+    cv::Mat histogram(480, 640, CV_8UC3);
     while (grabber->hasMoreFrames()) {
       grabber->grabFrame(frame);
-      imshow(frame, 30);
       if (data_collection.addFrame(frame))
         break;
+      auto hist = data_collection.getDataset()->computeIntensityHistogram();
+      histogram.setTo(0);
+      utils::plotHistogram(hist.rowRange(options.dc.valid_intensity_min, options.dc.valid_intensity_max), histogram);
+      imshow(arrangeImagesInGrid({frame, histogram}, {1, 2}), 30);
     }
 
     data = data_collection.getDataset();
