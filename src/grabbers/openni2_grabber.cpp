@@ -71,7 +71,7 @@ struct OpenNI2Grabber::Impl {
     streams.push_back(&color_stream);
 
     auto control = device.getPlaybackControl();
-    if (control != NULL) {
+    if (control != nullptr) {
       // This is a file, make sure we get every frame
       control->setSpeed(-1.0f);
       control->setRepeatEnabled(false);

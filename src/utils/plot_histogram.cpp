@@ -42,7 +42,7 @@ void plotHistogram(const cv::Mat& histogram, cv::Mat& canvas, const cv::Scalar& 
   assert(bar_height > 0);
 
   double max = 0;
-  cv::minMaxLoc(histogram, 0, &max, 0, 0);
+  cv::minMaxLoc(histogram, nullptr, &max, nullptr, nullptr);
 
   std::vector<cv::Mat> histogram_channels;
   cv::split(histogram, histogram_channels);
