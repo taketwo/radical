@@ -119,7 +119,7 @@ OpenNI2Grabber::OpenNI2Grabber(const std::string& device_uri)
   p->open(uri);
 }
 
-OpenNI2Grabber::~OpenNI2Grabber() {}
+OpenNI2Grabber::~OpenNI2Grabber() = default;
 
 inline bool OpenNI2Grabber::hasMoreFrames() const {
   return p->num_frames == -1 || p->next_frame_index < p->num_frames - 1;

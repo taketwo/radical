@@ -51,7 +51,7 @@ RadiometricResponse::RadiometricResponse(cv::InputArray _response) {
 RadiometricResponse::RadiometricResponse(const std::string& filename)
 : RadiometricResponse(readMat(filename)) {}
 
-RadiometricResponse::~RadiometricResponse() {}
+RadiometricResponse::~RadiometricResponse() = default;
 
 cv::Mat RadiometricResponse::getInverseResponse() const {
   return response_;

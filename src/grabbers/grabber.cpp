@@ -29,7 +29,7 @@
 
 namespace grabbers {
 
-Grabber::~Grabber() {}
+Grabber::~Grabber() = default;
 
 std::string Grabber::getCameraUID() const {
   return getCameraModelName() + "." + getCameraSerialNumber();

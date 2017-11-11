@@ -87,7 +87,7 @@ struct RealSenseGrabber::Impl {
 RealSenseGrabber::RealSenseGrabber(const std::string& /*device_uri*/)
 : p(new Impl) {}
 
-RealSenseGrabber::~RealSenseGrabber() {}
+RealSenseGrabber::~RealSenseGrabber() = default;
 
 inline bool RealSenseGrabber::hasMoreFrames() const {
   return true;

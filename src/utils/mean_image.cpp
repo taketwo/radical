@@ -37,7 +37,7 @@ MeanImage::MeanImage(bool compute_variance, unsigned int num_samples)
 , type_(-1)
 , size_(0, 0) {}
 
-MeanImage::~MeanImage() {}
+MeanImage::~MeanImage() = default;
 
 bool MeanImage::add(cv::InputArray _image, cv::InputArray _mask) {
   return addWeighted(_image, 1, _mask);

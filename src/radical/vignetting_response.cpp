@@ -91,7 +91,7 @@ VignettingResponse::VignettingResponse(const std::string& filename) {
   response_cache_.reset(new ResponseCache(*model_));
 }
 
-VignettingResponse::~VignettingResponse() {}
+VignettingResponse::~VignettingResponse() = default;
 
 VignettingModel::ConstPtr VignettingResponse::getModel() const {
   return model_;

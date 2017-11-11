@@ -51,7 +51,7 @@ struct Residual {
 };
 
 struct RegularizationResidual {
-  RegularizationResidual() {}
+  RegularizationResidual() = default;
 
   template <typename T>
   bool operator()(const T* const a, T* residual) const {
