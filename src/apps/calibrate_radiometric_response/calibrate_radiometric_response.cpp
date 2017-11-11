@@ -122,7 +122,7 @@ class Options : public OptionsBase {
                      boost::program_options::positional_options_description& positional) override {
     namespace po = boost::program_options;
     desc.add_options()("data-source", po::value<std::string>(&data_source),
-                       "Data source, either a camera (\"asus\", \"intel\"), or a path to dataset");
+                       R"(Data source, either a camera ("asus", "intel"), or a path to dataset)");
     positional.add("data-source", -1);
   }
 

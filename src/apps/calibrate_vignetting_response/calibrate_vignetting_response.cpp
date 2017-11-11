@@ -66,7 +66,7 @@ class Options : public OptionsBase {
                        "camera serial number + \".vgn\" suffix)");
     desc.add_options()(
         "crf", po::value<std::string>(&crf),
-        "Camera response function (default: camera model name + \".\" camera serial number + \".crf\" suffix)");
+        R"(Camera response function (default: camera model name + "." camera serial number + ".crf" suffix))");
     desc.add_options()("num-samples,s", po::value<unsigned int>(&num_samples),
                        "Number of samples to collect for each pixel (default: 100)");
     desc.add_options()("exposure,e", po::value<unsigned int>(&exposure), "Initial exposure time (default: 20)");
@@ -78,7 +78,7 @@ class Options : public OptionsBase {
   void addPositional(boost::program_options::options_description& desc,
                      boost::program_options::positional_options_description& positional) override {
     namespace po = boost::program_options;
-    desc.add_options()("camera", po::value<std::string>(&camera), "Camera to calibrate (\"asus\", \"intel\")");
+    desc.add_options()("camera", po::value<std::string>(&camera), R"(Camera to calibrate ("asus", "intel"))");
     positional.add("camera", -1);
   }
 

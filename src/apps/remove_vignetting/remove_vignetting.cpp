@@ -65,7 +65,7 @@ struct Options : public OptionsBase {
     desc.add_options()("radiometric", po::value<std::string>(&crf), "Calibration file with radiometric response");
     desc.add_options()("vignetting", po::value<std::string>(&vgn), "Calibration file with vignetting response");
     desc.add_options()("image-source", po::value<std::string>(&source),
-                       "Image source, either a camera (\"asus\", \"intel\"), or a PNG/JPG/MAT image");
+                       R"(Image source, either a camera ("asus", "intel"), or a PNG/JPG/MAT image)");
     positional.add("radiometric", 1);
     positional.add("vignetting", 1);
     positional.add("image-source", -1);
