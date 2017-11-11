@@ -71,4 +71,4 @@ cv::Mat plotHistogram(const cv::Mat& histogram, unsigned int bar_width, unsigned
   plotHistogram(histogram, canvas, color);
   return canvas;
 }
-}
+}  // namespace utils

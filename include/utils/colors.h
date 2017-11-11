@@ -31,5 +31,5 @@ namespace colors {
 // Colors from the "Paired" palette of Cynthia Brewer
 extern const cv::Scalar BGR[3];
 extern const cv::Scalar BGR_LIGHT[3];
-}
-}
+}  // namespace colors
+}  // namespace utils

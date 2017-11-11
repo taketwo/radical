@@ -24,10 +24,10 @@
 #include <iostream>
 #include <sstream>
 
-#include <radical/exceptions.h>
-#include <radical/polynomial_vignetting_model.h>
 #include <radical/check.h>
+#include <radical/exceptions.h>
 #include <radical/mat_io.h>
+#include <radical/polynomial_vignetting_model.h>
 
 namespace radical {
 

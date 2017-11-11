@@ -67,4 +67,4 @@ cv::Mat plotRadiometricResponse(const cv::Mat& response, const cv::Size& size, c
 cv::Mat plotRadiometricResponse(const radical::RadiometricResponse& rr, cv::Size size) {
   return plotRadiometricResponse(rr.getInverseResponse(), size);
 }
-}
+}  // namespace utils

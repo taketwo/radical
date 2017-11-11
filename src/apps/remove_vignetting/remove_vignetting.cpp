@@ -94,7 +94,9 @@ struct Options : public OptionsBase {
 
 class ImageDisplay {
  public:
-  ImageDisplay(bool side_by_side = true) : side_by_side_(side_by_side), alternate_(1) {}
+  ImageDisplay(bool side_by_side = true)
+  : side_by_side_(side_by_side)
+  , alternate_(1) {}
 
   bool operator()(const cv::Mat& img1, const cv::Mat& img2, int delay = 0) {
     if (delay <= 0) {

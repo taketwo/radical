@@ -36,12 +36,12 @@
 #include "grabbers/grabber.h"
 
 #include "utils/arrange_images_in_grid.h"
+#include "utils/colors.h"
+#include "utils/key_code.h"
 #include "utils/mask_saturated_pixels.h"
 #include "utils/mean_image.h"
 #include "utils/plot_polynomial_vignetting_model.h"
 #include "utils/program_options.h"
-#include "utils/key_code.h"
-#include "utils/colors.h"
 
 #include "blob_tracker.h"
 #include "model_fitting.h"

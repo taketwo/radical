@@ -33,7 +33,6 @@
 namespace grabbers {
 
 struct PylonGrabber::Impl {
-
   std::unique_ptr<Pylon::CBaslerUsbInstantCamera> camera;
 
   cv::Size color_image_resolution = {765, 576};
@@ -55,7 +54,7 @@ struct PylonGrabber::Impl {
       camera->PixelFormat.SetValue(Basler_UsbCameraParams::PixelFormat_BGR8);
 
       color_image_size = color_image_resolution.width * color_image_resolution.height * 3;
-    } catch (const GenericException &e) {
+    } catch (const GenericException& e) {
       BOOST_THROW_EXCEPTION(GrabberException("Failed to open camera")
                             << GrabberException::ErrorInfo(e.GetDescription()));
     }
@@ -77,7 +76,7 @@ struct PylonGrabber::Impl {
       }
       ++next_frame_index;
       return true;
-    } catch (const GenericException &e) {
+    } catch (const GenericException& e) {
       BOOST_THROW_EXCEPTION(GrabberException("Failed to grab frame")
                             << GrabberException::ErrorInfo(e.GetDescription()));
       return false;
@@ -85,7 +84,8 @@ struct PylonGrabber::Impl {
   }
 };
 
-PylonGrabber::PylonGrabber() : p(new Impl) {
+PylonGrabber::PylonGrabber()
+: p(new Impl) {
   p->open();
 }
 
@@ -120,7 +120,7 @@ void PylonGrabber::setAutoWhiteBalanceEnabled(bool state) {
       p->camera->BalanceRatioSelector.SetValue(Basler_UsbCameraParams::BalanceRatioSelector_Blue);
       p->camera->BalanceRatio.SetValue(1.00 * p->camera->BalanceRatio.GetMax());
     }
-  } catch (const GenericException &e) {
+  } catch (const GenericException& e) {
     BOOST_THROW_EXCEPTION(GrabberException("Failed to set auto white balance")
                           << GrabberException::ErrorInfo(e.GetDescription()));
   }
@@ -133,7 +133,7 @@ void PylonGrabber::setAutoExposureEnabled(bool state) {
     } else {
       p->camera->ExposureAuto.SetValue(Basler_UsbCameraParams::ExposureAuto_Off);
     }
-  } catch (const GenericException &e) {
+  } catch (const GenericException& e) {
     BOOST_THROW_EXCEPTION(GrabberException("Failed to set auto exposure")
                           << GrabberException::ErrorInfo(e.GetDescription()));
   }
@@ -142,7 +142,7 @@ void PylonGrabber::setAutoExposureEnabled(bool state) {
 void PylonGrabber::setExposure(int exposure) {
   try {
     p->camera->ExposureTime.SetValue(1000.0 * (double)exposure);
-  } catch (const GenericException &e) {
+  } catch (const GenericException& e) {
     BOOST_THROW_EXCEPTION(GrabberException("Failed to set exposure")
                           << GrabberException::ErrorInfo(e.GetDescription()));
   }
@@ -151,7 +151,7 @@ void PylonGrabber::setExposure(int exposure) {
 int PylonGrabber::getExposure() const {
   try {
     return (int)(p->camera->ExposureTime.GetValue() / 1000.0 + 0.5);
-  } catch (const GenericException &e) {
+  } catch (const GenericException& e) {
     BOOST_THROW_EXCEPTION(GrabberException("Failed to get exposure")
                           << GrabberException::ErrorInfo(e.GetDescription()));
     return -1;
@@ -167,18 +167,16 @@ std::pair<int, int> PylonGrabber::getExposureRange() const {
 void PylonGrabber::setGain(int gain) {
   try {
     p->camera->Gain.SetValue(20.0 * std::log((double)gain / 100.));
-  } catch (const GenericException &e) {
-    BOOST_THROW_EXCEPTION(GrabberException("Failed to set gain")
-                          << GrabberException::ErrorInfo(e.GetDescription()));
+  } catch (const GenericException& e) {
+    BOOST_THROW_EXCEPTION(GrabberException("Failed to set gain") << GrabberException::ErrorInfo(e.GetDescription()));
   }
 }
 
 int PylonGrabber::getGain() const {
   try {
     return (int)(100 * std::pow(10, p->camera->Gain.GetValue() / 20.) + 0.5);
-  } catch (const GenericException &e) {
-    BOOST_THROW_EXCEPTION(GrabberException("Failed to get gain")
-                          << GrabberException::ErrorInfo(e.GetDescription()));
+  } catch (const GenericException& e) {
+    BOOST_THROW_EXCEPTION(GrabberException("Failed to get gain") << GrabberException::ErrorInfo(e.GetDescription()));
     return -1;
   }
 }
@@ -192,7 +190,7 @@ std::string PylonGrabber::getCameraModelName() const {
     std::string name = (std::string)(p->camera->GetDeviceInfo().GetModelName());
     boost::algorithm::to_lower(name);
     return name;
-  } catch (const GenericException &e) {
+  } catch (const GenericException& e) {
     BOOST_THROW_EXCEPTION(GrabberException("Failed to get camera model name")
                           << GrabberException::ErrorInfo(e.GetDescription()));
     return "";
@@ -202,7 +200,7 @@ std::string PylonGrabber::getCameraModelName() const {
 std::string PylonGrabber::getCameraSerialNumber() const {
   try {
     return (std::string)(p->camera->GetDeviceInfo().GetSerialNumber());
-  } catch (const GenericException &e) {
+  } catch (const GenericException& e) {
     BOOST_THROW_EXCEPTION(GrabberException("Failed to get camera serial number")
                           << GrabberException::ErrorInfo(e.GetDescription()));
     return "";

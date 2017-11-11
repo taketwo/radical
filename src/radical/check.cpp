@@ -20,12 +20,14 @@
  * SOFTWARE.
  ******************************************************************************/
 
-#include <radical/exceptions.h>
 #include <radical/check.h>
+#include <radical/exceptions.h>
 
 namespace radical {
 
-Check::Check(const std::string& name, cv::InputArray m) : name_(name), m_(std::cref(m)) {}
+Check::Check(const std::string& name, cv::InputArray m)
+: name_(name)
+, m_(std::cref(m)) {}
 
 const Check& Check::hasChannels(int channels) const {
   if (m_.get().channels() != channels)

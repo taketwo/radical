@@ -28,5 +28,5 @@ namespace colors {
 
 const cv::Scalar BGR[3] = {{180, 120, 31}, {44, 160, 51}, {28, 26, 227}};
 const cv::Scalar BGR_LIGHT[3] = {{227, 206, 166}, {138, 223, 178}, {153, 154, 251}};
-}
-}
+}  // namespace colors
+}  // namespace utils

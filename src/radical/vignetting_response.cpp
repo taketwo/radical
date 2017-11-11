@@ -24,10 +24,10 @@
 
 #include <opencv2/imgproc/imgproc.hpp>
 
+#include <radical/check.h>
 #include <radical/exceptions.h>
 #include <radical/vignetting_model.h>
 #include <radical/vignetting_response.h>
-#include <radical/check.h>
 
 // Custom hasher to allow unordered map with cv::Size keys.
 namespace std {
@@ -41,7 +41,7 @@ struct hash<cv::Size> {
     return h1 ^ (h2 << 1);
   }
 };
-}
+}  // namespace std
 
 namespace radical {
 
@@ -50,7 +50,8 @@ struct VignettingResponse::ResponseCache {
   std::unordered_map<cv::Size, cv::Mat> precomputed_log_responses_;
   const VignettingModel& model_;
 
-  ResponseCache(const VignettingModel& model) : model_(model) {}
+  ResponseCache(const VignettingModel& model)
+  : model_(model) {}
 
   cv::Mat get(const cv::Size& image_size) {
     if (precomputed_responses_.count(image_size) == 0) {

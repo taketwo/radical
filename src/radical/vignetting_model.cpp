@@ -27,11 +27,11 @@
 
 namespace radical {
 
-#define TRY_LOAD(Model)                    \
-  if (!model)                              \
-    try {                                  \
-      model.reset(new Model(filename));    \
-    } catch (SerializationException&) {    \
+#define TRY_LOAD(Model)                 \
+  if (!model)                           \
+    try {                               \
+      model.reset(new Model(filename)); \
+    } catch (SerializationException&) { \
     }
 
 VignettingModel::Ptr VignettingModel::load(const std::string& filename) {

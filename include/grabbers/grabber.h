@@ -35,7 +35,8 @@ namespace grabbers {
 
 class GrabberException : public boost::exception, public std::runtime_error {
  public:
-  GrabberException(const std::string& message) : std::runtime_error(message) {}
+  GrabberException(const std::string& message)
+  : std::runtime_error(message) {}
   using ErrorInfo = boost::error_info<struct tag_error_info, std::string>;
   using URI = boost::error_info<struct tag_uri, std::string>;
 };

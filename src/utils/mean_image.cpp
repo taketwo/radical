@@ -31,7 +31,11 @@ namespace utils {
 using radical::Check;
 
 MeanImage::MeanImage(bool compute_variance, unsigned int num_samples)
-: compute_variance_(compute_variance), num_samples_(num_samples), done_(true), type_(-1), size_(0, 0) {}
+: compute_variance_(compute_variance)
+, num_samples_(num_samples)
+, done_(true)
+, type_(-1)
+, size_(0, 0) {}
 
 MeanImage::~MeanImage() {}
 
@@ -166,4 +170,4 @@ void MeanImage::reset(const cv::Size& size, int type) {
   counter_.setTo(0);
   done_ = false;
 }
-}
+}  // namespace utils

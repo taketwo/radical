@@ -39,4 +39,4 @@ cv::Mat plotRadiometricResponse(const cv::Mat& response, const cv::Size& size = 
                                 const cv::Scalar& color = {0, 0, 0, 0});
 
 cv::Mat plotRadiometricResponse(const radical::RadiometricResponse& rr, cv::Size size = {512, 512});
-}
+}  // namespace utils

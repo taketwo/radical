@@ -26,23 +26,24 @@
 
 #include "model_fitting.h"
 
+using ceres::AutoDiffCostFunction;
+using ceres::CauchyLoss;
+using ceres::Problem;
 using ceres::Solve;
 using ceres::Solver;
-using ceres::Problem;
-using ceres::CauchyLoss;
-using ceres::AutoDiffCostFunction;
 
-struct Residual
-{
+struct Residual {
   double x_;
   double y_;
   double i_;
 
-  Residual(int x, int y, float i) : x_(x), y_(y), i_(i) {}
+  Residual(int x, int y, float i)
+  : x_(x)
+  , y_(y)
+  , i_(i) {}
 
   template <typename T>
-  bool operator()(const T* const c, const T* const b, T* residual) const
-  {
+  bool operator()(const T* const c, const T* const b, T* residual) const {
     auto dx = c[0] - T(x_);
     auto dy = c[1] - T(y_);
     auto r_2 = dx * dx + dy * dy;
@@ -54,13 +55,11 @@ struct Residual
   }
 };
 
-radical::PolynomialVignettingModel<3>::Ptr
-fitPolynomialModel(cv::InputArray _data, bool fixed_center, unsigned int max_num_iterations, bool verbose)
-{
+radical::PolynomialVignettingModel<3>::Ptr fitPolynomialModel(cv::InputArray _data, bool fixed_center,
+                                                              unsigned int max_num_iterations, bool verbose) {
   cv::Mat_<cv::Vec3f> data = _data.getMat();
   cv::Mat coeff(1, 5, CV_64FC3);
-  for (size_t i = 0; i < 3; ++i)
-  {
+  for (size_t i = 0; i < 3; ++i) {
     double c[2];
     double b[3];
 
@@ -68,8 +67,8 @@ fitPolynomialModel(cv::InputArray _data, bool fixed_center, unsigned int max_num
     c[1] = data.rows / 2;
     int W = 640 / data.cols;
     b[0] = -7.5e-06 * std::pow(W, 2);
-    b[1] =    5e-11 * std::pow(W, 4);
-    b[2] =   -2e-16 * std::pow(W, 6);
+    b[1] = 5e-11 * std::pow(W, 4);
+    b[2] = -2e-16 * std::pow(W, 6);
 
     Problem problem;
     auto loss = new CauchyLoss(0.5);
@@ -79,7 +78,8 @@ fitPolynomialModel(cv::InputArray _data, bool fixed_center, unsigned int max_num
 
     for (int y = 0; y < data.rows; ++y)
       for (int x = 0; x < data.cols; ++x)
-        problem.AddResidualBlock(new AutoDiffCostFunction<Residual, 1, 2, 3>(new Residual{x, y, data(y, x)[i]}), loss, c, b);
+        problem.AddResidualBlock(new AutoDiffCostFunction<Residual, 1, 2, 3>(new Residual{x, y, data(y, x)[i]}), loss,
+                                 c, b);
 
     problem.SetParameterLowerBound(c, 0, c[0] * 0.9);
     problem.SetParameterUpperBound(c, 0, c[0] * 1.1);
@@ -101,7 +101,8 @@ fitPolynomialModel(cv::InputArray _data, bool fixed_center, unsigned int max_num
     else
       std::cout << summary.BriefReport() << std::endl;
 
-    std::cout << "Final   cx: " << c[0] << " cy: " << c[1] << " b1: " << b[0] << " b2: " << b[1] << " b3: " << b[2] << "\n";
+    std::cout << "Final cx: " << c[0] << " cy: " << c[1] << " b1: " << b[0] << " b2: " << b[1] << " b3: " << b[2]
+              << "\n";
     coeff.at<cv::Vec3d>(0, 0)[i] = c[0];
     coeff.at<cv::Vec3d>(0, 1)[i] = c[1];
     coeff.at<cv::Vec3d>(0, 2)[i] = b[0];

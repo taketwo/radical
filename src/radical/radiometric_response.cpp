@@ -24,9 +24,9 @@
 
 #include <opencv2/imgproc/imgproc.hpp>
 
-#include <radical/radiometric_response.h>
 #include <radical/check.h>
 #include <radical/mat_io.h>
+#include <radical/radiometric_response.h>
 
 /** Helper function for inverse look-up in a table (cv::Vec3f → Vec3b). */
 inline cv::Vec3b inverseLUT(const std::vector<cv::Mat>& lut, const cv::Vec3f& in) {
@@ -48,7 +48,8 @@ RadiometricResponse::RadiometricResponse(cv::InputArray _response) {
   cv::split(response_, response_channels_);
 }
 
-RadiometricResponse::RadiometricResponse(const std::string& filename) : RadiometricResponse(readMat(filename)) {}
+RadiometricResponse::RadiometricResponse(const std::string& filename)
+: RadiometricResponse(readMat(filename)) {}
 
 RadiometricResponse::~RadiometricResponse() {}
 

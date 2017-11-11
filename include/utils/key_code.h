@@ -47,4 +47,4 @@ class KeyCode {
  private:
   unsigned char code_lsb_;
 };
-}
+}  // namespace utils

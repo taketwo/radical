@@ -113,7 +113,8 @@ struct OpenNI2Grabber::Impl {
   }
 };
 
-OpenNI2Grabber::OpenNI2Grabber(const std::string& device_uri) : p(new Impl) {
+OpenNI2Grabber::OpenNI2Grabber(const std::string& device_uri)
+: p(new Impl) {
   const char* uri = device_uri == "" ? openni::ANY_DEVICE : device_uri.c_str();
   p->open(uri);
 }

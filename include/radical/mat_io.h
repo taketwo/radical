@@ -22,8 +22,8 @@
 
 #pragma once
 
-#include <string>
 #include <fstream>
+#include <string>
 
 #include <opencv2/core/core.hpp>
 

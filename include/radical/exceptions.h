@@ -30,29 +30,34 @@ namespace radical {
 
 class Exception : public std::runtime_error {
  public:
-  explicit Exception(const std::string& message) : std::runtime_error(message) {}
+  explicit Exception(const std::string& message)
+  : std::runtime_error(message) {}
 };
 
 class SerializationException : public Exception {
  public:
-  explicit SerializationException(const std::string& message) : Exception(message) {}
+  explicit SerializationException(const std::string& message)
+  : Exception(message) {}
 
   explicit SerializationException(const std::string& message, const std::string& filename)
-  : Exception(message), filename(filename) {}
+  : Exception(message)
+  , filename(filename) {}
 
   const std::string filename;
 };
 
 class MatException : public Exception {
  public:
-  explicit MatException(const std::string& message) : Exception(message) {}
+  explicit MatException(const std::string& message)
+  : Exception(message) {}
 };
 
 class MatChannelsException : public MatException {
  public:
   explicit MatChannelsException(const std::string& mat_name, int expected_channels, int actual_channels)
-  : MatException(mat_name + " does not have expected number of channels"), expected_channels(expected_channels),
-    actual_channels(actual_channels) {}
+  : MatException(mat_name + " does not have expected number of channels")
+  , expected_channels(expected_channels)
+  , actual_channels(actual_channels) {}
 
   const int expected_channels;
   const int actual_channels;
@@ -61,8 +66,9 @@ class MatChannelsException : public MatException {
 class MatDepthException : public MatException {
  public:
   explicit MatDepthException(const std::string& mat_name, int expected_depth, int actual_depth)
-  : MatException(mat_name + " does not have expected depth"), expected_depth(expected_depth),
-    actual_depth(actual_depth) {}
+  : MatException(mat_name + " does not have expected depth")
+  , expected_depth(expected_depth)
+  , actual_depth(actual_depth) {}
 
   const int expected_depth;
   const int actual_depth;
@@ -71,8 +77,9 @@ class MatDepthException : public MatException {
 class MatMaxDimensionsException : public MatException {
  public:
   explicit MatMaxDimensionsException(const std::string& mat_name, int expected_max_dims, int actual_dims)
-  : MatException(mat_name + " has more than expected dimensions"), expected_max_dims(expected_max_dims),
-    actual_dims(actual_dims) {}
+  : MatException(mat_name + " has more than expected dimensions")
+  , expected_max_dims(expected_max_dims)
+  , actual_dims(actual_dims) {}
 
   const int expected_max_dims;
   const int actual_dims;
@@ -81,7 +88,9 @@ class MatMaxDimensionsException : public MatException {
 class MatSizeException : public MatException {
  public:
   explicit MatSizeException(const std::string& mat_name, const cv::Size& expected_size, const cv::Size& actual_size)
-  : MatException(mat_name + " does not have expected size"), expected_size(expected_size), actual_size(actual_size) {}
+  : MatException(mat_name + " does not have expected size")
+  , expected_size(expected_size)
+  , actual_size(actual_size) {}
 
   const cv::Size expected_size;
   const cv::Size actual_size;
@@ -90,7 +99,9 @@ class MatSizeException : public MatException {
 class MatTypeException : public MatException {
  public:
   explicit MatTypeException(const std::string& mat_name, int expected_type, int actual_type)
-  : MatException(mat_name + " does not have expected type"), expected_type(expected_type), actual_type(actual_type) {}
+  : MatException(mat_name + " does not have expected type")
+  , expected_type(expected_type)
+  , actual_type(actual_type) {}
 
   const int expected_type;
   const int actual_type;

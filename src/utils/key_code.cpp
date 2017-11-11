@@ -24,7 +24,8 @@
 
 namespace utils {
 
-KeyCode::KeyCode(int code) : code_lsb_(code % 256) {}
+KeyCode::KeyCode(int code)
+: code_lsb_(code % 256) {}
 
 bool KeyCode::operator==(Key key) const {
   switch (key) {
@@ -57,4 +58,4 @@ bool KeyCode::operator==(Key key) const {
 bool KeyCode::operator!=(Key key) const {
   return !this->operator==(key);
 }
-}
+}  // namespace utils

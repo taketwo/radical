@@ -29,9 +29,12 @@
 #include "dataset_collection.h"
 
 DatasetCollection::DatasetCollection(grabbers::Grabber::Ptr grabber, const Parameters& params)
-: grabber_(grabber), params_(params), dataset_(new Dataset), mean_(false, params.num_average_frames),
-  mean_mask_(false, params.num_average_frames),
-  morph_(cv::getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(params_.bloom_radius * 2, params_.bloom_radius * 2))) {
+: grabber_(grabber)
+, params_(params)
+, dataset_(new Dataset)
+, mean_(false, params.num_average_frames)
+, mean_mask_(false, params.num_average_frames)
+, morph_(cv::getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(params_.bloom_radius * 2, params_.bloom_radius * 2))) {
   BOOST_ASSERT(params_.exposure_min <= params_.exposure_max);
   BOOST_ASSERT(params_.exposure_factor > 1.0);
   exposure_ = params_.exposure_min;

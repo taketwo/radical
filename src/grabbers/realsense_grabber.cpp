@@ -84,8 +84,8 @@ struct RealSenseGrabber::Impl {
   }
 };
 
-RealSenseGrabber::RealSenseGrabber(const std::string& /*device_uri*/) : p(new Impl) {
-}
+RealSenseGrabber::RealSenseGrabber(const std::string& /*device_uri*/)
+: p(new Impl) {}
 
 RealSenseGrabber::~RealSenseGrabber() {}
 

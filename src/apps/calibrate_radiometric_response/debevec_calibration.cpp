@@ -39,7 +39,9 @@ struct Residual {
   double t_;
   unsigned char i_;
 
-  Residual(double t, unsigned char i) : t_(t), i_(i) {}
+  Residual(double t, unsigned char i)
+  : t_(t)
+  , i_(i) {}
 
   template <typename T>
   bool operator()(const T* const x, const T* const a, T* residual) const {
@@ -63,7 +65,9 @@ struct CeresIterationCallback : public ceres::IterationCallback {
   DebevecCalibration* p;
   bool print_, visualize_;
   CeresIterationCallback(DebevecCalibration* parent, bool print, bool visualize)
-  : p(parent), print_(print), visualize_(visualize) {}
+  : p(parent)
+  , print_(print)
+  , visualize_(visualize) {}
   ceres::CallbackReturnType operator()(const ceres::IterationSummary& summary) override {
     if (print_)
       p->printIteration(summary.iteration + 1, summary.cost, summary.cost_change);

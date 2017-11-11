@@ -57,8 +57,8 @@ class Options : public OptionsBase {
     std::cout << "" << std::endl;
     std::cout << "Plots radiometric response stored in a calibration file and displays it on the screen." << std::endl;
     std::cout << "" << std::endl;
-    std::cout << "With the --save option the plot will be written to the disk instead of showing on the screen." << std::endl;
-    std::cout << "Output file name is constructed by appending \".png\" to the input file path." << std::endl;
+    std::cout << "With the --save option the plot will be written to the disk instead of showing on the " << std::endl;
+    std::cout << "screen. Output file name is constructed by appending \".png\" to the input file path." << std::endl;
     std::cout << "" << std::endl;
   }
 };

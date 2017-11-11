@@ -43,4 +43,4 @@ void plotHistogram(const cv::Mat& histogram, cv::Mat& canvas, const cv::Scalar& 
   * \param[in] color color of the histogram bars, ignored in the case of multi-channel histogram */
 cv::Mat plotHistogram(const cv::Mat& histogram, unsigned int bar_width, unsigned int height,
                       const cv::Scalar& color = {0, 0, 0, 0});
-}
+}  // namespace utils

@@ -23,8 +23,8 @@
 #include <cassert>
 #include <iostream>
 
-#include <radical/exceptions.h>
 #include <radical/check.h>
+#include <radical/exceptions.h>
 #include <radical/mat_io.h>
 
 namespace radical {

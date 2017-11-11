@@ -36,7 +36,9 @@
 
 #include "dataset.h"
 
-Dataset::Dataset() : num_images_(0), image_size_(0, 0) {}
+Dataset::Dataset()
+: num_images_(0)
+, image_size_(0, 0) {}
 
 void Dataset::insert(int exposure_time, const cv::Mat& image) {
   if (image_size_.area() == 0)

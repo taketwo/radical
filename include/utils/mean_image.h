@@ -125,4 +125,4 @@ class MeanImage {
   cv::Mat zeros_mask_;
   cv::Mat nonzeros_mask_;
 };
-}
+}  // namespace utils

@@ -24,8 +24,8 @@
 
 #include <grabbers/grabber.h>
 #include <grabbers/openni2_grabber.h>
-#include <grabbers/realsense_grabber.h>
 #include <grabbers/pylon_grabber.h>
+#include <grabbers/realsense_grabber.h>
 
 namespace grabbers {
 
