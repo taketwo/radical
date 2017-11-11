@@ -40,19 +40,19 @@ class Options : public OptionsBase {
   bool save = false;
 
  protected:
-  virtual void addOptions(boost::program_options::options_description& desc) override {
+  void addOptions(boost::program_options::options_description& desc) override {
     namespace po = boost::program_options;
     desc.add_options()("save,s", po::bool_switch(&save), "Save to PNG file and exit");
   }
 
-  virtual void addPositional(boost::program_options::options_description& desc,
-                             boost::program_options::positional_options_description& positional) override {
+  void addPositional(boost::program_options::options_description& desc,
+                     boost::program_options::positional_options_description& positional) override {
     namespace po = boost::program_options;
     desc.add_options()("crf", po::value<std::string>(&r_response), "Calibration file with radiometric response");
     positional.add("crf", 1);
   }
 
-  virtual void printHelp() override {
+  void printHelp() override {
     std::cout << "Usage: display_radiometric_response [options] <radiometric-response>" << std::endl;
     std::cout << "" << std::endl;
     std::cout << "Plots radiometric response stored in a calibration file and displays it on the screen." << std::endl;

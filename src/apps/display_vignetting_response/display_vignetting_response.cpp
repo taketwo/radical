@@ -44,21 +44,21 @@ class Options : public OptionsBase {
   int colormap_id = -1;
 
  protected:
-  virtual void addOptions(boost::program_options::options_description& desc) override {
+  void addOptions(boost::program_options::options_description& desc) override {
     namespace po = boost::program_options;
     desc.add_options()("fused,f", po::bool_switch(&fused), "Display response channels fused as an RGB image")(
         "colormap,c", po::value<std::string>(&colormap), "Display response channels with color map")(
         "save,s", po::bool_switch(&save), "Save to PNG file and exit");
   }
 
-  virtual void addPositional(boost::program_options::options_description& desc,
-                             boost::program_options::positional_options_description& positional) override {
+  void addPositional(boost::program_options::options_description& desc,
+                     boost::program_options::positional_options_description& positional) override {
     namespace po = boost::program_options;
     desc.add_options()("vignetting", po::value<std::string>(&v_response), "Calibration file with vignetting response");
     positional.add("vignetting", 1);
   }
 
-  virtual void printHelp() override {
+  void printHelp() override {
     std::cout << "Usage: display_vignetting_response [options] <vignetting-response>" << std::endl;
     std::cout << "" << std::endl;
     std::cout << "Visualizes vignetting response stored in a calibration file. Displays either a" << std::endl;
@@ -72,7 +72,7 @@ class Options : public OptionsBase {
     std::cout << "" << std::endl;
   }
 
-  virtual void validate() override {
+  void validate() override {
 #if CV_MAJOR_VERSION >= 3
     if (colormap == "parula")
       colormap_id = cv::COLORMAP_PARULA;

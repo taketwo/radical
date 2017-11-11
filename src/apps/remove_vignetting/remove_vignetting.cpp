@@ -50,7 +50,7 @@ struct Options : public OptionsBase {
   float scale = 0.7;
   bool save = false;
 
-  virtual void addOptions(boost::program_options::options_description& desc) override {
+  void addOptions(boost::program_options::options_description& desc) override {
     namespace po = boost::program_options;
     desc.add_options()("alternate,a", po::bool_switch(&alternate),
                        "Alternate between original and cleared images on keypress");
@@ -59,8 +59,8 @@ struct Options : public OptionsBase {
     desc.add_options()("save", po::bool_switch(&save), "Save the cleared image");
   }
 
-  virtual void addPositional(boost::program_options::options_description& desc,
-                             boost::program_options::positional_options_description& positional) override {
+  void addPositional(boost::program_options::options_description& desc,
+                     boost::program_options::positional_options_description& positional) override {
     namespace po = boost::program_options;
     desc.add_options()("radiometric", po::value<std::string>(&crf), "Calibration file with radiometric response");
     desc.add_options()("vignetting", po::value<std::string>(&vgn), "Calibration file with vignetting response");
@@ -71,7 +71,7 @@ struct Options : public OptionsBase {
     positional.add("image-source", -1);
   }
 
-  virtual void printHelp() override {
+  void printHelp() override {
     std::cout << "Usage: remove_vignetting [options] <radiometric-response> <vignetting-response> <image-source>"
               << std::endl;
     std::cout << "" << std::endl;

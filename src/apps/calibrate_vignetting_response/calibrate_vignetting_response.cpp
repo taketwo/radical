@@ -59,7 +59,7 @@ class Options : public OptionsBase {
   bool fixed_center = false;
 
  protected:
-  virtual void addOptions(boost::program_options::options_description& desc) override {
+  void addOptions(boost::program_options::options_description& desc) override {
     namespace po = boost::program_options;
     desc.add_options()("output,o", po::value<std::string>(&output),
                        "Output filename with calibrated vignetting response (default: camera model name + \".\" + "
@@ -75,14 +75,14 @@ class Options : public OptionsBase {
                        "Fix model center of symmetry to image center (only for polynomial model)");
   }
 
-  virtual void addPositional(boost::program_options::options_description& desc,
-                             boost::program_options::positional_options_description& positional) override {
+  void addPositional(boost::program_options::options_description& desc,
+                     boost::program_options::positional_options_description& positional) override {
     namespace po = boost::program_options;
     desc.add_options()("camera", po::value<std::string>(&camera), "Camera to calibrate (\"asus\", \"intel\")");
     positional.add("camera", -1);
   }
 
-  virtual void printHelp() override {
+  void printHelp() override {
     std::cout << "Usage: calibrate_vignetting_response [options] <camera>" << std::endl;
     std::cout << "" << std::endl;
     std::cout << "Calibrate vignetting response of a camera. Two vignetting models are available:" << std::endl;
@@ -91,7 +91,7 @@ class Options : public OptionsBase {
     std::cout << "" << std::endl;
   }
 
-  virtual void validate() override {
+  void validate() override {
 #ifndef HAVE_CERES
     if (model == "polynomial")
       throw boost::program_options::error(

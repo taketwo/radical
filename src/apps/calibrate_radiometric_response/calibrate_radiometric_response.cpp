@@ -69,7 +69,7 @@ class Options : public OptionsBase {
   bool print = false;
 
  protected:
-  virtual void addOptions(boost::program_options::options_description& desc) override {
+  void addOptions(boost::program_options::options_description& desc) override {
     namespace po = boost::program_options;
     desc.add_options()("output,o", po::value<std::string>(&output),
                        "Output filename with calibrated response function (default: camera model name + \".\" + camera "
@@ -118,15 +118,15 @@ class Options : public OptionsBase {
     desc.add(dcopt);
   }
 
-  virtual void addPositional(boost::program_options::options_description& desc,
-                             boost::program_options::positional_options_description& positional) override {
+  void addPositional(boost::program_options::options_description& desc,
+                     boost::program_options::positional_options_description& positional) override {
     namespace po = boost::program_options;
     desc.add_options()("data-source", po::value<std::string>(&data_source),
                        "Data source, either a camera (\"asus\", \"intel\"), or a path to dataset");
     positional.add("data-source", -1);
   }
 
-  virtual void printHelp() override {
+  void printHelp() override {
     std::cout << "Usage: calibrate_radiometric_response [options] <data-source>" << std::endl;
     std::cout << "" << std::endl;
     std::cout << "Calibrate radiometric response of a camera. Two algorithms are available:" << std::endl;
@@ -139,7 +139,7 @@ class Options : public OptionsBase {
     std::cout << "" << std::endl;
   }
 
-  virtual void validate() override {
+  void validate() override {
     if (dc.valid_intensity_max > 255) {
       throw boost::program_options::error("maximum valid intensity can not exceed 255");
     }

@@ -64,7 +64,7 @@ struct CeresIterationCallback : public ceres::IterationCallback {
   bool print_, visualize_;
   CeresIterationCallback(DebevecCalibration* parent, bool print, bool visualize)
   : p(parent), print_(print), visualize_(visualize) {}
-  ceres::CallbackReturnType virtual operator()(const ceres::IterationSummary& summary) override {
+  ceres::CallbackReturnType operator()(const ceres::IterationSummary& summary) override {
     if (print_)
       p->printIteration(summary.iteration + 1, summary.cost, summary.cost_change);
     if (visualize_)
