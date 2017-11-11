@@ -33,8 +33,8 @@
 namespace std {
 template <>
 struct hash<cv::Size> {
-  typedef cv::Size argument_type;
-  typedef std::size_t result_type;
+  using argument_type = cv::Size;
+  using result_type = std::size_t;
   result_type operator()(argument_type const& s) const {
     result_type const h1(std::hash<int>()(s.width));
     result_type const h2(std::hash<int>()(s.height));
