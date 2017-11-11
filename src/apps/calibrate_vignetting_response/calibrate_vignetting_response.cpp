@@ -107,7 +107,7 @@ int main(int argc, const char** argv) {
   if (!options.parse(argc, argv))
     return 1;
 
-  auto imshow = [&options](const cv::Mat& image, int w = -1) {
+  auto imshow = [](const cv::Mat& image, int w = -1) {
     if (image.empty())
       return -1;
     cv::imshow("Calibration", image);
