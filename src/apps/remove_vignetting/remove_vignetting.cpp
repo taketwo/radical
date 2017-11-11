@@ -95,8 +95,7 @@ struct Options : public OptionsBase {
 class ImageDisplay {
  public:
   ImageDisplay(bool side_by_side = true)
-  : side_by_side_(side_by_side)
-  , alternate_(1) {}
+  : side_by_side_(side_by_side) {}
 
   bool operator()(const cv::Mat& img1, const cv::Mat& img2, int delay = 0) {
     if (delay <= 0) {
@@ -126,7 +125,7 @@ class ImageDisplay {
   }
 
   bool side_by_side_;
-  int alternate_;
+  int alternate_ = 1;
 };
 
 int main(int argc, const char** argv) {

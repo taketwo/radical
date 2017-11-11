@@ -46,15 +46,15 @@ cv::Mat Calibration::calibrate(const Dataset& data) {
   //  * map intensity below min_valid to 0
   //  * map intensity above max_valid to 1
   //  * sort to ensure invertability
-  for (size_t i = 0; i < response_channels.size(); ++i) {
+  for (auto& response_channel : response_channels) {
     double min, max;
-    cv::minMaxIdx(response_channels[i], &min, &max);
-    cv::divide(response_channels[i], max, response_channels[i]);
+    cv::minMaxIdx(response_channel, &min, &max);
+    cv::divide(response_channel, max, response_channel);
     for (int j = 0; j < min_valid_; ++j)
-      response_channels[i].at<float>(j) = 0;
+      response_channel.at<float>(j) = 0;
     for (int j = max_valid_ + 1; j < 256; ++j)
-      response_channels[i].at<float>(j) = 1;
-    cv::sort(response_channels[i], response_channels[i], cv::SORT_EVERY_ROW | cv::SORT_ASCENDING);
+      response_channel.at<float>(j) = 1;
+    cv::sort(response_channel, response_channel, cv::SORT_EVERY_ROW | cv::SORT_ASCENDING);
   }
 
   cv::Mat response;

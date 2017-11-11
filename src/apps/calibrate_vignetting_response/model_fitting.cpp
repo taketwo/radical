@@ -49,7 +49,7 @@ struct Residual {
     auto r_2 = dx * dx + dy * dy;
     auto r_4 = r_2 * r_2;
     auto r_6 = r_4 * r_2;
-    T v = T(1.0 + b[0] * r_2 + b[1] * r_4 + b[2] * r_6);
+    auto v = T(1.0 + b[0] * r_2 + b[1] * r_4 + b[2] * r_6);
     residual[0] = T(i_) - v;
     return true;
   }
