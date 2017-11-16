@@ -39,6 +39,6 @@ if(BUILD_APPS)
     endif()
   endmacro()
 
-  APP_TEST_ADD(calibrate_radiometric_response)
   TEST_ADD(mean_image LINK_WITH radical utils)
+  APP_TEST_ADD(calibrate_radiometric_response)
 endif()
