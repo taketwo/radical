@@ -728,7 +728,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(MeanVarianceSameSamples, T, ImageTypes) {
   MeanImage mi1(true, 0);
   MeanImage mi2(true, NUM_SAMPLES);
 
-  // Four elements to make sure we experence "strange" behavior in OpenCV
+  // Four elements to make sure we experience "strange" behavior in OpenCV
   // See: https://github.com/opencv/opencv/issues/8413
   cv::Mat_<T> image(1, 4);
   cv::randu(image, cv::Scalar(0, 0, 0), cv::Scalar(1, 1, 1));

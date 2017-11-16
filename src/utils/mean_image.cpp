@@ -140,10 +140,13 @@ cv::Mat MeanImage::getVarianceInverse() {
     return cv::Mat();
   if (!compute_variance_)
     return S_;
-  // Workaround for matrix element-wise division producing Infs instead of zeros
+  // Matrix element-wise division produces Infs instead of zeros for CV_65F.
+  // Thus we need to explicitly set all infinity values in the output to zero.
+  // Another possible workaround is to use cv::setUseOptimized(false), but it
+  // does not work on Windows (at least on Appveyor hardware).
   // See: https://github.com/opencv/opencv/issues/8413#issuecomment-287475833
-  cv::setUseOptimized(false);
   cv::divide(W_, S_, get_inverse_variance_output_);
+  get_inverse_variance_output_.reshape(1).setTo(0, get_inverse_variance_output_.reshape(1) == std::numeric_limits<double>::infinity());
   return get_inverse_variance_output_;
 }
 
