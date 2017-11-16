@@ -1,0 +1,28 @@
+shallow_clone: true
+
+cache:
+  - c:\tools\vcpkg\installed\
+
+install:
+  - cd c:\tools\vcpkg
+  - git pull >$null
+  - .\bootstrap-vcpkg.bat >$null
+  - vcpkg update
+  - vcpkg install opencv boost
+
+configuration: Release
+
+build:
+  parallel: true
+
+build_script:
+  - cd c:\projects\radical
+  - mkdir build
+  - cd build
+  - cmake -DCMAKE_TOOLCHAIN_FILE=c:\tools\vcpkg\scripts\buildsystems\vcpkg.cmake
+          -DBUILD_TESTS=ON -DBUILD_APPS=ON
+          ..
+  - cmake --build . --config Release
+
+test_script:
+  - ctest -VV -C Release
