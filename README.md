@@ -1,6 +1,6 @@
 [![Linux build Status](https://travis-ci.org/taketwo/radical.svg?branch=master)](https://travis-ci.org/taketwo/radical)
 [![Windows build status](https://ci.appveyor.com/api/projects/status/3d7eoit2j90wi3ep?svg=true)](https://ci.appveyor.com/project/taketwo/radical)
-
+[![Gitter](https://badges.gitter.im/taketwo/radical.svg)](https://gitter.im/taketwo/radical?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
 [![License](https://img.shields.io/badge/license-MIT-green.svg?style=flat)](https://github.com/taketwo/radical/blob/master/LICENSE.md)
 
 Consumer-grade color cameras suffer from significant optical nonlinearities,
