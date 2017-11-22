@@ -149,7 +149,7 @@ BOOST_AUTO_TEST_CASE(InverseMapImageInvalid) {
 
 BOOST_AUTO_TEST_CASE(InverseLogMapInfinity) {
   // If the CRF has zero, negative, or special (NaN, Inf) values in it, then inverse log map should
-  // produce Inf values in the output.
+  // produce -Inf values in the output.
   cv::Mat_<cv::Vec3f> crf(1, 256);
   crf.setTo(1.0f);
   const float INV[] = { -1.0f, 0.0f, std::numeric_limits<float>::infinity(), std::numeric_limits<float>::quiet_NaN() };
@@ -161,7 +161,7 @@ BOOST_AUTO_TEST_CASE(InverseLogMapInfinity) {
   {
     auto E = rr.inverseLogMap(cv::Vec3b(i, i, i));
     for (size_t j = 0; j < 3; ++j)
-      BOOST_CHECK(std::isinf(E[j]));
+      BOOST_CHECK(std::isinf(E[j]) && E[j] < 0);
   }
 }
 
