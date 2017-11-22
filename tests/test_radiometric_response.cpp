@@ -20,6 +20,9 @@
  * SOFTWARE.
  ******************************************************************************/
 
+#include <cmath>
+#include <iostream>
+
 #include "test.h"
 
 #include <radical/exceptions.h>
@@ -117,11 +120,11 @@ BOOST_AUTO_TEST_CASE(InverseMapPixel) {
 BOOST_AUTO_TEST_CASE(InverseMapImage) {
   RadiometricResponse rr(getTestFilename("radiometric_response_identity.crf"));
   cv::Mat I(256, 1, CV_8UC3);
-  cv::Mat E_expected(256, 1, CV_32FC3), E_expected_log;
   for (int j = 0; j < 256; ++j) {
-    I.at<cv::Vec3b>(0, j) = cv::Vec3b(j, j, 255 - j);
-    E_expected.at<cv::Vec3f>(0, j) = cv::Vec3f(j, j, 255 - j);
+    I.at<cv::Vec3b>(0, j) = cv::Vec3b(std::max(j, 1), 100, std::max(255 - j, 1));
   }
+  cv::Mat E_expected(256, 1, CV_32FC3), E_expected_log;
+  I.convertTo(E_expected, CV_32F);
   cv::log(E_expected, E_expected_log);
   cv::Mat E;
   // Normal version
@@ -143,6 +146,24 @@ BOOST_AUTO_TEST_CASE(InverseMapImageInvalid) {
   BOOST_CHECK(E.empty());
   I.create(10, 10, CV_8UC1);
   BOOST_CHECK_THROW(rr.directMap(I, E), MatTypeException);
+}
+
+BOOST_AUTO_TEST_CASE(InverseLogMapInfinity) {
+  // If the CRF has zero, negative, or special (NaN, Inf) values in it, then inverse log map should
+  // produce Inf values in the output.
+  cv::Mat_<cv::Vec3f> crf(1, 256);
+  crf.setTo(1.0f);
+  const float INV[] = { -1.0f, 0.0f, std::numeric_limits<float>::infinity(), std::numeric_limits<float>::quiet_NaN() };
+  for (size_t i = 0; i < 4; ++i)
+    crf(i) = { INV[i], INV[i], INV[i] };
+  RadiometricResponse rr(crf);
+
+  for (size_t i = 0; i < 4; ++i)
+  {
+    auto E = rr.inverseLogMap(cv::Vec3b(i, i, i));
+    for (size_t j = 0; j < 3; ++j)
+      BOOST_CHECK(std::isinf(E[j]));
+  }
 }
 
 BOOST_AUTO_TEST_CASE(SaveLoad) {
