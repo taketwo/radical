@@ -146,7 +146,8 @@ cv::Mat MeanImage::getVarianceInverse() {
   // does not work on Windows (at least on Appveyor hardware).
   // See: https://github.com/opencv/opencv/issues/8413#issuecomment-287475833
   cv::divide(W_, S_, get_inverse_variance_output_);
-  get_inverse_variance_output_.reshape(1).setTo(0, get_inverse_variance_output_.reshape(1) == std::numeric_limits<double>::infinity());
+  get_inverse_variance_output_.reshape(1).setTo(
+      0, get_inverse_variance_output_.reshape(1) == std::numeric_limits<double>::infinity());
   return get_inverse_variance_output_;
 }
 
