@@ -48,7 +48,7 @@ RadiometricResponse::RadiometricResponse(cv::InputArray _response) {
   cv::log(response_, log_response_);
   // Logarithm is only defined for positive numbers, everything else should map to -Inf
   const auto Inf = std::numeric_limits<float>::infinity();
-  cv::Mat_<bool> positive = response_.reshape(1) > 0.0f & response_.reshape(1) != Inf;
+  cv::Mat_<bool> positive = (response_.reshape(1) > 0.0f) & (response_.reshape(1) != Inf);
 #ifndef _MSC_VER
   log_response_.reshape(1).setTo(-Inf, ~positive);
 #else
