@@ -36,7 +36,7 @@ namespace radical {
   * where c is the center of symmetry of the vignetting response.
   * Template argument \c Degree is the order of the polynomial divided by two (k from the formula).
   * Each color channel has its own model coefficients. The number of coefficients per channel is \c Degree + 2. First
-  * two numbers define c, and the remaing are betas.
+  * two numbers define c, and the remaining are betas.
   *
   * \note The implementation is generic and supports polynomials of different degree. However, the model is explicitly
   * instantiated only with \c Degree = 3. */

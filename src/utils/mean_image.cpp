@@ -105,7 +105,7 @@ bool MeanImage::addWeighted(cv::InputArray _image, cv::InputArray _weights, cv::
   // Need to explicitly specify depth for output array, otherwise fails with OpenCV 2.4
   cv::add(counter_, 1, counter_, mask, CV_32S);
 
-  // If there is a prescribed number of samples, check if we fullfilled it
+  // If there is a prescribed number of samples, check if we fulfilled it
   if (num_samples_ > 0) {
     double min, max;
     cv::minMaxLoc(counter_, &min, &max);
