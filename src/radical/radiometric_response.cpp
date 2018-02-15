@@ -49,15 +49,16 @@ RadiometricResponse::RadiometricResponse(cv::InputArray _response) {
   // Logarithm is only defined for positive numbers, everything else should map to -Inf
   const auto Inf = std::numeric_limits<float>::infinity();
   cv::Mat_<bool> positive = (response_.reshape(1) > 0.0f) & (response_.reshape(1) != Inf);
-#ifndef _MSC_VER
-  log_response_.reshape(1).setTo(-Inf, ~positive);
-#else
-  // On MSVC setTo(Inf) results in very large values, which however are not exactly Inf and don't pass std::isinf() test
+  // We used the following code to assign all masked values to -Inf:
+  //
+  //     log_response_.reshape(1).setTo(-Inf, ~positive);
+  //
+  // However, it turned out that with certain compilers and OpenCV versions this assigns very large values, which are
+  // not exactly Inf and thus don't pass std::isinf() test. The code below is more verbose, but works consistently.
   cv::Mat_<float> log_response_flat = log_response_.reshape(1);
   for (size_t i = 0; i < log_response_flat.total(); ++i)
     if (!positive(i))
       log_response_flat(i) = -Inf;
-#endif
 }
 
 RadiometricResponse::RadiometricResponse(const std::string& filename)
