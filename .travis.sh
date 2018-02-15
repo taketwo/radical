@@ -61,6 +61,7 @@ function install_opencv()
   case $pkg_ver in
     "2.4.8") local pkg_md5sum="9b8f1426bc01a1ae1e8b3bce11dc1e1c";;
     "3.1.0") local pkg_md5sum="a0669e22172dfc3225835b180744c9f0";;
+    "3.4.0") local pkg_md5sum="170732dc760e5f7ddeccbe53ba5d16a6";;
   esac
   local pkg_src_dir=${DOWNLOAD_DIR}/opencv-${pkg_ver}
   local pkg_install_dir=$OPENCV_DIR/${pkg_ver}

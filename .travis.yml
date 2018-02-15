@@ -8,6 +8,7 @@ git:
 env:
   - OPENCV_VERSION=2.4.8
   - OPENCV_VERSION=3.1.0
+  - OPENCV_VERSION=3.4.0
 addons:
   apt:
     sources:
