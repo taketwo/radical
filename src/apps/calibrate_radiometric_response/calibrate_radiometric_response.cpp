@@ -163,12 +163,16 @@ int main(int argc, const char** argv) {
 
   auto data = Dataset::load(options.data_source);
   if (data) {
+    if (data->getNumImages() < 2) {
+      std::cerr << "Loaded dataset contains less than 2 images, calibration is not possible" << std::endl;
+      return 1;
+    }
     if (!options("output")) {
       auto dir = boost::filesystem::canonical(options.data_source);
       options.output = (dir / dir.filename()).string() + ".crf";
     }
     if (options.verbosity)
-      std::cout << "Loaded dataset from: " << options.data_source << std::endl;
+      std::cout << "Loaded dataset (" << data->getNumImages() << " images) from: " << options.data_source << std::endl;
 
     auto hist = data->computeIntensityHistogram();
     imshow(utils::plotHistogram(hist.rowRange(options.dc.valid_intensity_min, options.dc.valid_intensity_max), 2, 256));
