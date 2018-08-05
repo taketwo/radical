@@ -28,6 +28,12 @@
 
 #include <opencv2/imgproc/imgproc.hpp>
 
+// To preserve compatibility with OpenCV 2.x
+#if CV_MAJOR_VERSION >= 4
+#define CV_BGR2GRAY cv::COLOR_BGR2GRAY
+#define CV_GRAY2BGR cv::COLOR_GRAY2BGR
+#endif
+
 /** Arrange a collection of images into a grid and return as a single cv::Mat.
   * The input images may have different depth and number of channels, but should have equal size. */
 cv::Mat arrangeImagesInGrid(const std::vector<cv::Mat>& images, cv::Size grid, int depth = -1, int channels = -1) {

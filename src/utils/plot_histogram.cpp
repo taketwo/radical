@@ -56,7 +56,7 @@ void plotHistogram(const cv::Mat& histogram, cv::Mat& canvas, const cv::Scalar& 
       auto height = std::round(value * bar_height / max);
       if (height > 0)
         cv::rectangle(roi, cv::Point(b * bar_width, bar_height - 1),
-                      cv::Point((b + 1) * bar_width - 1, bar_height - 1 - height), COLORS[c], CV_FILLED);
+                      cv::Point((b + 1) * bar_width - 1, bar_height - 1 - height), COLORS[c], -1);
     }
   }
 }
