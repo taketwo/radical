@@ -13,7 +13,13 @@ dir="$2/radiometric_response_calibration"
 
 methods=("debevec" "engel")
 for method in "${methods[@]}"; do
-  crf=`$exe $dir --verbosity 0 --no-visualization --print --method $method -o /tmp/crf`
+  crf=$($exe $dir --verbosity 0 --no-visualization --print --method $method -o /tmp/crf)
+  if [[ $? -ne 0 ]]; then
+    echo "Calibration app returned non-zero status"
+    echo "NOTE: this test requires calibration data to be downloaded from Git LFS."
+    echo "      Please make sure to run: git lfs pull"
+    exit 1
+  fi
   while read -r line; do
     values=($(echo $line))
     if [[ ${#values[@]} != 256 ]]; then
